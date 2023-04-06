@@ -1,21 +1,50 @@
-﻿namespace Microsoft.Dafny {
+﻿using System.Diagnostics;
 
-public class FuzzMain
+namespace Microsoft.Dafny
 {
-  public static int Main(string[] args)
+
+  public class FuzzMain
   {
-    args = new string[]{"verify", "examples/sum.dfy"};
-    var cliArgumentsResult = DafnyDriver.ProcessCommandLineArguments(args, out var dafnyOptions, out var dafnyFiles, out var otherFiles);
-    if (cliArgumentsResult != DafnyDriver.CommandLineArgumentsResult.OK) {
-      return -1;
+
+    public static readonly string[] VerificationArgs = { "verify", "--cores=2", "--use-basename-for-filename", "--verification-time-limit=300" };
+
+    public static (int, string, string) RunDafnyVerify(string filepath) {
+      // Verification API is not easily callable, use Dafny CLI instead
+      string dafnyCLIPath = "/Users/wyt/.dotnet/tools/dafny";
+      var process = new Process();
+      process.StartInfo.FileName = dafnyCLIPath;
+      foreach (var vArg in VerificationArgs)
+      {
+        process.StartInfo.ArgumentList.Add(vArg);
+      }
+      process.StartInfo.ArgumentList.Add(filepath);
+      process.StartInfo.UseShellExecute = false;
+      process.StartInfo.RedirectStandardInput = true;
+      process.StartInfo.RedirectStandardOutput = true;
+      process.StartInfo.RedirectStandardError = true;
+      process.Start();
+      string output = process.StandardOutput.ReadToEnd();
+      string error = process.StandardError.ReadToEnd();
+      process.WaitForExit();
+      return (process.ExitCode, output, error);
     }
-    ErrorReporter reporter = new ConsoleErrorReporter(dafnyOptions);
-    Program dafnyProgram;
-    Dafny.Main.Parse(dafnyFiles, "the_program", reporter, out dafnyProgram);
-    Dafny.Main.MaybePrintProgram(dafnyProgram, "-", false);    
-    return 0;
+    public static int Main(string[] args)
+    {
+      // For now, assume no errors while parsing command line or file
+      string fileToVerify = "examples/Array.dfy";
+      var cliArgumentsResult = DafnyDriver.ProcessCommandLineArguments(VerificationArgs.Append(fileToVerify).ToArray(), out var dafnyOptions, out var dafnyFiles, out var otherFiles);
+      ErrorReporter reporter = new ConsoleErrorReporter(dafnyOptions);
+      Program dafnyProgram;
+      var (vCode, vOut, vErr) = RunDafnyVerify(fileToVerify);
+      Console.WriteLine($"Verifying File: {fileToVerify}");
+      Dafny.Main.Parse(dafnyFiles, fileToVerify, reporter, out dafnyProgram);
+      Dafny.Main.MaybePrintProgram(dafnyProgram, "-", false);
+      Console.WriteLine($"Exit Code: {vCode}");
+      Console.WriteLine($"Output: {vOut}");
+      Console.WriteLine($"Error: {(String.IsNullOrEmpty(vErr) ? "Empty" : vErr)}");
+      return 0;
+    }
   }
-}
 
 }
 
