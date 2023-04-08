@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DafnyCore" Version="4.0.0.50303-nightly-2023-03-30-76266c9" />
+    <PackageReference Include="DafnyDriver" Version="4.0.0.50303-nightly-2023-03-30-76266c9" />
+  </ItemGroup>
+
+</Project>

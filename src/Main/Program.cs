@@ -10,7 +10,7 @@ namespace Microsoft.Dafny
 
     public static (int, string, string) RunDafnyVerify(string filepath) {
       // Verification API is not easily callable, use Dafny CLI instead
-      string dafnyCLIPath = "/Users/wyt/.dotnet/tools/dafny";
+      string dafnyCLIPath = "/Users/wyt/Desktop/dafny_proj/dafny/Scripts/dafny";
       var process = new Process();
       process.StartInfo.FileName = dafnyCLIPath;
       foreach (var vArg in VerificationArgs)
@@ -31,7 +31,7 @@ namespace Microsoft.Dafny
     public static int Main(string[] args)
     {
       // For now, assume no errors while parsing command line or file
-      string fileToVerify = "examples/Array.dfy";
+      string fileToVerify = "../../examples/Array.dfy";
       var cliArgumentsResult = DafnyDriver.ProcessCommandLineArguments(VerificationArgs.Append(fileToVerify).ToArray(), out var dafnyOptions, out var dafnyFiles, out var otherFiles);
       ErrorReporter reporter = new ConsoleErrorReporter(dafnyOptions);
       Program dafnyProgram;
