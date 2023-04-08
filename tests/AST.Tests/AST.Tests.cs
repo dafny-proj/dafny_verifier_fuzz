@@ -1,4 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Dafny = Microsoft.Dafny;
 using DafnyW = DafnyWrappers.DafnyWrappers;
 
 namespace AST.Tests;
@@ -16,8 +17,9 @@ public class ASTTests
                  z := x + y;
                }
                """;
-    var dafnyProg = DafnyW.ParseDafnyProgram(prog);
-    var ast = Program.FromDafnyAST(dafnyProg);
+    Dafny.Program progDafny;
+    DafnyW.ParseDafnyProgram(prog, out progDafny);
+    var ast = Program.FromDafnyAST(progDafny);
     var backtranslated = Program.ToDafnyAST(ast);
     Assert.AreEqual(prog, DafnyW.DafnyProgramToString(backtranslated), /*ignoreCase=*/false);
   }
