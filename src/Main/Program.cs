@@ -28,7 +28,7 @@ namespace Microsoft.Dafny
       process.WaitForExit();
       return (process.ExitCode, output, error);
     }
-    public static int Main(string[] args)
+    public static int MainOld(string[] args)
     {
       // For now, assume no errors while parsing command line or file
       string fileToVerify = "../../examples/Array.dfy";

@@ -14,4 +14,8 @@
     <PackageReference Include="DafnyDriver" Version="4.0.0.50303-nightly-2023-03-30-76266c9" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DafnyWrappers\DafnyWrappers.csproj" />
+  </ItemGroup>
+
 </Project>
