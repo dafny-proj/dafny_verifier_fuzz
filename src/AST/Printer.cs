@@ -1,7 +1,6 @@
 namespace AST;
 
-public class Printer
-{
+public class Printer {
   public TextWriter Wr;
 
   private int indent = 0;
@@ -11,19 +10,16 @@ public class Printer
 
   private string Sep = "";
   private string NextSep = "";
-  private void ResetSep(string init = "", string sep = ", ")
-  {
+  private void ResetSep(string init = "", string sep = ", ") {
     Sep = init;
     NextSep = sep;
   }
-  private void WriteSep()
-  {
+  private void WriteSep() {
     Wr.Write(Sep);
     Sep = NextSep;
   }
 
-  public Printer(TextWriter wr)
-  {
+  public Printer(TextWriter wr) {
     Wr = wr;
   }
 
@@ -33,23 +29,18 @@ public class Printer
     return wr.ToString();
   }
 
-  public void PrintProgram(Program program)
-  {
+  public void PrintProgram(Program program) {
     PrintTopLevelDecls(program.DefaultModuleDef.TopLevelDecls);
   }
 
-  private void PrintTopLevelDecls(List<TopLevelDecl> topLevelDecls)
-  {
-    foreach (TopLevelDecl decl in topLevelDecls)
-    {
+  private void PrintTopLevelDecls(List<TopLevelDecl> topLevelDecls) {
+    foreach (TopLevelDecl decl in topLevelDecls) {
       PrintTopLevelDecl(decl);
     }
   }
 
-  private void PrintTopLevelDecl(TopLevelDecl topLevelDecl)
-  {
-    switch (topLevelDecl)
-    {
+  private void PrintTopLevelDecl(TopLevelDecl topLevelDecl) {
+    switch (topLevelDecl) {
       case ClassDecl cd:
         PrintClassDecl(cd);
         break;
@@ -58,41 +49,31 @@ public class Printer
     }
   }
 
-  private void PrintClassDecl(ClassDecl cl)
-  {
-    if (cl.IsDefaultClass)
-    {
+  private void PrintClassDecl(ClassDecl cl) {
+    if (cl.IsDefaultClass) {
       PrintMembers(cl.Members);
-    }
-    else
-    {
+    } else {
       throw new NotImplementedException();
     }
   }
 
-  private void PrintMembers(List<MemberDecl> mbs)
-  {
+  private void PrintMembers(List<MemberDecl> mbs) {
     MemberDecl? prev = null;
-    void PrintSeparator(MemberDecl? prev, MemberDecl cur)
-    {
-      if (prev is not null && cur is Method)
-      {
+    void PrintSeparator(MemberDecl? prev, MemberDecl cur) {
+      if (prev is not null && cur is Method) {
         Wr.WriteLine();
       }
       // TODO: Handle other MemberDecl types
     }
-    foreach (MemberDecl m in mbs)
-    {
+    foreach (MemberDecl m in mbs) {
       PrintSeparator(prev, m);
       PrintMember(m);
       prev = m;
     }
   }
 
-  private void PrintMember(MemberDecl mb)
-  {
-    switch (mb)
-    {
+  private void PrintMember(MemberDecl mb) {
+    switch (mb) {
       case Method m:
         PrintMethod(m);
         break;
@@ -101,22 +82,17 @@ public class Printer
     }
   }
 
-  private void PrintMethod(Method m)
-  {
+  private void PrintMethod(Method m) {
     Indent();
     string mKind = "method";
     string mName = m.Name;
     Wr.Write($"{mKind} {mName}");
     PrintFormals(m.Ins);
-    if (m.Outs.Count > 0)
-    {
-      if (m.Ins.Count + m.Outs.Count <= 3)
-      {
+    if (m.Outs.Count > 0) {
+      if (m.Ins.Count + m.Outs.Count <= 3) {
         Wr.Write(" returns ");
         PrintFormals(m.Outs);
-      }
-      else
-      {
+      } else {
         Wr.WriteLine();
         IncIndent(2);
         Indent();
@@ -131,15 +107,12 @@ public class Printer
     Wr.WriteLine();
   }
 
-  private void PrintStatement(Statement stmt)
-  {
-    switch (stmt)
-    {
+  private void PrintStatement(Statement stmt) {
+    switch (stmt) {
       case BlockStmt blockStmt:
         Wr.WriteLine("{");
         IncIndent();
-        foreach (Statement s in blockStmt.Body)
-        {
+        foreach (Statement s in blockStmt.Body) {
           Indent();
           PrintStatement(s);
           Wr.WriteLine();
@@ -156,29 +129,24 @@ public class Printer
     }
   }
 
-  private void PrintUpdateStmt(UpdateStmt stmt)
-  {
+  private void PrintUpdateStmt(UpdateStmt stmt) {
     ResetSep();
-    foreach (Expression lhs in stmt.Lhss)
-    {
+    foreach (Expression lhs in stmt.Lhss) {
       WriteSep();
       PrintExpression(lhs);
     }
-    if (stmt.Lhss.Count > 0)
-    {
+    if (stmt.Lhss.Count > 0) {
       Wr.Write(" := ");
     }
     ResetSep();
-    foreach (AssignmentRhs rhs in stmt.Rhss)
-    {
+    foreach (AssignmentRhs rhs in stmt.Rhss) {
       WriteSep();
       PrintAssignRHS(rhs);
     }
     Wr.Write(";");
   }
 
-  private void PrintAssignRHS(AssignmentRhs rhs)
-  {
+  private void PrintAssignRHS(AssignmentRhs rhs) {
     switch (rhs) {
       case ExprRhs exprRhs:
         PrintExpression(exprRhs.Expr);
@@ -187,8 +155,7 @@ public class Printer
         throw new NotImplementedException();
     }
   }
-  private void PrintExpression(Expression expr)
-  {
+  private void PrintExpression(Expression expr) {
     switch (expr) {
       case NameSegment ns:
         Wr.Write(ns.Name);
@@ -203,12 +170,10 @@ public class Printer
     }
   }
 
-  private void PrintFormals(List<Formal> fs)
-  {
+  private void PrintFormals(List<Formal> fs) {
     Wr.Write("(");
     string sep = "";
-    foreach (Formal f in fs)
-    {
+    foreach (Formal f in fs) {
       Wr.Write(sep);
       sep = ", ";
       PrintFormal(f);
@@ -216,14 +181,12 @@ public class Printer
     Wr.Write(")");
   }
 
-  private void PrintFormal(Formal f)
-  {
+  private void PrintFormal(Formal f) {
     Wr.Write($"{f.Name}: ");
     PrintType(f.Type);
   }
 
-  private void PrintType(Type t)
-  {
+  private void PrintType(Type t) {
     Wr.Write(t.Name);
   }
 }

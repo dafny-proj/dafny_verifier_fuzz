@@ -1,10 +1,8 @@
 ﻿using System.Diagnostics;
 
-namespace Microsoft.Dafny
-{
+namespace Microsoft.Dafny {
 
-  public class FuzzMain
-  {
+  public class FuzzMain {
 
     public static readonly string[] VerificationArgs = { "verify", "--cores=2", "--use-basename-for-filename", "--verification-time-limit=300" };
 
@@ -13,8 +11,7 @@ namespace Microsoft.Dafny
       string dafnyCLIPath = "/Users/wyt/Desktop/dafny_proj/dafny/Scripts/dafny";
       var process = new Process();
       process.StartInfo.FileName = dafnyCLIPath;
-      foreach (var vArg in VerificationArgs)
-      {
+      foreach (var vArg in VerificationArgs) {
         process.StartInfo.ArgumentList.Add(vArg);
       }
       process.StartInfo.ArgumentList.Add(filepath);
@@ -28,8 +25,7 @@ namespace Microsoft.Dafny
       process.WaitForExit();
       return (process.ExitCode, output, error);
     }
-    public static int MainOld(string[] args)
-    {
+    public static int MainOld(string[] args) {
       // For now, assume no errors while parsing command line or file
       string fileToVerify = "../../examples/Array.dfy";
       var cliArgumentsResult = DafnyDriver.ProcessCommandLineArguments(VerificationArgs.Append(fileToVerify).ToArray(), out var dafnyOptions, out var dafnyFiles, out var otherFiles);

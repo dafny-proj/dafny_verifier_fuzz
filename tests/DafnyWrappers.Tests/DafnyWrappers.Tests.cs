@@ -5,11 +5,9 @@ namespace DafnyWrappers.Tests;
 using DafnyW = DafnyWrappers;
 
 [TestClass]
-public class DafnyWrappersTest
-{
+public class DafnyWrappersTest {
   [TestMethod]
-  public void ParseAndPrint()
-  {
+  public void ParseAndPrint() {
     var programFile = "../../../../../examples/sum.dfy";
     var expected = $"// sum.dfy\n\n" + File.ReadAllText(programFile);
 
