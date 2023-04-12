@@ -21,9 +21,26 @@ public class ASTTests {
 
     Assert.AreEqual(sourceStr, outputStr.TrimEnd(), /*ignore_case=*/false);
   }
+  
+  [TestMethod]
+  public void OperatorReplacementMutationFinder() {
+    var sourceStr = """
+    method Sum(x: int, y: int) returns (z: int)
+    {
+      z := x + y + y;
+    }
+    """;
+    var programDafny = DafnyW.ParseDafnyProgramFromString(sourceStr);
+    var program = Program.FromDafny(programDafny);
+
+    var mutFinder = new AST.Mutator.OperatorReplacementMutationFinder();
+    mutFinder.VisitProgram(program);
+    var muts = mutFinder.Mutations;
+    Assert.AreEqual(2, muts.Count);
+  }
 
   [TestMethod]
-  public void SimpleMutation() {
+  public void OperatorReplacementMutation() {
     var sourceStr = """
     method Sum(x: int, y: int) returns (z: int)
     {
@@ -39,7 +56,7 @@ public class ASTTests {
     }
     """;
 
-    var mutFinder = new AST.Mutator.SimpleMutationFinder();
+    var mutFinder = new AST.Mutator.OperatorReplacementMutationFinder();
     mutFinder.VisitProgram(program);
     var muts = mutFinder.Mutations;
     Assert.AreEqual(1, muts.Count);

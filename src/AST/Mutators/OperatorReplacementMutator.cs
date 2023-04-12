@@ -1,10 +1,10 @@
 namespace AST.Mutator;
 
-public class SimpleMutation {
+public class OperatorReplacementMutation {
   public delegate void ApplyT();
   public ApplyT Apply;
 
-  public SimpleMutation(BinaryExpr be) {
+  public OperatorReplacementMutation(BinaryExpr be) {
     Apply = () => { be.Op = GetRandomEquivOperand(be.Op); };
   }
 
@@ -14,15 +14,16 @@ public class SimpleMutation {
 
 }
 
-public class SimpleMutationFinder : ASTVisitor {
+public class OperatorReplacementMutationFinder : ASTVisitor {
 
-  public List<SimpleMutation> Mutations = new List<SimpleMutation>();
+  public List<OperatorReplacementMutation> Mutations = new List<OperatorReplacementMutation>();
 
-  public SimpleMutationFinder() { }
+  public OperatorReplacementMutationFinder() { }
 
   protected override void VisitBinaryExpr(BinaryExpr be) {
     if (BinaryExpr.HasTypeEquivOperands(be.Op)) {
-      Mutations.Add(new SimpleMutation(be));
+      Mutations.Add(new OperatorReplacementMutation(be));
     }
+    base.VisitBinaryExpr(be);
   }
 }
