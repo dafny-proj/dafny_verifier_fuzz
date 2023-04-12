@@ -2,7 +2,7 @@ namespace DafnyWrappers;
 
 public class Experiment {
   public static int Main(string[] args) {
-    DafnyWrappers.ParseDafnyProgram("../../examples/sum.dfy", out var programDafny);
+    var programDafny = DafnyWrappers.ParseDafnyProgramFromFile("../../examples/sum.dfy");
     var prog = AST.Program.FromDafny(programDafny);
     Console.WriteLine(prog);
     // var children = programDafny.Children;

@@ -3,18 +3,28 @@
 namespace DafnyWrappers;
 public static class DafnyWrappers {
   public static readonly string[] VerificationArgs = { "verify", "--cores=2", "--use-basename-for-filename", "--verification-time-limit=300" };
-  public static void ParseDafnyProgram(string programFile, out Dafny.Program programDafny) {
-    // FIXME: For now, assume no errors while parsing
-    // FIXME: The pipeline does more work than is required here, it is currently
-    //        used to get things going, but we should look into extracting just 
-    //        the functionality needed (e.g. removing CLI args processing)
-    var cliArgumentsResult = Dafny.DafnyDriver.ProcessCommandLineArguments(
-      VerificationArgs.Append(programFile).ToArray(),
-      out var dafnyOptions,
-      out var dafnyFiles,
-      out var otherFiles);
-    var reporter = new Dafny.ConsoleErrorReporter(dafnyOptions);
-    Dafny.Main.Parse(dafnyFiles, programFile, reporter, out programDafny);
+
+  public static Dafny.DafnyOptions DefaultDafnyParseOptions() {
+    return Dafny.DafnyOptions.Create();
+  }
+
+  // FIXME: For now, assume no errors while parsing and that we only parse a single file
+  public static Dafny.Program
+  ParseDafnyProgramFromFile(string sourceFile) {
+    var sourceStr = File.ReadAllText(sourceFile);
+    return ParseDafnyProgramFromString(sourceStr, sourceFile);
+  }
+
+  // FIXME: For now, assume no errors while parsing and that we only parse a single file
+  public static Dafny.Program
+  ParseDafnyProgramFromString(string sourceStr, string sourceFile = "") {
+    var options = DefaultDafnyParseOptions();
+    var defModule = new Dafny.LiteralModuleDecl(
+      new Dafny.DefaultModuleDefinition(), /*parent=*/null);
+    var builtIns = new Dafny.BuiltIns(options);
+    var reporter = new Dafny.ConsoleErrorReporter(options);
+    var success = Dafny.Parser.Parse(sourceStr, sourceFile, sourceFile, defModule, builtIns, reporter);
+    return new Dafny.Program("program", defModule, builtIns, reporter);
   }
 
   public static string DafnyProgramToString(Dafny.Program programDafny) {

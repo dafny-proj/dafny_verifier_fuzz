@@ -1,4 +1,3 @@
-using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DafnyW = DafnyWrappers.DafnyWrappers;
@@ -9,27 +8,36 @@ namespace AST.Tests;
 public class ASTTests {
   [TestMethod]
   public void SimpleParseAndPrint() {
-    var filepath = "../../../../../examples/sum.dfy";
-    var expected = File.ReadAllText(filepath);
+    var sourceStr = """
+    method Sum(x: int, y: int) returns (z: int)
+    {
+      z := x + y;
+    }
+    """;
 
-    DafnyW.ParseDafnyProgram(filepath, out var programDafny);
+    var programDafny = DafnyW.ParseDafnyProgramFromString(sourceStr);
     var program = Program.FromDafny(programDafny);
-    var programStr = Printer.ProgramToString(program);
+    var outputStr = Printer.ProgramToString(program);
 
-    Assert.AreEqual(expected, programStr, /*ignore_case=*/false);
+    Assert.AreEqual(sourceStr, outputStr.TrimEnd(), /*ignore_case=*/false);
   }
 
   [TestMethod]
   public void SimpleMutation() {
-    var filepath = "../../../../../examples/sum.dfy";
-    DafnyW.ParseDafnyProgram(filepath, out var programDafny);
+    var sourceStr = """
+    method Sum(x: int, y: int) returns (z: int)
+    {
+      z := x + y;
+    }
+    """;
+    var programDafny = DafnyW.ParseDafnyProgramFromString(sourceStr);
     var program = Program.FromDafny(programDafny);
     var expected = """
-                  method Sum(x: int, y: int) returns (z: int)
-                  {
-                    z := x - y;
-                  }
-                  """ + "\n";
+    method Sum(x: int, y: int) returns (z: int)
+    {
+      z := x - y;
+    }
+    """;
 
     var mutFinder = new AST.Mutator.SimpleMutationFinder();
     mutFinder.VisitProgram(program);
@@ -38,7 +46,7 @@ public class ASTTests {
 
     mutFinder.Mutations.ElementAt(0).Apply();
     var mutant = Printer.ProgramToString(program);
-    Assert.AreEqual(expected, mutant, /*ignore_case=*/false);
+    Assert.AreEqual(expected, mutant.TrimEnd(), /*ignore_case=*/false);
   }
 
 }
