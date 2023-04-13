@@ -21,6 +21,24 @@ public class ASTTests {
 
     Assert.AreEqual(sourceStr, outputStr.TrimEnd(), /*ignore_case=*/false);
   }
+
+  [TestMethod]
+  public void MethodSpecifications() {
+    var sourceStr = """
+    method Double(x: int) returns (r: int)
+      requires 0 <= x
+      ensures r >= 2 * x
+    {
+      r := x + x;
+    }
+    """;
+
+    var programDafny = DafnyW.ParseDafnyProgramFromString(sourceStr);
+    var program = Program.FromDafny(programDafny);
+    var outputStr = Printer.ProgramToString(program);
+
+    Assert.AreEqual(sourceStr, outputStr.TrimEnd(), /*ignore_case=*/false);
+  }
   
   [TestMethod]
   public void OperatorReplacementMutationFinder() {

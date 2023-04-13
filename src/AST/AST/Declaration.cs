@@ -82,6 +82,10 @@ public class Method
   public Specification<Dafny.Expression, Expression> Decreases { get; set; }
   public List<Formal> Ins = new List<Formal>();
   public List<Formal> Outs = new List<Formal>();
+  public List<AttributedExpression> Req = new List<AttributedExpression>();
+  public List<AttributedExpression> Ens = new List<AttributedExpression>();
+  public Specification<Dafny.FrameExpression, FrameExpression> Mod { get; set; }
+
 
   private Method(Dafny.Method methodDafny) {
     Name = methodDafny.Name;
@@ -89,6 +93,9 @@ public class Method
     Decreases = Specification<Dafny.Expression, Expression>.FromDafny(methodDafny.Decreases);
     Ins.AddRange(methodDafny.Ins.Select(Formal.FromDafny));
     Outs.AddRange(methodDafny.Outs.Select(Formal.FromDafny));
+    Req.AddRange(methodDafny.Req.Select(AttributedExpression.FromDafny));
+    Ens.AddRange(methodDafny.Ens.Select(AttributedExpression.FromDafny));
+    Mod = Specification<Dafny.FrameExpression, FrameExpression>.FromDafny(methodDafny.Mod);
   }
   public static Method FromDafny(Dafny.Method dafnyNode) {
     return new Method(dafnyNode);

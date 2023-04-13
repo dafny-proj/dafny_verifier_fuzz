@@ -101,10 +101,59 @@ public class Printer {
         DecIndent(2);
       }
     }
+
+    IncIndent();
+    PrintSpec("requires", m.Req);
+    PrintFrameSpec("modifies", m.Mod);
+    PrintSpec("ensures", m.Ens);
+    PrintDecreasesSpec(m.Decreases);
+    DecIndent();
+
     Wr.WriteLine();
     Indent();
     PrintStatement(m.Body);
     Wr.WriteLine();
+  }
+
+  private void PrintSpec(string kind, List<AttributedExpression> aes) {
+    foreach (AttributedExpression ae in aes) {
+      Wr.WriteLine();
+      Indent();
+      Wr.Write($"{kind} ");
+      PrintAttributedExpression(ae);
+    }
+  }
+
+  private void PrintAttributedExpression(AttributedExpression ae) {
+    PrintExpression(ae.E);
+  }
+
+  private void PrintFrameSpec(string kind, Specification<Dafny.FrameExpression, FrameExpression> frame) {
+    if (frame.Expressions.Count <= 0) {
+      return;
+    }
+    Wr.WriteLine();
+    Indent();
+    Wr.Write("{0} ");
+    ResetSep();
+    foreach (FrameExpression fe in frame.Expressions) {
+      WriteSep();
+      PrintExpression(fe.E);
+    }
+  }
+
+  private void PrintDecreasesSpec(Specification<Dafny.Expression, Expression> decreases) {
+    if (decreases.Expressions.Count <= 0) {
+      return;
+    }
+    Wr.WriteLine();
+    Indent();
+    Wr.Write("decreases ");
+    ResetSep();
+    foreach (Expression e in decreases.Expressions) {
+      WriteSep();
+      PrintExpression(e);
+    }
   }
 
   private void PrintStatement(Statement stmt) {
@@ -164,6 +213,9 @@ public class Printer {
         PrintExpression(binExpr.E0);
         Wr.Write($" {BinaryExpr.OpcodeString(binExpr.Op)} ");
         PrintExpression(binExpr.E1);
+        break;
+      case IntLiteralExpr intLitExpr:
+        Wr.Write(intLitExpr.Value);
         break;
       default:
         throw new NotImplementedException();
