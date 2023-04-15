@@ -5,6 +5,7 @@ public abstract class Type : Node, ConstructableFromDafny<Dafny.Type, Type> {
   public static Type FromDafny(Dafny.Type dafnyNode) {
     return dafnyNode switch {
       Dafny.IntType intType => IntType.FromDafny(intType),
+      Dafny.BoolType boolType => BoolType.FromDafny(boolType),
       Dafny.UserDefinedType udType => UserDefinedTypeHelper(udType),
       _ => throw new NotImplementedException(),
     };
@@ -28,13 +29,21 @@ public class IntType : Type, ConstructableFromDafny<Dafny.IntType, IntType> {
   }
 }
 
-public class NatType : Type, ConstructableFromDafny<Dafny.UserDefinedType, NatType>
-{
+public class BoolType : Type, ConstructableFromDafny<Dafny.BoolType, BoolType> {
+  private BoolType() { }
+
+  public override string Name { get => "bool"; }
+
+  public static BoolType FromDafny(Dafny.BoolType dafnyNode) {
+    return new BoolType();
+  }
+}
+
+public class NatType : Type, ConstructableFromDafny<Dafny.UserDefinedType, NatType> {
   private NatType() { }
   public override string Name { get => "nat"; }
 
-  public static NatType FromDafny(Dafny.UserDefinedType dafnyNode)
-  {
+  public static NatType FromDafny(Dafny.UserDefinedType dafnyNode) {
     return new NatType();
   }
 }

@@ -150,6 +150,8 @@ public abstract class LiteralExpr
   public static LiteralExpr FromDafny(Dafny.LiteralExpr dafnyNode) {
     if (dafnyNode.Value is BigInteger) {
       return IntLiteralExpr.FromDafny(dafnyNode);
+    } else if (dafnyNode.Value is bool) {
+      return BoolLiteralExpr.FromDafny(dafnyNode);
     }
     throw new NotImplementedException();
   }
@@ -163,6 +165,17 @@ public class IntLiteralExpr
   }
   public static new IntLiteralExpr FromDafny(Dafny.LiteralExpr dafnyNode) {
     return new IntLiteralExpr(dafnyNode);
+  }
+}
+
+public class BoolLiteralExpr
+: LiteralExpr, ConstructableFromDafny<Dafny.LiteralExpr, BoolLiteralExpr> {
+  public bool Value { get; set; }
+  private BoolLiteralExpr(Dafny.LiteralExpr literalExprDafny) {
+    Value = (bool)literalExprDafny.Value;
+  }
+  public static new BoolLiteralExpr FromDafny(Dafny.LiteralExpr dafnyNode) {
+    return new BoolLiteralExpr(dafnyNode);
   }
 }
 

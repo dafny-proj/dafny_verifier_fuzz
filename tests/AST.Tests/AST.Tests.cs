@@ -36,11 +36,13 @@ public class ASTTests {
   }
 
   [TestMethod]
-  public void CanParseAndPrintNaturalNumbers() {
+  public void CanParseAndPrintDifferentTypes() {
     var sourceStr = """
-    function Identity(n: nat): nat
+    method m()
     {
-      n
+      var x: int := 1;
+      var b, c: bool := true, false;
+      var n: nat := 0;
     }
     """;
     CanParseAndPrintFeature(sourceStr);
@@ -79,8 +81,8 @@ public class ASTTests {
     var sourceStr = """
     method Inc(x: int) returns (y: int)
     {
-      var z: int := x;
-      return z + 1;
+      var a, b: int := x, 1;
+      return a + b;
     }
     """;
     CanParseAndPrintFeature(sourceStr);

@@ -263,6 +263,9 @@ public class Printer {
       case IntLiteralExpr intLitExpr:
         Wr.Write(intLitExpr.Value);
         break;
+      case BoolLiteralExpr boolLitExpr:
+        Wr.Write(boolLitExpr.Value ? "true" : "false");
+        break;
       case ParensExpression parensExpr:
         // Note that this deviates from the original Dafny printer which prints 
         // parentheses optimally instead of following the program
