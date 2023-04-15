@@ -179,6 +179,15 @@ public class Printer {
       case IfStmt ifStmt:
         PrintIfStmt(ifStmt);
         break;
+      case ReturnStmt retStmt:
+        Wr.Write("return");
+        ResetSep(init: " ");
+        foreach (AssignmentRhs rhs in retStmt.Rhss) {
+          WriteSep();
+          PrintAssignRHS(rhs);
+        }
+        Wr.Write(";");
+        break;
       default:
         throw new NotImplementedException();
     }

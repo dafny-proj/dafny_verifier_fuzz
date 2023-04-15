@@ -10,6 +10,8 @@ public class Statement
         => UpdateStmt.FromDafny(updateStmt),
       Dafny.IfStmt ifStmt
         => IfStmt.FromDafny(ifStmt),
+      Dafny.ReturnStmt retStmt
+        => ReturnStmt.FromDafny(retStmt),
       _ => throw new NotImplementedException(),
     };
   }
@@ -55,5 +57,18 @@ public class IfStmt
 
   public static IfStmt FromDafny(Dafny.IfStmt dafnyNode) {
     return new IfStmt(dafnyNode);
+  }
+}
+
+public class ReturnStmt
+: Statement, ConstructableFromDafny<Dafny.ReturnStmt, ReturnStmt> {
+  public List<AssignmentRhs> Rhss = new List<AssignmentRhs>();
+
+  private ReturnStmt(Dafny.ReturnStmt retStmtDafny) {
+    Rhss.AddRange(retStmtDafny.Rhss.Select(AssignmentRhs.FromDafny));
+  }
+
+  public static ReturnStmt FromDafny(Dafny.ReturnStmt dafnyNode) {
+    return new ReturnStmt(dafnyNode);
   }
 }

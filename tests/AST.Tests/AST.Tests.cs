@@ -64,6 +64,17 @@ public class ASTTests {
   }
 
   [TestMethod]
+  public void CanParseAndPrintReturnStmt() {
+    var sourceStr = """
+    method Identity(x: int) returns (y: int)
+    {
+      return x;
+    }
+    """;
+    CanParseAndPrintFeature(sourceStr);
+  }
+
+  [TestMethod]
   public void CanParseAndPrintMethodSpecifications() {
     var sourceStr = """
     method Double(x: int) returns (r: int)
