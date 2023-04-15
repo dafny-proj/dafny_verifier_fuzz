@@ -36,6 +36,34 @@ public class ASTTests {
   }
 
   [TestMethod]
+  public void CanParseAndPrintNaturalNumbers() {
+    var sourceStr = """
+    function Identity(n: nat): nat
+    {
+      n
+    }
+    """;
+    CanParseAndPrintFeature(sourceStr);
+  }
+
+  [TestMethod]
+  public void CanParseAndPrintIfStmt() {
+    var sourceStr = """
+    method Sign(x: int) returns (s: int)
+    {
+      if (x < 0) {
+        s := -1;
+      } else if (0 < x) {
+        s := 1;
+      } else {
+        s := 0;
+      }
+    }
+    """;
+    CanParseAndPrintFeature(sourceStr);
+  }
+
+  [TestMethod]
   public void CanParseAndPrintMethodSpecifications() {
     var sourceStr = """
     method Double(x: int) returns (r: int)

@@ -176,6 +176,9 @@ public class Printer {
       case UpdateStmt updateStmt:
         PrintUpdateStmt(updateStmt);
         break;
+      case IfStmt ifStmt:
+        PrintIfStmt(ifStmt);
+        break;
       default:
         throw new NotImplementedException();
     }
@@ -219,6 +222,19 @@ public class Printer {
         break;
       case IntLiteralExpr intLitExpr:
         Wr.Write(intLitExpr.Value);
+        break;
+      case ParensExpression parensExpr:
+        // Note that this deviates from the original Dafny printer which prints 
+        // parentheses optimally instead of following the program
+        Wr.Write("(");
+        PrintExpression(parensExpr.E);
+        Wr.Write(")");
+        break;
+      case NegationExpression negExpr:
+        // Note that this deviates from the original Dafny printer which
+        // potentially prints parentheses based on binding/context strengths 
+        Wr.Write("-");
+        PrintExpression(negExpr.E);
         break;
       default:
         throw new NotImplementedException();
@@ -282,5 +298,20 @@ public class Printer {
         Wr.WriteLine();
         break;
     }
+  }
+
+  private void PrintIfStmt(IfStmt ifStmt) {
+    Wr.Write("if ");
+    if (ifStmt.Guard == null) {
+      Wr.Write("*");
+    } else {
+      PrintExpression(ifStmt.Guard);
+    }
+    Wr.Write(" ");
+    PrintStatement(ifStmt.Thn);
+
+    if (ifStmt.Els == null) return;
+    Wr.Write(" else ");
+    PrintStatement(ifStmt.Els);
   }
 }

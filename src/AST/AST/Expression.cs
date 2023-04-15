@@ -11,6 +11,10 @@ public abstract class Expression
         => BinaryExpr.FromDafny(binExpr),
       Dafny.LiteralExpr litExpr
         => LiteralExpr.FromDafny(litExpr),
+      Dafny.ParensExpression parensExpr
+        => ParensExpression.FromDafny(parensExpr),
+      Dafny.NegationExpression negExpr
+        => NegationExpression.FromDafny(negExpr),
       _ => throw new NotImplementedException(),
     };
   }
@@ -181,5 +185,31 @@ public class FrameExpression
   }
   public static FrameExpression FromDafny(Dafny.FrameExpression dafnyNode) {
     return new FrameExpression(dafnyNode);
+  }
+}
+
+public class ParensExpression
+: Expression, ConstructableFromDafny<Dafny.ParensExpression, ParensExpression> {
+  public Expression E { get; set; }
+
+  private ParensExpression(Dafny.ParensExpression parensExprDafny) {
+    E = Expression.FromDafny(parensExprDafny.E);
+  }
+
+  public static ParensExpression FromDafny(Dafny.ParensExpression dafnyNode) {
+    return new ParensExpression(dafnyNode);
+  }
+}
+
+public class NegationExpression
+: Expression, ConstructableFromDafny<Dafny.NegationExpression, NegationExpression> {
+  public Expression E { get; set; }
+
+  private NegationExpression(Dafny.NegationExpression negExprDafny) {
+    E = Expression.FromDafny(negExprDafny.E);
+  }
+
+  public static NegationExpression FromDafny(Dafny.NegationExpression dafnyNode) {
+    return new NegationExpression(dafnyNode);
   }
 }

@@ -5,8 +5,16 @@ public abstract class Type : Node, ConstructableFromDafny<Dafny.Type, Type> {
   public static Type FromDafny(Dafny.Type dafnyNode) {
     return dafnyNode switch {
       Dafny.IntType intType => IntType.FromDafny(intType),
+      Dafny.UserDefinedType udType => UserDefinedTypeHelper(udType),
       _ => throw new NotImplementedException(),
     };
+  }
+
+  private static Type UserDefinedTypeHelper(Dafny.UserDefinedType udType) {
+    if (udType.Name == "nat") {
+      return NatType.FromDafny(udType);
+    }
+    throw new NotImplementedException();
   }
 }
 
@@ -17,5 +25,16 @@ public class IntType : Type, ConstructableFromDafny<Dafny.IntType, IntType> {
 
   public static IntType FromDafny(Dafny.IntType dafnyNode) {
     return new IntType();
+  }
+}
+
+public class NatType : Type, ConstructableFromDafny<Dafny.UserDefinedType, NatType>
+{
+  private NatType() { }
+  public override string Name { get => "nat"; }
+
+  public static NatType FromDafny(Dafny.UserDefinedType dafnyNode)
+  {
+    return new NatType();
   }
 }
