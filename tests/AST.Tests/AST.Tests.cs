@@ -75,6 +75,18 @@ public class ASTTests {
   }
 
   [TestMethod]
+  public void CanParseAndPrintVarDeclStmt() {
+    var sourceStr = """
+    method Inc(x: int) returns (y: int)
+    {
+      var z: int := x;
+      return z + 1;
+    }
+    """;
+    CanParseAndPrintFeature(sourceStr);
+  }
+
+  [TestMethod]
   public void CanParseAndPrintMethodSpecifications() {
     var sourceStr = """
     method Double(x: int) returns (r: int)

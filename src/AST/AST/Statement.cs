@@ -6,12 +6,14 @@ public class Statement
     return dafnyNode switch {
       Dafny.BlockStmt blockStmt
         => BlockStmt.FromDafny(blockStmt),
-      Dafny.UpdateStmt updateStmt
-        => UpdateStmt.FromDafny(updateStmt),
+      Dafny.ConcreteUpdateStatement concrUpdateStmt
+        => ConcreteUpdateStatement.FromDafny(concrUpdateStmt),
       Dafny.IfStmt ifStmt
         => IfStmt.FromDafny(ifStmt),
       Dafny.ReturnStmt retStmt
         => ReturnStmt.FromDafny(retStmt),
+      Dafny.VarDeclStmt varDeclStmt
+        => VarDeclStmt.FromDafny(varDeclStmt),
       _ => throw new NotImplementedException(),
     };
   }
@@ -28,15 +30,30 @@ public class BlockStmt
   }
 }
 
-public class UpdateStmt
-: Statement, ConstructableFromDafny<Dafny.UpdateStmt, UpdateStmt> {
+public abstract class ConcreteUpdateStatement
+: Statement, ConstructableFromDafny<Dafny.ConcreteUpdateStatement, ConcreteUpdateStatement> {
   public List<Expression> Lhss = new List<Expression>();
+
+  protected ConcreteUpdateStatement(Dafny.ConcreteUpdateStatement cuStmtDafny) {
+    Lhss.AddRange(cuStmtDafny.Lhss.Select(Expression.FromDafny));
+  }
+
+  public static ConcreteUpdateStatement FromDafny(Dafny.ConcreteUpdateStatement cuStmtDafny) {
+    return cuStmtDafny switch {
+      Dafny.UpdateStmt us => UpdateStmt.FromDafny(us),
+      _ => throw new NotImplementedException(),
+    };
+  }
+}
+
+public class UpdateStmt
+: ConcreteUpdateStatement, ConstructableFromDafny<Dafny.UpdateStmt, UpdateStmt> {
   public List<AssignmentRhs> Rhss = new List<AssignmentRhs>();
 
-  private UpdateStmt(Dafny.UpdateStmt updateStmtDafny) {
-    Lhss.AddRange(updateStmtDafny.Lhss.Select(Expression.FromDafny));
+  private UpdateStmt(Dafny.UpdateStmt updateStmtDafny) : base(updateStmtDafny) {
     Rhss.AddRange(updateStmtDafny.Rhss.Select(AssignmentRhs.FromDafny));
   }
+
   public static UpdateStmt FromDafny(Dafny.UpdateStmt dafnyNode) {
     return new UpdateStmt(dafnyNode);
   }
@@ -70,5 +87,20 @@ public class ReturnStmt
 
   public static ReturnStmt FromDafny(Dafny.ReturnStmt dafnyNode) {
     return new ReturnStmt(dafnyNode);
+  }
+}
+
+public class VarDeclStmt
+: Statement, ConstructableFromDafny<Dafny.VarDeclStmt, VarDeclStmt> {
+  public List<LocalVariable> Locals = new List<LocalVariable>();
+  public ConcreteUpdateStatement? Update;
+
+  private VarDeclStmt(Dafny.VarDeclStmt vdStmt) {
+    Locals.AddRange(vdStmt.Locals.Select(LocalVariable.FromDafny));
+    Update = vdStmt.Update == null ? null : ConcreteUpdateStatement.FromDafny(vdStmt.Update);
+  }
+
+  public static VarDeclStmt FromDafny(Dafny.VarDeclStmt dafnyNode) {
+    return new VarDeclStmt(dafnyNode);
   }
 }

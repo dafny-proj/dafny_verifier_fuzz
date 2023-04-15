@@ -173,8 +173,8 @@ public class Printer {
         Indent();
         Wr.Write("}");
         break;
-      case UpdateStmt updateStmt:
-        PrintUpdateStmt(updateStmt);
+      case ConcreteUpdateStatement updateStmt:
+        PrintCUpdateStmt(updateStmt);
         break;
       case IfStmt ifStmt:
         PrintIfStmt(ifStmt);
@@ -188,25 +188,56 @@ public class Printer {
         }
         Wr.Write(";");
         break;
+      case VarDeclStmt varDeclStmt:
+        PrintVarDeclStmt(varDeclStmt);
+        break;
       default:
         throw new NotImplementedException();
     }
   }
 
-  private void PrintUpdateStmt(UpdateStmt stmt) {
+  private void PrintVarDeclStmt(VarDeclStmt vdStmt) {
+    // TODO: handle ghost, wildcard names
+    Wr.Write("var");
+    ResetSep(init: " ");
+    foreach (LocalVariable lv in vdStmt.Locals) {
+      WriteSep();
+      Wr.Write($"{lv.Name}");
+      if (lv.ExplicitType != null) {
+        Wr.Write($": ");
+        PrintType(lv.ExplicitType);
+      }
+    }
+    if (vdStmt.Update != null) {
+      PrintCUpdateRHS(vdStmt.Update);
+    }
+    Wr.Write(";");
+  }
+
+  private void PrintCUpdateRHS(ConcreteUpdateStatement cus) {
+    switch (cus) {
+      case UpdateStmt us:
+        if (us.Lhss.Count > 0) {
+          Wr.Write(" := ");
+        }
+        ResetSep();
+        foreach (AssignmentRhs rhs in us.Rhss) {
+          WriteSep();
+          PrintAssignRHS(rhs);
+        }
+        break;
+      default:
+        throw new NotImplementedException();
+    }
+  }
+
+  private void PrintCUpdateStmt(ConcreteUpdateStatement cus) {
     ResetSep();
-    foreach (Expression lhs in stmt.Lhss) {
+    foreach (Expression lhs in cus.Lhss) {
       WriteSep();
       PrintExpression(lhs);
     }
-    if (stmt.Lhss.Count > 0) {
-      Wr.Write(" := ");
-    }
-    ResetSep();
-    foreach (AssignmentRhs rhs in stmt.Rhss) {
-      WriteSep();
-      PrintAssignRHS(rhs);
-    }
+    PrintCUpdateRHS(cus);
     Wr.Write(";");
   }
 
@@ -244,6 +275,9 @@ public class Printer {
         // potentially prints parentheses based on binding/context strengths 
         Wr.Write("-");
         PrintExpression(negExpr.E);
+        break;
+      case IdentifierExpr identExpr:
+        Wr.Write(identExpr.Name);
         break;
       default:
         throw new NotImplementedException();
