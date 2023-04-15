@@ -6,24 +6,37 @@ namespace AST.Tests;
 
 [TestClass]
 public class ASTTests {
+  private void CanParseAndPrintFeature(string sourceStr) {
+    var programDafny = DafnyW.ParseDafnyProgramFromString(sourceStr);
+    var program = Program.FromDafny(programDafny);
+    var outputStr = Printer.ProgramToString(program);
+    Assert.AreEqual(sourceStr, outputStr.TrimEnd(), /*ignore_case=*/false);
+  }
+
   [TestMethod]
-  public void SimpleParseAndPrint() {
+  public void CanParseAndPrintMethod() {
     var sourceStr = """
     method Sum(x: int, y: int) returns (z: int)
     {
       z := x + y;
     }
     """;
-
-    var programDafny = DafnyW.ParseDafnyProgramFromString(sourceStr);
-    var program = Program.FromDafny(programDafny);
-    var outputStr = Printer.ProgramToString(program);
-
-    Assert.AreEqual(sourceStr, outputStr.TrimEnd(), /*ignore_case=*/false);
+    CanParseAndPrintFeature(sourceStr);
   }
 
   [TestMethod]
-  public void MethodSpecifications() {
+  public void CanParseAndPrintFunction() {
+    var sourceStr = """
+    function Identity(x: int): int
+    {
+      x
+    }
+    """;
+    CanParseAndPrintFeature(sourceStr);
+  }
+
+  [TestMethod]
+  public void CanParseAndPrintMethodSpecifications() {
     var sourceStr = """
     method Double(x: int) returns (r: int)
       requires 0 <= x
@@ -32,14 +45,9 @@ public class ASTTests {
       r := x + x;
     }
     """;
-
-    var programDafny = DafnyW.ParseDafnyProgramFromString(sourceStr);
-    var program = Program.FromDafny(programDafny);
-    var outputStr = Printer.ProgramToString(program);
-
-    Assert.AreEqual(sourceStr, outputStr.TrimEnd(), /*ignore_case=*/false);
+    CanParseAndPrintFeature(sourceStr);
   }
-  
+
   [TestMethod]
   public void OperatorReplacementMutationFinder() {
     var sourceStr = """

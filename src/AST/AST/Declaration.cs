@@ -68,6 +68,7 @@ public class MemberDecl
   public static MemberDecl FromDafny(Dafny.MemberDecl dafnyNode) {
     return dafnyNode switch {
       Dafny.Method method => Method.FromDafny(method),
+      Dafny.Function func => Function.FromDafny(func),
       _ => throw new NotImplementedException(),
     };
 
@@ -76,7 +77,7 @@ public class MemberDecl
 
 public class Method
 : MemberDecl, ConstructableFromDafny<Dafny.Method, Method> {
-  // TODO: TypeArgs, Req, Ens, Mod
+  // TODO: TypeArgs
   public string Name { get; set; }
   public BlockStmt Body { get; set; }
   public Specification<Dafny.Expression, Expression> Decreases { get; set; }
@@ -99,5 +100,35 @@ public class Method
   }
   public static Method FromDafny(Dafny.Method dafnyNode) {
     return new Method(dafnyNode);
+  }
+}
+
+public class Function
+: MemberDecl, ConstructableFromDafny<Dafny.Function, Function> {
+  // TODO: TypeArgs, byMethodBody
+  public string Name { get; set; }
+  public Expression Body { get; set; }
+  public Specification<Dafny.Expression, Expression> Decreases { get; set; }
+  public List<Formal> Ins = new List<Formal>();
+  public Formal? Out { get; set; }
+  public Type OutType { get; set; }
+  public List<AttributedExpression> Req = new List<AttributedExpression>();
+  public List<AttributedExpression> Ens = new List<AttributedExpression>();
+  public Specification<Dafny.FrameExpression, FrameExpression> Reads { get; set; }
+
+  private Function(Dafny.Function functionDafny) {
+    Name = functionDafny.Name;
+    Body = Expression.FromDafny(functionDafny.Body);
+    Decreases = Specification<Dafny.Expression, Expression>.FromDafny(functionDafny.Decreases);
+    Ins.AddRange(functionDafny.Formals.Select(Formal.FromDafny));
+    Out = functionDafny.Result == null ? null : Formal.FromDafny(functionDafny.Result);
+    OutType = Type.FromDafny(functionDafny.ResultType);
+    Req.AddRange(functionDafny.Req.Select(AttributedExpression.FromDafny));
+    Ens.AddRange(functionDafny.Ens.Select(AttributedExpression.FromDafny));
+    Reads = Specification<Dafny.FrameExpression, FrameExpression>.FromDafny(functionDafny.Reads);
+  }
+
+  public static Function FromDafny(Dafny.Function dafnyNode) {
+    return new Function(dafnyNode);
   }
 }

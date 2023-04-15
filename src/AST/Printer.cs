@@ -77,6 +77,9 @@ public class Printer {
       case Method m:
         PrintMethod(m);
         break;
+      case Function f:
+        PrintFunction(f);
+        break;
       default:
         throw new NotImplementedException();
     }
@@ -240,5 +243,44 @@ public class Printer {
 
   private void PrintType(Type t) {
     Wr.Write(t.Name);
+  }
+
+  private void PrintFunction(Function f) {
+    Indent();
+    Wr.Write($"function {f.Name}");
+    PrintFormals(f.Ins);
+    Wr.Write(": ");
+    if (f.Out != null) {
+      Wr.Write("(");
+      PrintFormal(f.Out);
+      Wr.Write(")");
+    } else {
+      PrintType(f.OutType);
+    }
+    IncIndent();
+    PrintSpec("requires", f.Req);
+    PrintFrameSpec("reads", f.Reads);
+    PrintSpec("ensures", f.Ens);
+    PrintDecreasesSpec(f.Decreases);
+    DecIndent();
+    Wr.WriteLine();
+
+    Indent();
+    Wr.WriteLine("{");
+    IncIndent();
+    PrintExtendedExpr(f.Body);
+    DecIndent();
+    Indent();
+    Wr.WriteLine("}");
+  }
+
+  private void PrintExtendedExpr(Expression expr) {
+    switch (expr) {
+      default:
+        Indent();
+        PrintExpression(expr);
+        Wr.WriteLine();
+        break;
+    }
   }
 }
