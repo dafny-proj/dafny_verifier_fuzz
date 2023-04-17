@@ -85,7 +85,7 @@ public class Printer {
     }
   }
 
-  private void PrintMethod(Method m) {
+  private void PrintMethod(Method m, bool includeAutoGen = false) {
     Indent();
     string mKind = "method";
     string mName = m.Name;
@@ -109,7 +109,7 @@ public class Printer {
     PrintSpec("requires", m.Req);
     PrintFrameSpec("modifies", m.Mod);
     PrintSpec("ensures", m.Ens);
-    PrintDecreasesSpec(m.Decreases);
+    PrintDecreasesSpec(includeAutoGen ? m.AllDecreases : m.ProvidedDecreases);
     DecIndent();
 
     Wr.WriteLine();
@@ -307,7 +307,7 @@ public class Printer {
     Wr.Write(t.Name);
   }
 
-  private void PrintFunction(Function f) {
+  private void PrintFunction(Function f, bool includeAutoGen = false) {
     Indent();
     Wr.Write($"function {f.Name}");
     PrintFormals(f.Ins);
@@ -323,7 +323,7 @@ public class Printer {
     PrintSpec("requires", f.Req);
     PrintFrameSpec("reads", f.Reads);
     PrintSpec("ensures", f.Ens);
-    PrintDecreasesSpec(f.Decreases);
+    PrintDecreasesSpec(includeAutoGen ? f.AllDecreases : f.ProvidedDecreases);
     DecIndent();
     Wr.WriteLine();
 

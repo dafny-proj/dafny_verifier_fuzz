@@ -2,7 +2,7 @@
 using System.Diagnostics;
 
 namespace DafnyWrappers;
-public static class DafnyWrappers {
+public static partial class DafnyWrappers {
   public static Dafny.DafnyOptions DefaultDafnyParseOptions() {
     return Dafny.DafnyOptions.Create();
   }
@@ -24,6 +24,12 @@ public static class DafnyWrappers {
     var reporter = new Dafny.ConsoleErrorReporter(options);
     var success = Dafny.Parser.Parse(sourceStr, sourceFile, sourceFile, defModule, builtIns, reporter);
     return new Dafny.Program("program", defModule, builtIns, reporter);
+  }
+
+  public static void
+  ResolveDafnyProgram(Dafny.Program programDafny) {
+    var resolver = new Dafny.Resolver(programDafny);
+    resolver.ResolveProgram(programDafny);
   }
 
   public static string DafnyProgramToString(Dafny.Program programDafny) {

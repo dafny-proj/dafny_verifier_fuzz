@@ -41,7 +41,7 @@ public abstract class ASTVisitor {
 
   protected void VisitMethod(Method m) {
     VisitBlockStmt(m.Body);
-    VisitSpecification(m.Decreases);
+    VisitSpecification(m.AllDecreases);
     m.Ins.ForEach(VisitFormal);
     m.Outs.ForEach(VisitFormal);
   }

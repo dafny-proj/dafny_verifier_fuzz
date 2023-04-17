@@ -8,6 +8,7 @@ namespace AST.Tests;
 public class ASTTests {
   private void CanParseAndPrintFeature(string sourceStr) {
     var programDafny = DafnyW.ParseDafnyProgramFromString(sourceStr);
+    DafnyW.ResolveDafnyProgram(programDafny);
     var program = Program.FromDafny(programDafny);
     var outputStr = Printer.ProgramToString(program);
     Assert.AreEqual(sourceStr, outputStr.TrimEnd(), /*ignore_case=*/false);

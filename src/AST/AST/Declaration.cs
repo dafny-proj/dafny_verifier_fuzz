@@ -80,7 +80,13 @@ public class Method
   // TODO: TypeArgs
   public string Name { get; set; }
   public BlockStmt Body { get; set; }
-  public Specification<Dafny.Expression, Expression> Decreases { get; set; }
+  private Specification<Dafny.Expression, Expression> _Decreases { get; set; }
+  public Specification<Dafny.Expression, Expression> AllDecreases {
+    get => _Decreases;
+  }
+  public Specification<Dafny.Expression, Expression> ProvidedDecreases {
+    get => _Decreases.GetProvided();
+  }
   public List<Formal> Ins = new List<Formal>();
   public List<Formal> Outs = new List<Formal>();
   public List<AttributedExpression> Req = new List<AttributedExpression>();
@@ -91,7 +97,7 @@ public class Method
   private Method(Dafny.Method methodDafny) {
     Name = methodDafny.Name;
     Body = BlockStmt.FromDafny(methodDafny.Body);
-    Decreases = Specification<Dafny.Expression, Expression>.FromDafny(methodDafny.Decreases);
+    _Decreases = Specification<Dafny.Expression, Expression>.FromDafny(methodDafny.Decreases);
     Ins.AddRange(methodDafny.Ins.Select(Formal.FromDafny));
     Outs.AddRange(methodDafny.Outs.Select(Formal.FromDafny));
     Req.AddRange(methodDafny.Req.Select(AttributedExpression.FromDafny));
@@ -108,7 +114,13 @@ public class Function
   // TODO: TypeArgs, byMethodBody
   public string Name { get; set; }
   public Expression Body { get; set; }
-  public Specification<Dafny.Expression, Expression> Decreases { get; set; }
+  private Specification<Dafny.Expression, Expression> _Decreases { get; set; }
+  public Specification<Dafny.Expression, Expression> AllDecreases {
+    get => _Decreases;
+  }
+  public Specification<Dafny.Expression, Expression> ProvidedDecreases {
+    get => _Decreases.GetProvided();
+  }
   public List<Formal> Ins = new List<Formal>();
   public Formal? Out { get; set; }
   public Type OutType { get; set; }
@@ -119,7 +131,7 @@ public class Function
   private Function(Dafny.Function functionDafny) {
     Name = functionDafny.Name;
     Body = Expression.FromDafny(functionDafny.Body);
-    Decreases = Specification<Dafny.Expression, Expression>.FromDafny(functionDafny.Decreases);
+    _Decreases = Specification<Dafny.Expression, Expression>.FromDafny(functionDafny.Decreases);
     Ins.AddRange(functionDafny.Formals.Select(Formal.FromDafny));
     Out = functionDafny.Result == null ? null : Formal.FromDafny(functionDafny.Result);
     OutType = Type.FromDafny(functionDafny.ResultType);
