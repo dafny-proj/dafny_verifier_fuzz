@@ -105,6 +105,21 @@ public class ASTTests {
   }
 
   [TestMethod]
+  public void CanParseAndPrintMethodCalls() {
+    var sourceStr = """
+    method Foo(n: nat)
+    {
+    }
+    
+    method Bar()
+    {
+      Foo(1);
+    }
+    """;
+    CanParseAndPrintFeature(sourceStr);
+  }
+
+  [TestMethod]
   public void OperatorReplacementMutationFinder() {
     var sourceStr = """
     method Sum(x: int, y: int) returns (z: int)

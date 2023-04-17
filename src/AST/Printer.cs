@@ -191,9 +191,30 @@ public class Printer {
       case VarDeclStmt varDeclStmt:
         PrintVarDeclStmt(varDeclStmt);
         break;
+      case CallStmt callStmt:
+        PrintCall(callStmt.Callee, callStmt.ArgumentBindings);
+        break;
       default:
         throw new NotImplementedException();
     }
+  }
+
+  private void PrintCall(Expression callee, ArgumentBindings arguments) {
+    PrintExpression(callee);
+    PrintCallArguments(arguments);
+  }
+
+  private void PrintCallArguments(ArgumentBindings abs) {
+    Wr.Write("(");
+    ResetSep();
+    foreach (ArgumentBinding ab in abs.providedArguments) {
+      WriteSep();
+      if (!ab.IsPositional) {
+        Wr.Write($"{ab.FormalParameterName} := ");
+      }
+      PrintExpression(ab.Argument);
+    }
+    Wr.Write(")");
   }
 
   private void PrintVarDeclStmt(VarDeclStmt vdStmt) {
@@ -300,9 +321,27 @@ public class Printer {
       case IdentifierExpr identExpr:
         Wr.Write(identExpr.Name);
         break;
+      case MemberSelectExpr memberSelectExpr:
+        PrintMemberSelectExpr(memberSelectExpr);
+        break;
+      case StaticReceiverExpr staticReceiverExpr:
+        Wr.Write(staticReceiverExpr.Type);
+        break;
+      case ApplySuffix applySuffix:
+        PrintCall(applySuffix.Lhs, applySuffix.ArgumentBindings);
+        break;
       default:
         throw new NotImplementedException();
     }
+  }
+
+  private void PrintMemberSelectExpr(MemberSelectExpr mse) {
+    // TODO: parentheses
+    if (!mse.ReceiverIsImplicit) {
+      PrintExpression(mse.Receiver);
+      Wr.Write(".");
+    }
+    Wr.Write(mse.MemberName);
   }
 
   private void PrintFormals(List<Formal> fs) {

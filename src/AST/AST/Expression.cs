@@ -1,4 +1,6 @@
 using System.Numerics;
+using System.Diagnostics.Contracts;
+
 namespace AST;
 
 public abstract class Expression
@@ -17,7 +19,9 @@ public abstract class Expression
         => NegationExpression.FromDafny(negExpr),
       Dafny.IdentifierExpr identExpr
         => IdentifierExpr.FromDafny(identExpr),
-      _ => throw new NotImplementedException(),
+      Dafny.ApplySuffix applySuffix
+        => ApplySuffix.FromDafny(applySuffix),
+      _ => throw new NotImplementedException($"{dafnyNode.GetType()}"),
     };
   }
 }
@@ -148,9 +152,13 @@ public class BinaryExpr
 public abstract class LiteralExpr
 : Expression, ConstructableFromDafny<Dafny.LiteralExpr, LiteralExpr> {
   public static LiteralExpr FromDafny(Dafny.LiteralExpr dafnyNode) {
+    if (dafnyNode is Dafny.StaticReceiverExpr sred) {
+      return StaticReceiverExpr.FromDafny(sred);
+    }
     if (dafnyNode.Value is BigInteger) {
       return IntLiteralExpr.FromDafny(dafnyNode);
-    } else if (dafnyNode.Value is bool) {
+    }
+    if (dafnyNode.Value is bool) {
       return BoolLiteralExpr.FromDafny(dafnyNode);
     }
     throw new NotImplementedException();
@@ -255,5 +263,57 @@ public class IdentifierExpr
 
   public static IdentifierExpr FromDafny(Dafny.IdentifierExpr dafnyNode) {
     return new IdentifierExpr(dafnyNode);
+  }
+}
+
+
+public class MemberSelectExpr
+: Expression, ConstructableFromDafny<Dafny.MemberSelectExpr, MemberSelectExpr> {
+  public Expression Receiver { get; set; }
+  public bool ReceiverIsImplicit { get; }
+  public string MemberName { get; set; }
+  public MemberDecl Member { get; set; } // TODO: Is this field needed?
+
+  private MemberSelectExpr(Dafny.MemberSelectExpr mse) {
+    Receiver = Expression.FromDafny(mse.Obj);
+    // TODO: is it better to check the type of the receiver for deducing implicitness?
+    ReceiverIsImplicit = mse.Obj.IsImplicit;
+    MemberName = mse.MemberName;
+    Member = MemberDecl.FromDafny(mse.Member);
+  }
+
+  public static MemberSelectExpr FromDafny(Dafny.MemberSelectExpr dafnyNode) {
+    return new MemberSelectExpr(dafnyNode);
+  }
+}
+
+public class StaticReceiverExpr
+: LiteralExpr, ConstructableFromDafny<Dafny.StaticReceiverExpr, StaticReceiverExpr> {
+  public Type Type { get; set; }
+  public bool IsImplicit { get; set; }
+
+  private StaticReceiverExpr(Dafny.StaticReceiverExpr sred) {
+    Type = Type.FromDafny(sred.Type);
+    IsImplicit = sred.IsImplicit;
+  }
+
+  public static StaticReceiverExpr FromDafny(Dafny.StaticReceiverExpr dafnyNode) {
+    Contract.Requires(dafnyNode.WasResolved()); // for type to be non-null.
+    return new StaticReceiverExpr(dafnyNode);
+  }
+}
+
+public class ApplySuffix
+: Expression, ConstructableFromDafny<Dafny.ApplySuffix, ApplySuffix> {
+  public Expression Lhs { get; set; }
+  public ArgumentBindings ArgumentBindings { get; set; }
+
+  private ApplySuffix(Dafny.ApplySuffix asd) {
+    Lhs = Expression.FromDafny(asd.Lhs);
+    ArgumentBindings = ArgumentBindings.FromDafny(asd.Bindings);
+  }
+
+  public static ApplySuffix FromDafny(Dafny.ApplySuffix dafnyNode) {
+    return new ApplySuffix(dafnyNode);
   }
 }
