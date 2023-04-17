@@ -44,6 +44,8 @@ public class ASTTests {
       var x: int := 1;
       var b, c: bool := true, false;
       var n: nat := 0;
+      var a := new int[1];
+      var a2: array2<int> := new int[1, 2];
     }
     """;
     CanParseAndPrintFeature(sourceStr);

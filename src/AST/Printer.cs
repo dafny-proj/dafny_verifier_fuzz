@@ -246,10 +246,28 @@ public class Printer {
       case ExprRhs exprRhs:
         PrintExpression(exprRhs.Expr);
         break;
+      case NewArrayRHS newArrRhs:
+        PrintNewArrayRhs(newArrRhs);
+        break;
       default:
         throw new NotImplementedException();
     }
   }
+
+  // This currently only handles `new T[int size]`
+  // TODO: handle `new T[EE](E)` and `new T[][EE]`
+  private void PrintNewArrayRhs(NewArrayRHS nar) {
+    Wr.Write("new ");
+    PrintType(nar.ElementType);
+    Wr.Write("[");
+    ResetSep();
+    foreach (Expression dim in nar.ArrayDimensions) {
+      WriteSep();
+      PrintExpression(dim);
+    }
+    Wr.Write("]");
+  }
+
   private void PrintExpression(Expression expr) {
     switch (expr) {
       case NameSegment ns:

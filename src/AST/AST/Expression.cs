@@ -244,6 +244,7 @@ public class NegationExpression
   }
 }
 
+// Subclasses: AutoGhostIdentExpr, ResolverIdentExpr
 public class IdentifierExpr
 : Expression, ConstructableFromDafny<Dafny.IdentifierExpr, IdentifierExpr> {
   public string Name { get; set; }
