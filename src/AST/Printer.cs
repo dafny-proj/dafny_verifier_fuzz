@@ -194,6 +194,9 @@ public class Printer {
       case CallStmt callStmt:
         PrintCall(callStmt.Callee, callStmt.ArgumentBindings);
         break;
+      case WhileStmt whileStmt:
+        PrintWhileStmt(whileStmt);
+        break;
       default:
         throw new NotImplementedException();
     }
@@ -404,11 +407,7 @@ public class Printer {
 
   private void PrintIfStmt(IfStmt ifStmt) {
     Wr.Write("if ");
-    if (ifStmt.Guard == null) {
-      Wr.Write("*");
-    } else {
-      PrintExpression(ifStmt.Guard);
-    }
+    PrintGuard(ifStmt.Guard);
     Wr.Write(" ");
     PrintStatement(ifStmt.Thn);
 
@@ -420,10 +419,34 @@ public class Printer {
   private void PrintITEExpr(ITEExpr itee) {
     // TODO: parentheses?
     Wr.Write("if ");
-    PrintExpression(itee.Guard);
+    PrintGuard(itee.Guard);
     Wr.Write(" then ");
     PrintExpression(itee.Thn);
     Wr.Write(" else ");
     PrintExpression(itee.Els);
+  }
+
+  private void PrintGuard(Expression? g) {
+    if (g == null) {
+      Wr.Write("*");
+    } else {
+      PrintExpression(g);
+    }
+  }
+
+  private void PrintWhileStmt(WhileStmt ws) {
+    Wr.Write("while ");
+    PrintGuard(ws.Guard);
+
+    IncIndent();
+    PrintSpec("invariant", ws.Invariants);
+    PrintDecreasesSpec(ws.ProvidedDecreases);
+    PrintFrameSpec("modifies", ws.Modifies);
+    DecIndent();
+
+    if (ws.Body == null) return;
+    Wr.WriteLine();
+    Indent();
+    PrintStatement(ws.Body);
   }
 }

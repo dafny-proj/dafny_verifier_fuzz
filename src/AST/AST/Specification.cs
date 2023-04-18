@@ -6,7 +6,9 @@ where S : Dafny.Node where T : Node, ConstructableFromDafny<S, T> {
   public List<T> Expressions = new List<T>();
 
   private Specification(Dafny.Specification<S> specDafny) {
-    Expressions.AddRange(specDafny.Expressions.Select(e => (T)Node.FromDafny(e)));
+    if (specDafny.Expressions != null) {
+      Expressions.AddRange(specDafny.Expressions.Select(e => (T)Node.FromDafny(e)));
+    }
   }
   private Specification(IEnumerable<S> specDafny) {
     Expressions.AddRange(specDafny.Select(e => (T)Node.FromDafny(e)));

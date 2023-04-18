@@ -146,6 +146,22 @@ public class ASTTests {
   }
 
   [TestMethod]
+  public void CanParseAndPrintWhileLoop() {
+    var sourceStr = """
+    method Loop(n: nat)
+    {
+      var x := 0;
+      while x < n
+        invariant x <= n
+      {
+        x := x + 1;
+      }
+    }
+    """;
+    CanParseAndPrintFeature(sourceStr);
+  }
+
+  [TestMethod]
   public void OperatorReplacementMutationFinder() {
     var sourceStr = """
     method Sum(x: int, y: int) returns (z: int)
