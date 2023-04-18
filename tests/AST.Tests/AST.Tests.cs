@@ -120,6 +120,21 @@ public class ASTTests {
   }
 
   [TestMethod]
+  public void CanParseAndPrintDefaultArguments() {
+    var sourceStr = """
+    method Foo(w: int, x: int, y: int := 0, z: int := 0)
+    {
+    }
+    
+    method Bar()
+    {
+      Foo(0, y := 1, x := 1);
+    }
+    """;
+    CanParseAndPrintFeature(sourceStr);
+  }
+
+  [TestMethod]
   public void OperatorReplacementMutationFinder() {
     var sourceStr = """
     method Sum(x: int, y: int) returns (z: int)

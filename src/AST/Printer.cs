@@ -358,6 +358,10 @@ public class Printer {
   private void PrintFormal(Formal f) {
     Wr.Write($"{f.Name}: ");
     PrintType(f.Type);
+    if (f.DefaultValue != null) {
+      Wr.Write(" := ");
+      PrintExpression(f.DefaultValue);
+    }
   }
 
   private void PrintType(Type t) {

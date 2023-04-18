@@ -3,10 +3,15 @@ namespace AST;
 public class Formal : Node, ConstructableFromDafny<Dafny.Formal, Formal> {
   public string Name { get; set; }
   public Type Type { get; set; }
-  public Formal(Dafny.Formal formalDafny) {
-    Name = formalDafny.Name;
-    Type = Type.FromDafny(formalDafny.Type);
+  public Expression? DefaultValue { get; set; }
+
+  private Formal(Dafny.Formal fd) {
+    Name = fd.Name;
+    Type = Type.FromDafny(fd.Type);
+    DefaultValue = fd.DefaultValue == null ? null
+      : Expression.FromDafny(fd.DefaultValue);
   }
+
   public static Formal FromDafny(Dafny.Formal dafnyNode) {
     return new Formal(dafnyNode);
   }
