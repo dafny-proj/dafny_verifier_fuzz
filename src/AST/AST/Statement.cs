@@ -84,6 +84,7 @@ public class IfStmt
   }
 }
 
+// TODO: After resolution, an UpdateStmt is created, do we use that instead of Rhss?
 public class ReturnStmt
 : Statement, ConstructableFromDafny<Dafny.ReturnStmt, ReturnStmt> {
   public List<AssignmentRhs> Rhss = new List<AssignmentRhs>();

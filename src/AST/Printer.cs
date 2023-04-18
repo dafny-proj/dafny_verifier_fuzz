@@ -339,6 +339,9 @@ public class Printer {
       case ChainingExpression chainingExpr:
         PrintChainingExpr(chainingExpr);
         break;
+      case SeqSelectExpr seqSelectExpr:
+        PrintSeqSelectExpr(seqSelectExpr);
+        break;
       default:
         throw new NotImplementedException();
     }
@@ -460,5 +463,21 @@ public class Printer {
       Wr.Write($" {BinaryExpr.OpcodeString(ce.Operators[i])} ");
       PrintExpression(ce.Operands[i + 1]);
     }
+  }
+
+  private void PrintSeqSelectExpr(SeqSelectExpr sse) {
+    // TODO: parentheses?
+    PrintExpression(sse.Seq);
+    Wr.Write("[");
+    if (sse.E0 != null) {
+      PrintExpression(sse.E0);
+    }
+    if (sse.IsSlice) {
+      Wr.Write("..");
+      if (sse.E1 != null) {
+        PrintExpression(sse.E1);
+      }
+    }
+    Wr.Write("]");
   }
 }

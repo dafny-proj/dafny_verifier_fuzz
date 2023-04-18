@@ -173,6 +173,21 @@ public class ASTTests {
   }
 
   [TestMethod]
+  public void CanParseAndPrintSeqSelectExprForArray() {
+    var sourceStr = """
+    method Foo(a: array<int>, i: int)
+    {
+      var x1 := a[..];
+      var x2 := a[i..];
+      var x3 := a[..i];
+      var x4 := a[0..i];
+      var x5 := a[i];
+    }
+    """;
+    CanParseAndPrintFeature(sourceStr);
+  }
+
+  [TestMethod]
   public void OperatorReplacementMutationFinder() {
     var sourceStr = """
     method Sum(x: int, y: int) returns (z: int)
