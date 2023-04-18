@@ -336,6 +336,9 @@ public class Printer {
       case ITEExpr iteExpr:
         PrintITEExpr(iteExpr);
         break;
+      case ChainingExpression chainingExpr:
+        PrintChainingExpr(chainingExpr);
+        break;
       default:
         throw new NotImplementedException();
     }
@@ -448,5 +451,14 @@ public class Printer {
     Wr.WriteLine();
     Indent();
     PrintStatement(ws.Body);
+  }
+
+  private void PrintChainingExpr(ChainingExpression ce) {
+    // TODO: parentheses?
+    PrintExpression(ce.Operands[0]);
+    for (int i = 0; i < ce.Operators.Count; i++) {
+      Wr.Write($" {BinaryExpr.OpcodeString(ce.Operators[i])} ");
+      PrintExpression(ce.Operands[i + 1]);
+    }
   }
 }

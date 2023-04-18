@@ -162,6 +162,17 @@ public class ASTTests {
   }
 
   [TestMethod]
+  public void CanParseAndPrintChainingExpr() {
+    var sourceStr = """
+    function LteTen(n: nat): bool
+    {
+      0 <= n <= 10
+    }
+    """;
+    CanParseAndPrintFeature(sourceStr);
+  }
+
+  [TestMethod]
   public void OperatorReplacementMutationFinder() {
     var sourceStr = """
     method Sum(x: int, y: int) returns (z: int)

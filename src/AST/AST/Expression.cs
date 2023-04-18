@@ -23,6 +23,8 @@ public abstract class Expression
         => ApplySuffix.FromDafny(applySuffix),
       Dafny.ITEExpr itee
         => ITEExpr.FromDafny(itee),
+      Dafny.ChainingExpression ce
+        => ChainingExpression.FromDafny(ce),
       _ => throw new NotImplementedException($"{dafnyNode.GetType()}"),
     };
   }
@@ -334,5 +336,20 @@ public class ITEExpr
 
   public static ITEExpr FromDafny(Dafny.ITEExpr dafnyNode) {
     return new ITEExpr(dafnyNode);
+  }
+}
+
+public class ChainingExpression
+: Expression, ConstructableFromDafny<Dafny.ChainingExpression, ChainingExpression> {
+  public List<Expression> Operands = new List<Expression>();
+  public List<BinaryExpr.Opcode> Operators = new List<BinaryExpr.Opcode>();
+
+  private ChainingExpression(Dafny.ChainingExpression ced) {
+    Operands.AddRange(ced.Operands.Select(Expression.FromDafny));
+    Operators.AddRange(ced.Operators.Select(BinaryExpr.FromDafny));
+  }
+
+  public static ChainingExpression FromDafny(Dafny.ChainingExpression dafnyNode) {
+    return new ChainingExpression(dafnyNode);
   }
 }
