@@ -125,10 +125,21 @@ public class ASTTests {
     method Foo(w: int, x: int, y: int := 0, z: int := 0)
     {
     }
-    
+
     method Bar()
     {
       Foo(0, y := 1, x := 1);
+    }
+    """;
+    CanParseAndPrintFeature(sourceStr);
+  }
+
+  [TestMethod]
+  public void CanParseAndPrintITEExpr() {
+    var sourceStr = """
+    function Fib(n: nat): nat
+    {
+      if n < 2 then n else Fib(n - 2) + Fib(n - 1)
     }
     """;
     CanParseAndPrintFeature(sourceStr);

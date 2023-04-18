@@ -330,6 +330,9 @@ public class Printer {
       case ApplySuffix applySuffix:
         PrintCall(applySuffix.Lhs, applySuffix.ArgumentBindings);
         break;
+      case ITEExpr iteExpr:
+        PrintITEExpr(iteExpr);
+        break;
       default:
         throw new NotImplementedException();
     }
@@ -391,20 +394,12 @@ public class Printer {
     Indent();
     Wr.WriteLine("{");
     IncIndent();
-    PrintExtendedExpr(f.Body);
+    Indent();
+    PrintExpression(f.Body);
+    Wr.WriteLine();
     DecIndent();
     Indent();
     Wr.WriteLine("}");
-  }
-
-  private void PrintExtendedExpr(Expression expr) {
-    switch (expr) {
-      default:
-        Indent();
-        PrintExpression(expr);
-        Wr.WriteLine();
-        break;
-    }
   }
 
   private void PrintIfStmt(IfStmt ifStmt) {
@@ -420,5 +415,15 @@ public class Printer {
     if (ifStmt.Els == null) return;
     Wr.Write(" else ");
     PrintStatement(ifStmt.Els);
+  }
+
+  private void PrintITEExpr(ITEExpr itee) {
+    // TODO: parentheses?
+    Wr.Write("if ");
+    PrintExpression(itee.Guard);
+    Wr.Write(" then ");
+    PrintExpression(itee.Thn);
+    Wr.Write(" else ");
+    PrintExpression(itee.Els);
   }
 }

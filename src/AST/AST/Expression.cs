@@ -21,6 +21,8 @@ public abstract class Expression
         => IdentifierExpr.FromDafny(identExpr),
       Dafny.ApplySuffix applySuffix
         => ApplySuffix.FromDafny(applySuffix),
+      Dafny.ITEExpr itee
+        => ITEExpr.FromDafny(itee),
       _ => throw new NotImplementedException($"{dafnyNode.GetType()}"),
     };
   }
@@ -315,5 +317,22 @@ public class ApplySuffix
 
   public static ApplySuffix FromDafny(Dafny.ApplySuffix dafnyNode) {
     return new ApplySuffix(dafnyNode);
+  }
+}
+
+public class ITEExpr
+: Expression, ConstructableFromDafny<Dafny.ITEExpr, ITEExpr> {
+  public Expression Guard { get; set; }
+  public Expression Thn { get; set; }
+  public Expression Els { get; set; }
+
+  private ITEExpr(Dafny.ITEExpr iteed) {
+    Guard = Expression.FromDafny(iteed.Test);
+    Thn = Expression.FromDafny(iteed.Thn);
+    Els = Expression.FromDafny(iteed.Els);
+  }
+
+  public static ITEExpr FromDafny(Dafny.ITEExpr dafnyNode) {
+    return new ITEExpr(dafnyNode);
   }
 }
