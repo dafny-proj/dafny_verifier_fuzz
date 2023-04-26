@@ -1,0 +1,1 @@
+global using Dafny = Microsoft.Dafny;

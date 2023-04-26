@@ -10,9 +10,4 @@
     <ProjectReference Include="..\AST\AST.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="DafnyCore" Version="4.0.0.50303-nightly-2023-03-30-76266c9" />
-    <PackageReference Include="DafnyDriver" Version="4.0.0.50303-nightly-2023-03-30-76266c9" />
-  </ItemGroup>
-
 </Project>

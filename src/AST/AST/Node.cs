@@ -1,5 +1,3 @@
-﻿global using Dafny = Microsoft.Dafny;
-
 namespace AST;
 
 public interface ConstructableFromDafny<S, T> {

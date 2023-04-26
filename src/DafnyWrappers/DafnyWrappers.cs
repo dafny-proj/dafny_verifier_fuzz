@@ -85,10 +85,11 @@ public static partial class DafnyWrappers {
     }
   }
 
-  public static void PrintDafnyAST(Dafny.Node node, string prefix="0") {
+  public static void PrintDafnyAST(Dafny.Node node, string prefix="0", bool preResolve = false) {
     Console.WriteLine($"{prefix}: {node.GetType()}");
     int childCount = 1;
-    foreach (var child in node.Children) {
+    var children = preResolve ? node.PreResolveChildren : node.Children;
+    foreach (var child in children) {
       PrintDafnyAST(child, $"{prefix}.{childCount++}");
     }
   }

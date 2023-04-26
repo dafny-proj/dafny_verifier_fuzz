@@ -1,6 +1,6 @@
 namespace AST;
-public class Program : Node, ConstructableFromDafny<Dafny.Program, Program> {
 
+public class Program : Node, ConstructableFromDafny<Dafny.Program, Program> {
   public ModuleDecl DefaultModule { get; set; }
   public ModuleDefinition DefaultModuleDef {
     get {
