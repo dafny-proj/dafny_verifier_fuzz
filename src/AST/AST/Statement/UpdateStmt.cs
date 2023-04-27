@@ -1,3 +1,5 @@
+using System.Diagnostics.Contracts;
+
 namespace AST;
 
 public abstract class ConcreteUpdateStatement
@@ -19,12 +21,11 @@ public abstract class ConcreteUpdateStatement
 public class UpdateStmt
 : ConcreteUpdateStatement, ConstructableFromDafny<Dafny.UpdateStmt, UpdateStmt> {
   public override IEnumerable<Node> Children => Lhss.Concat<Node>(Rhss);
-
+  
   public List<AssignmentRhs> Rhss = new List<AssignmentRhs>();
 
   private UpdateStmt(Dafny.UpdateStmt updateStmtDafny) : base(updateStmtDafny) {
     Rhss.AddRange(updateStmtDafny.Rhss.Select(AssignmentRhs.FromDafny));
-    // TODO: should this somehow use updateStmtDafny.ResolvedStatements?
   }
 
   public static UpdateStmt FromDafny(Dafny.UpdateStmt dafnyNode) {

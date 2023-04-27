@@ -85,7 +85,9 @@ public class Function
   }
   public List<Formal> Ins = new List<Formal>();
   public Formal? Out { get; set; }
-  public Type? OutType { get => Out == null ? null : Out.Type; }
+  // OutType is required as Out is not always set
+  // e.g. function Foo(): int {} // Unnamed output variable => Out not set
+  public Type OutType { get; set; }
   public List<AttributedExpression> Req = new List<AttributedExpression>();
   public List<AttributedExpression> Ens = new List<AttributedExpression>();
   public Specification<Dafny.FrameExpression, FrameExpression> Reads { get; set; }
@@ -96,6 +98,7 @@ public class Function
     _Decreases = Specification<Dafny.Expression, Expression>.FromDafny(functionDafny.Decreases);
     Ins.AddRange(functionDafny.Formals.Select(Formal.FromDafny));
     Out = functionDafny.Result == null ? null : Formal.FromDafny(functionDafny.Result);
+    OutType = Type.FromDafny(functionDafny.ResultType);
     Req.AddRange(functionDafny.Req.Select(AttributedExpression.FromDafny));
     Ens.AddRange(functionDafny.Ens.Select(AttributedExpression.FromDafny));
     Reads = Specification<Dafny.FrameExpression, FrameExpression>.FromDafny(functionDafny.Reads);

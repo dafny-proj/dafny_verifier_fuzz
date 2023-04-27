@@ -4,14 +4,16 @@ public abstract class Type : Node, ConstructableFromDafny<Dafny.Type, Type> {
   public abstract string Name { get; }
 
   public static readonly BoolType Bool = BoolType.Instance;
-  public static readonly IntType Int = IntType.Instance; 
+  public static readonly IntType Int = IntType.Instance;
+  public static readonly OtherType Other = OtherType.Instance;
 
   public static Type FromDafny(Dafny.Type dafnyNode) {
     return dafnyNode switch {
-      Dafny.IntType intType => IntType.FromDafny(intType),
-      Dafny.BoolType boolType => BoolType.FromDafny(boolType),
+      Dafny.IntType intType => Type.Int,
+      Dafny.BoolType boolType => Type.Bool,
       Dafny.UserDefinedType udType => UserDefinedTypeHelper(udType),
-      _ => throw new NotImplementedException(),
+      _ => Type.Other,
+      // _ => throw new NotImplementedException($"{dafnyNode.GetType()}"),
     };
   }
 
@@ -22,7 +24,7 @@ public abstract class Type : Node, ConstructableFromDafny<Dafny.Type, Type> {
     if (udType.IsArrayType) {
       return ArrayType.FromDafny(udType);
     }
-    throw new NotImplementedException();
+    return Type.Other;
+    // throw new NotImplementedException($"{udType.GetType()}");
   }
 }
-
