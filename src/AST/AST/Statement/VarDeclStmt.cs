@@ -2,6 +2,15 @@ namespace AST;
 
 public class VarDeclStmt
 : Statement, ConstructableFromDafny<Dafny.VarDeclStmt, VarDeclStmt> {
+    public override IEnumerable<Node> Children {
+      get {
+        var children = Locals;
+        if (Update != null) {
+          children.Append<Node>(Update);
+        }
+        return children;
+      }
+    }
   public List<LocalVariable> Locals = new List<LocalVariable>();
   public ConcreteUpdateStatement? Update;
 

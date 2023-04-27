@@ -1,22 +1,28 @@
 namespace AST;
 
 public class IntType : Type, ConstructableFromDafny<Dafny.IntType, IntType> {
+  private static IntType instance = new IntType();
+  public static IntType Instance { get => instance; }
   private IntType() { }
 
   public override string Name { get => "int"; }
 
   public static IntType FromDafny(Dafny.IntType dafnyNode) {
-    return new IntType();
+    return instance;
   }
+
 }
 
 public class BoolType : Type, ConstructableFromDafny<Dafny.BoolType, BoolType> {
+  private static BoolType instance = new BoolType();
+  public static BoolType Instance { get => instance; }
+
   private BoolType() { }
 
   public override string Name { get => "bool"; }
 
   public static BoolType FromDafny(Dafny.BoolType dafnyNode) {
-    return new BoolType();
+    return Instance;
   }
 }
 

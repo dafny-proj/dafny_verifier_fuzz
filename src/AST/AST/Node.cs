@@ -6,6 +6,9 @@ public interface ConstructableFromDafny<S, T> {
 }
 
 public abstract class Node : ConstructableFromDafny<Dafny.Node, Node> {
+  // TODO: convert to abstract after implemented for current classes
+  public virtual IEnumerable<Node> Children { get => Enumerable.Empty<Node>(); }
+
   public static Node FromDafny(Dafny.Node dafnyNode) {
     return dafnyNode switch {
       Dafny.Program program => Program.FromDafny(program),

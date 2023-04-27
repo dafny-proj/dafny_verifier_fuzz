@@ -27,6 +27,20 @@ public abstract class TypeRhs
 ///    by E must equal the length of EE.
 public class NewArrayRHS
 : TypeRhs, ConstructableFromDafny<Dafny.TypeRhs, NewArrayRHS> {
+  public override IEnumerable<Node> Children {
+    get {
+      var children = new[] { ElementType };
+      children.Concat<Node>(ArrayDimensions);
+      if (ElementInit != null) {
+        children.Append<Node>(ElementInit);
+      }
+      if (ListInit != null) {
+        children.Concat<Node>(ListInit);
+      }
+      return children;
+    }
+  }
+
   public Type ElementType { get; set; }
   public List<Expression> ArrayDimensions = new List<Expression>();
   public Expression? ElementInit;

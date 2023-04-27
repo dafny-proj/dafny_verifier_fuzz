@@ -1,6 +1,12 @@
 namespace AST;
 
 public class Formal : Node, ConstructableFromDafny<Dafny.Formal, Formal> {
+  public override IEnumerable<Node> Children {
+    get {
+      if (DefaultValue != null) yield return DefaultValue;
+    }
+  }
+
   public string Name { get; set; }
   public Type Type { get; set; }
   public Expression? DefaultValue { get; set; }

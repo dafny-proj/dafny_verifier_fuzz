@@ -18,6 +18,8 @@ public abstract class ConcreteUpdateStatement
 
 public class UpdateStmt
 : ConcreteUpdateStatement, ConstructableFromDafny<Dafny.UpdateStmt, UpdateStmt> {
+  public override IEnumerable<Node> Children => Lhss.Concat<Node>(Rhss);
+
   public List<AssignmentRhs> Rhss = new List<AssignmentRhs>();
 
   private UpdateStmt(Dafny.UpdateStmt updateStmtDafny) : base(updateStmtDafny) {

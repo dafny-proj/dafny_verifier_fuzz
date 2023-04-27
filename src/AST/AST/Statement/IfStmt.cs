@@ -2,6 +2,17 @@ namespace AST;
 
 public class IfStmt
 : Statement, ConstructableFromDafny<Dafny.IfStmt, IfStmt> {
+  public override IEnumerable<Node> Children {
+    get {
+      if (Guard != null) {
+        yield return Guard;
+      }
+      yield return Thn;
+      if (Els != null) {
+        yield return Els;
+      }
+    }
+  }
 
   public Expression? Guard { get; set; }
   public BlockStmt Thn { get; set; }

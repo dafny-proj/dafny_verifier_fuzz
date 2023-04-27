@@ -22,6 +22,7 @@ public abstract class LiteralExpr
 public class IntLiteralExpr
 : LiteralExpr, ConstructableFromDafny<Dafny.LiteralExpr, IntLiteralExpr> {
   public BigInteger Value { get; set; }
+  public override Type Type { get => Type.Int; }
   private IntLiteralExpr(Dafny.LiteralExpr literalExprDafny) {
     Value = (BigInteger)literalExprDafny.Value;
   }
@@ -33,9 +34,14 @@ public class IntLiteralExpr
 public class BoolLiteralExpr
 : LiteralExpr, ConstructableFromDafny<Dafny.LiteralExpr, BoolLiteralExpr> {
   public bool Value { get; set; }
-  private BoolLiteralExpr(Dafny.LiteralExpr literalExprDafny) {
-    Value = (bool)literalExprDafny.Value;
+  public override Type Type { get => Type.Bool; }
+
+  public BoolLiteralExpr(bool value) {
+    Value = value;
   }
+  private BoolLiteralExpr(Dafny.LiteralExpr literalExprDafny)
+  : this((bool)literalExprDafny.Value) { }
+
   public static new BoolLiteralExpr FromDafny(Dafny.LiteralExpr dafnyNode) {
     return new BoolLiteralExpr(dafnyNode);
   }
@@ -43,11 +49,12 @@ public class BoolLiteralExpr
 
 public class StaticReceiverExpr
 : LiteralExpr, ConstructableFromDafny<Dafny.StaticReceiverExpr, StaticReceiverExpr> {
-  public Type Type { get; set; }
+  private Type _Type;
+  public override Type Type { get => _Type; }
   public bool IsImplicit { get; set; }
 
   private StaticReceiverExpr(Dafny.StaticReceiverExpr sred) {
-    Type = Type.FromDafny(sred.Type);
+    _Type = Type.FromDafny(sred.Type);
     IsImplicit = sred.IsImplicit;
   }
 

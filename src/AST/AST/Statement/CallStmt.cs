@@ -6,6 +6,8 @@ namespace AST;
 // gets the ApplySuffix class. CallStmt are only created after resolution.
 public class CallStmt
 : Statement, ConstructableFromDafny<Dafny.CallStmt, CallStmt> {
+  public override IEnumerable<Node> Children => new Node[] { Callee, ArgumentBindings };
+
   // TODO: record lhs? (i.e the expressions which are assigned the return values
   // of the method)
   public MemberSelectExpr Callee { get; set; }

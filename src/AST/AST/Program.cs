@@ -1,6 +1,7 @@
 namespace AST;
 
 public class Program : Node, ConstructableFromDafny<Dafny.Program, Program> {
+  public override IEnumerable<Node> Children => new[] { DefaultModule };
   public ModuleDecl DefaultModule { get; set; }
   public ModuleDefinition DefaultModuleDef {
     get {

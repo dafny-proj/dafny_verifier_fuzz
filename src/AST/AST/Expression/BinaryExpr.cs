@@ -2,6 +2,7 @@ namespace AST;
 
 public class BinaryExpr
 : Expression, ConstructableFromDafny<Dafny.BinaryExpr, BinaryExpr> {
+  public override IEnumerable<Node> Children => new Node[] { E0, E1 };
   public enum Opcode {
     Iff,
     Imp,
@@ -91,11 +92,38 @@ public class BinaryExpr
   public Opcode Op { get; set; }
   public Expression E0 { get; set; }
   public Expression E1 { get; set; }
-  private BinaryExpr(Dafny.BinaryExpr binaryExprDafny) {
-    Op = FromDafny(binaryExprDafny.Op);
-    E0 = Expression.FromDafny(binaryExprDafny.E0);
-    E1 = Expression.FromDafny(binaryExprDafny.E1);
+  public Type _Type;
+  public override Type Type { get => _Type; }
+
+  private Type GetBinExprType() {
+    switch (Op) {
+      case Opcode.Eq:
+      case Opcode.Neq:
+      case Opcode.Lt:
+      case Opcode.Le:
+      case Opcode.Gt:
+      case Opcode.Ge:
+      case Opcode.Disjoint:
+      case Opcode.In:
+      case Opcode.NotIn:
+        return Type.Bool;
+      default:
+        return E0.Type;
+    }
   }
+
+  public BinaryExpr(Opcode op, Expression e0, Expression e1) {
+    Op = op;
+    E0 = e0;
+    E1 = e1;
+    _Type = GetBinExprType();
+  }
+
+  private BinaryExpr(Dafny.BinaryExpr binaryExprDafny)
+  : this(/*op=*/FromDafny(binaryExprDafny.Op),
+         /*e0=*/Expression.FromDafny(binaryExprDafny.E0),
+         /*e1=*/Expression.FromDafny(binaryExprDafny.E1)) { }
+
   public static BinaryExpr FromDafny(Dafny.BinaryExpr dafnyNode) {
     return new BinaryExpr(dafnyNode);
   }

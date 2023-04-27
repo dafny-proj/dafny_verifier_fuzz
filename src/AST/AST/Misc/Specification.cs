@@ -3,6 +3,8 @@ namespace AST;
 public class Specification<S, T>
 : Node, ConstructableFromDafny<Dafny.Specification<S>, Specification<S, T>>
 where S : Dafny.Node where T : Node, ConstructableFromDafny<S, T> {
+  public override IEnumerable<Node> Children => Expressions;
+
   public List<T> Expressions = new List<T>();
 
   private Specification(Dafny.Specification<S> specDafny) {

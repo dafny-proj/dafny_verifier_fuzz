@@ -2,6 +2,8 @@ namespace AST;
 
 public class ModuleDefinition
 : Node, ConstructableFromDafny<Dafny.ModuleDefinition, ModuleDefinition> {
+  public override IEnumerable<Node> Children => TopLevelDecls;
+
   public List<TopLevelDecl> TopLevelDecls = new List<TopLevelDecl>();
 
   private ModuleDefinition(Dafny.ModuleDefinition moduleDefDafny) {

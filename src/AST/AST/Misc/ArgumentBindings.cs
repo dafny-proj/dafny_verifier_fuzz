@@ -4,11 +4,14 @@ namespace AST;
 
 public class ArgumentBindings
 : Node, ConstructableFromDafny<Dafny.ActualBindings, ArgumentBindings> {
+  // TODO: refactor providedArguments and allArguments into a single structure
+  public override IEnumerable<Node> Children => providedArguments;
+
   // Arguments provided in the program text and the parameters they correspond to.
   public List<ArgumentBinding> providedArguments = new List<ArgumentBinding>();
   // Arguments provided in the program text + default arguments, arguments are 
   // given in positional order of parameters hence binding is not required here.
-  public List<Expression>? allArguments {get; set;}
+  public List<Expression>? allArguments { get; set; }
 
   private ArgumentBindings(Dafny.ActualBindings abd) {
     Contract.Requires(abd.WasResolved); // For abd.Arguments to be available
@@ -25,6 +28,8 @@ public class ArgumentBindings
 
 public class ArgumentBinding
 : Node, ConstructableFromDafny<Dafny.ActualBinding, ArgumentBinding> {
+  public override IEnumerable<Node> Children => new[] { Argument };
+
   public string? FormalParameterName { get; }
   public Expression Argument { get; set; }
 

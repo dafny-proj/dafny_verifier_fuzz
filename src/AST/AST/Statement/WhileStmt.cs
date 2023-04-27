@@ -2,6 +2,21 @@ namespace AST;
 
 public class WhileStmt
 : Statement, ConstructableFromDafny<Dafny.WhileStmt, WhileStmt> {
+  public override IEnumerable<Node> Children {
+    get {
+      if (Guard != null) {
+        yield return Guard;
+      }
+      if (Body != null) {
+        yield return Body;
+      }
+      foreach (var i in Invariants) {
+        yield return i;
+      }
+      yield return Modifies;
+      yield return AllDecreases;
+    }
+  }
   public Expression? Guard { get; set; }
   public BlockStmt? Body { get; set; }
   public List<AttributedExpression> Invariants = new List<AttributedExpression>();

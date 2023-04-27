@@ -2,6 +2,8 @@ namespace AST;
 
 public abstract class Expression
 : Node, ConstructableFromDafny<Dafny.Expression, Expression> {
+  public abstract Type Type { get; }
+
   public static Expression FromDafny(Dafny.Expression dafnyNode) {
     return dafnyNode switch {
       Dafny.NameSegment nameSeg

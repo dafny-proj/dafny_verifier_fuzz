@@ -26,6 +26,7 @@ public class ModuleDecl
 
 public class LiteralModuleDecl
 : ModuleDecl, ConstructableFromDafny<Dafny.LiteralModuleDecl, LiteralModuleDecl> {
+  public override IEnumerable<Node> Children => new[] { ModuleDef };
   public ModuleDefinition ModuleDef { get; set; }
 
   private LiteralModuleDecl(Dafny.LiteralModuleDecl moduleDeclDafny) {
@@ -39,6 +40,7 @@ public class LiteralModuleDecl
 
 public class ClassDecl
 : TopLevelDecl, ConstructableFromDafny<Dafny.ClassDecl, ClassDecl> {
+  public override IEnumerable<Node> Children => Members;
   public List<MemberDecl> Members = new List<MemberDecl>();
   public readonly bool IsDefaultClass = false;
 

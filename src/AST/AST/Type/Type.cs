@@ -2,6 +2,10 @@ namespace AST;
 
 public abstract class Type : Node, ConstructableFromDafny<Dafny.Type, Type> {
   public abstract string Name { get; }
+
+  public static readonly BoolType Bool = BoolType.Instance;
+  public static readonly IntType Int = IntType.Instance; 
+
   public static Type FromDafny(Dafny.Type dafnyNode) {
     return dafnyNode switch {
       Dafny.IntType intType => IntType.FromDafny(intType),
