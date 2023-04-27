@@ -17,7 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\AST\AST.csproj" />
     <ProjectReference Include="..\..\src\Fuzzer\Fuzzer.csproj" />
+    <ProjectReference Include="..\..\src\DafnyWrappers\DafnyWrappers.csproj" />
   </ItemGroup>
 
 </Project>
