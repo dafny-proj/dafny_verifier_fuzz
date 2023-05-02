@@ -8,6 +8,9 @@ public interface ConstructableFromDafny<S, T> {
 public abstract class Node : ConstructableFromDafny<Dafny.Node, Node> {
   // TODO: convert to abstract after implemented for current classes
   public virtual IEnumerable<Node> Children { get => Enumerable.Empty<Node>(); }
+  public virtual void ReplaceChild(Node oldChild, Node newChild) {
+    throw new NotSupportedException();
+  }
 
   public static Node FromDafny(Dafny.Node dafnyNode) {
     return dafnyNode switch {

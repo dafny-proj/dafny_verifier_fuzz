@@ -29,6 +29,18 @@ public class WhileStmt
     get => _Decreases.GetProvided();
   }
 
+  public WhileStmt(Expression? guard,
+    BlockStmt? body,
+    List<AttributedExpression> inv,
+    Specification<Dafny.FrameExpression, FrameExpression> mod,
+    Specification<Dafny.Expression, Expression> dec) {
+    Guard = guard;
+    Body = body;
+    Invariants.AddRange(inv);
+    Modifies = mod;
+    _Decreases = dec;
+  }
+
   private WhileStmt(Dafny.WhileStmt wsd) {
     Guard = wsd.Guard == null ? null : Expression.FromDafny(wsd.Guard);
     Body = wsd.Body == null ? null : BlockStmt.FromDafny(wsd.Body);

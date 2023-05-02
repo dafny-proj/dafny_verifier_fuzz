@@ -97,11 +97,11 @@ public class Printer {
         PrintFormals(m.Outs);
       } else {
         Wr.WriteLine();
-        IncIndent(2);
+        IncIndent();
         Indent();
         Wr.Write($"returns ");
         PrintFormals(m.Outs);
-        DecIndent(2);
+        DecIndent();
       }
     }
 

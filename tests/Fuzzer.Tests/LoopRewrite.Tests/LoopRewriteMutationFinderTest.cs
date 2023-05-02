@@ -1,10 +1,10 @@
 namespace Fuzzer.Tests;
 
 [TestClass]
-public class LoopUnrollMutationFinderTest {
+public class LoopRewriteMutationFinderTest {
   [TestMethod]
   public void FindsWhileLoop() {
-    var finder = new LoopUnrollMutationFinder();
+    var finder = new LoopRewriteMutationFinder();
     var sourceStr = """
     method Foo() {
       while (true) {}
