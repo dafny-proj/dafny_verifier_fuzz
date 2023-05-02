@@ -197,6 +197,9 @@ public class Printer {
       case WhileStmt whileStmt:
         PrintWhileStmt(whileStmt);
         break;
+      case ForLoopStmt forLoopStmt:
+        PrintForLoopStmt(forLoopStmt);
+        break;
       default:
         throw new NotImplementedException();
     }
@@ -479,5 +482,33 @@ public class Printer {
       }
     }
     Wr.Write("]");
+  }
+
+  private void PrintForLoopStmt(ForLoopStmt fs) {
+    Wr.Write($"for {fs.LoopIndex.Name}");
+    // TODO: Handle case where type is inferred and not explicitly stated
+    Wr.Write(": ");
+    PrintType(fs.LoopIndex.Type);
+    
+    Wr.Write(" := ");
+    PrintExpression(fs.Start);
+    Wr.Write(fs.GoingUp ? " to " : " downto ");
+    if (fs.End == null) {
+      Wr.Write("*");
+    } else {
+      PrintExpression(fs.End);
+    }
+    Wr.WriteLine();
+
+    IncIndent();
+    PrintSpec("invariant", fs.Invariants);
+    PrintDecreasesSpec(fs.ProvidedDecreases);
+    PrintFrameSpec("modifies", fs.Modifies);
+    DecIndent();
+
+    if (fs.Body != null) {
+      Indent();
+      PrintStatement(fs.Body);
+    }
   }
 }

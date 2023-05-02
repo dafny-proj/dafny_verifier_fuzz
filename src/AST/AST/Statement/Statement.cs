@@ -16,9 +16,9 @@ public class Statement
         => VarDeclStmt.FromDafny(varDeclStmt),
       Dafny.CallStmt callStmt
         => CallStmt.FromDafny(callStmt),
-      Dafny.WhileStmt whileStmt
-        => WhileStmt.FromDafny(whileStmt),
-      _ => throw new NotImplementedException(),
+      Dafny.LoopStmt loopStmt
+        => LoopStmt.FromDafny(loopStmt),
+      _ => throw new NotImplementedException($"Unhandled translation from Dafny for `{dafnyNode.GetType()}`"),
     };
   }
 }

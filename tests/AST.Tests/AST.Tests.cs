@@ -161,6 +161,23 @@ public class ASTTests {
   }
 
   [TestMethod]
+  public void CanParseAndPrintForLoop() {
+    // TODO: handle cases e.g. `for i := ...` and `for _ := ...`
+    var sourceStr = """
+    method Fibonacci(n: nat) returns (x: nat)
+    {
+      x := 0;
+      var y := 1;
+      for i: nat := 0 to n
+      {
+        x, y := y, x + y;
+      }
+    }
+    """;
+    CanParseAndPrintFeature(sourceStr);
+  }
+
+  [TestMethod]
   public void CanParseAndPrintChainingExpr() {
     var sourceStr = """
     function LteTen(n: nat): bool
