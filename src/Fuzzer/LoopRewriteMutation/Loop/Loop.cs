@@ -37,12 +37,14 @@ public class ConditionalLoopGuard : LoopGuard {
 public class IndexLoopGuard : LoopGuard {
   /*  e.g. for i := lo to hi {...} */
   public BoundVar Index { get; set; }
-  public Expression? Lo { get; set; }
-  public Expression? Hi { get; set; }
-  public IndexLoopGuard(BoundVar index, Expression? lo, Expression? hi) {
+  public Expression Start { get; set; }
+  public Expression? End { get; set; }
+  public bool Up { get; set; }
+  public IndexLoopGuard(BoundVar index, Expression start, Expression? end, bool up) {
     Index = index;
-    Lo = lo;
-    Hi = hi;
+    Start = start;
+    End = end;
+    Up = up;
   }
 }
 

@@ -47,9 +47,9 @@ public class LoopRewriteMutationTest {
   }
 
   [TestMethod]
-  public void WriteIndexBasedLoopWithNonnullBoundsAsForLoop() {
+  public void WriteIndexBasedLoopGoingUp() {
     var finder = new LoopRewriteMutationFinder();
-    var sourceStr1 = """
+    var forUp = """
     method Fibonacci(n: nat) returns (x: nat)
     {
       x := 0;
@@ -60,18 +60,7 @@ public class LoopRewriteMutationTest {
       }
     }
     """;
-    var sourceStr2 = """
-    method Fibonacci(n: nat) returns (x: nat)
-    {
-      x := 0;
-      var y := 1;
-      for i: nat := n downto 0
-      {
-        x, y := y, x + y;
-      }
-    }
-    """;
-    var programDafny = DafnyW.ParseDafnyProgramFromString(sourceStr1);
+    var programDafny = DafnyW.ParseDafnyProgramFromString(forUp);
     DafnyW.ResolveDafnyProgram(programDafny);
     var program = Program.FromDafny(programDafny);
     finder.FindMutations(program);
@@ -89,11 +78,46 @@ public class LoopRewriteMutationTest {
     var rewrittenLoop = writer.WriteLoop(parsedLoop);
     finder.Mutations[0].RewriteLoop(rewrittenLoop);
     var mutant = Printer.ProgramToString(program).TrimEnd();
-    CollectionAssert.Contains(new[] { sourceStr1, sourceStr2 }, mutant);
+    Assert.AreEqual(forUp, mutant);
   }
 
   [TestMethod]
-  public void WriteIndexBasedLoopWithNullUpperBoundAsForLoop() {
+  public void WriteIndexBasedLoopGoingDown() {
+    var finder = new LoopRewriteMutationFinder();
+    var forDown = """
+    method Fibonacci(n: nat) returns (x: nat)
+    {
+      x := 0;
+      var y := 1;
+      for i: nat := n downto 0
+      {
+        x, y := y, x + y;
+      }
+    }
+    """;
+    var programDafny = DafnyW.ParseDafnyProgramFromString(forDown);
+    DafnyW.ResolveDafnyProgram(programDafny);
+    var program = Program.FromDafny(programDafny);
+    finder.FindMutations(program);
+    Assert.AreEqual(1, finder.NumMutationsFound);
+
+    var loopMutation = finder.Mutations[0];
+    var originalLoop = loopMutation.OriginalLoop;
+    var parser = new ForLoop.Parser();
+    Assert.IsTrue(parser.CanParseLoop(originalLoop));
+
+    var parsedLoop = parser.ParseLoop(originalLoop);
+    var writer = new ForLoop.Writer();
+    Assert.IsTrue(writer.CanWriteLoop(parsedLoop));
+
+    var rewrittenLoop = writer.WriteLoop(parsedLoop);
+    finder.Mutations[0].RewriteLoop(rewrittenLoop);
+    var mutant = Printer.ProgramToString(program).TrimEnd();
+    Assert.AreEqual(forDown, mutant);
+  }
+
+  [TestMethod]
+  public void WriteIndexBasedLoopWithNullUpperBound() {
     var finder = new LoopRewriteMutationFinder();
     var sourceStr = """
     method BuggyFibonacci(n: nat) returns (x: nat)
@@ -129,7 +153,7 @@ public class LoopRewriteMutationTest {
   }
 
   [TestMethod]
-  public void WriteIndexBasedLoopWithNullLowerBoundAsForLoop() {
+  public void WriteIndexBasedLoopWithNullLowerBound() {
     var finder = new LoopRewriteMutationFinder();
     var sourceStr = """
     method BuggyFibonacci(n: nat) returns (x: nat)
