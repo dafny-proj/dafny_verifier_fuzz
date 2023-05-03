@@ -15,7 +15,14 @@ public class LoopRewriteMutationFinder : ASTVisitor {
   }
 
   private bool IsCandidateForLoopRewrite(Statement s) {
-    return s is WhileStmt or ForLoopStmt;
+    // Ignore uninteresting (?) cases where the loop body is empty.
+    if (s is WhileStmt ws) {
+      return ws.Body != null;
+    }
+    if (s is ForLoopStmt fs) {
+      return fs.Body != null;
+    }
+    return false;
   }
 
   public override void VisitStmt(Statement s) {

@@ -4,71 +4,70 @@ namespace Fuzzer;
 
 public interface ILoopParser {
   public bool CanParseLoop(Node node);
-  public Loop ParseLoop(Node node);
+  public ALoop ParseLoop(Node node);
 }
 public interface ILoopWriter {
-  public bool CanWriteLoop(Loop loop);
-  public Node WriteLoop(Loop loop);
+  public bool CanWriteLoop(ALoop loop);
+  public Node WriteLoop(ALoop loop);
 }
 
-public class Loop {
-  public LoopGuard Guard { get; set; }
-  public LoopBody Body { get; set; }
-  public LoopSpec Spec { get; set; }
-
-  public Loop(LoopGuard guard, LoopBody body, LoopSpec spec) {
-    Guard = guard;
-    Body = body;
-    Spec = spec;
-  }
-}
-
-public abstract class LoopGuard { }
-public class NoLoopGuard : LoopGuard {
-  /*  e.g. while * {...} */
-}
-public class ConditionalLoopGuard : LoopGuard {
-  /*  e.g. while condition {...} */
-  public Expression Condition { get; set; }
-  public ConditionalLoopGuard(Expression condition) {
-    Condition = condition;
-  }
-}
-public class IndexLoopGuard : LoopGuard {
-  /*  e.g. for i := lo to hi {...} */
-  public BoundVar Index { get; set; }
-  public Expression Start { get; set; }
-  public Expression? End { get; set; }
-  public bool Up { get; set; }
-  public IndexLoopGuard(BoundVar index, Expression start, Expression? end, bool up) {
-    Index = index;
-    Start = start;
-    End = end;
-    Up = up;
-  }
-}
-
-public abstract class LoopBody { }
-public class NoLoopBody : LoopBody { }
-public class BlockLoopBody : LoopBody {
-  public BlockStmt Block { get; set; }
-  public BlockLoopBody(BlockStmt block) {
-    Block = block;
-  }
-}
-
-// TODO: single loop spec or separate inv, dec, mod?
-public class LoopSpec {
+public abstract class ALoop {
+  public BlockStmt Body { get; set; }
   public List<AttributedExpression> Invariants { get; set; }
   public Specification<Dafny.FrameExpression, FrameExpression> Modifies { get; set; }
   public Specification<Dafny.Expression, Expression> Decreases { get; set; }
 
-  public LoopSpec(List<AttributedExpression> inv,
-  Specification<Dafny.FrameExpression, FrameExpression> mod,
-  Specification<Dafny.Expression, Expression> dec) {
-    // TODO: clone instead of reference?
+  public ALoop(BlockStmt body,
+    List<AttributedExpression> inv,
+    Specification<Dafny.FrameExpression, FrameExpression> mod,
+    Specification<Dafny.Expression, Expression> dec
+  ) {
+    Body = body;
     Invariants = inv;
     Modifies = mod;
     Decreases = dec;
+  }
+}
+
+/*  e.g. while * {...} */
+public class ANoGuardLoop : ALoop {
+  public ANoGuardLoop(BlockStmt body,
+    List<AttributedExpression> inv,
+    Specification<Dafny.FrameExpression, FrameExpression> mod,
+    Specification<Dafny.Expression, Expression> dec)
+  : base(body, inv, mod, dec) { }
+}
+
+/*  e.g. while condition {...} */
+public class AConditionalLoop : ALoop {
+  public Expression Condition { get; set; }
+
+  public AConditionalLoop(Expression cond,
+    BlockStmt body,
+    List<AttributedExpression> inv,
+    Specification<Dafny.FrameExpression, FrameExpression> mod,
+    Specification<Dafny.Expression, Expression> dec)
+  : base(body, inv, mod, dec) {
+    Condition = cond;
+  }
+}
+
+/*  e.g. for i := lo to hi {...} */
+public class AIndexLoop : ALoop {
+  public BoundVar Index { get; set; }
+  public Expression IStart { get; set; }
+  public Expression? IEnd { get; set; }
+  public bool Up { get; set; }
+
+  public AIndexLoop(BoundVar index, Expression start, Expression? end, bool up,
+    BlockStmt body,
+    List<AttributedExpression> inv,
+    Specification<Dafny.FrameExpression, FrameExpression> mod,
+    Specification<Dafny.Expression, Expression> dec)
+  : base(body, inv, mod, dec) {
+    Index = index;
+    IStart = start;
+    IEnd = end;
+    Up = up;
   }
 }

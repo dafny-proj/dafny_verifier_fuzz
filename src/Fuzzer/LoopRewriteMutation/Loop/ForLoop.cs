@@ -5,39 +5,36 @@ namespace Fuzzer;
 public static class ForLoop {
   public class Parser : ILoopParser {
     public bool CanParseLoop(Node node) {
-      return node is ForLoopStmt;
+      return node is ForLoopStmt fs && fs.Body != null;
     }
 
-    public Loop ParseLoop(Node node) {
+    public ALoop ParseLoop(Node node) {
       if (!CanParseLoop(node)) {
         throw new NotSupportedException($"ForLoop.Parser: Node of type '{node.GetType()}' cannot be parsed as a for loop.");
       }
       ForLoopStmt fs = (ForLoopStmt)node;
-      IndexLoopGuard guard = new IndexLoopGuard(fs.LoopIndex, fs.Start, fs.End, fs.GoingUp);
-      // TODO: extract common loop body and spec processing
-      LoopBody body;
-      if (fs.Body == null) {
-        body = new NoLoopBody();
-      } else {
-        body = new BlockLoopBody(fs.Body);
-      }
-      LoopSpec spec = new LoopSpec(fs.Invariants, fs.Modifies, fs.AllDecreases);
-      return new Loop(guard, body, spec);
+      Contract.Assert(fs.Body != null);
+      return new AIndexLoop(
+        fs.LoopIndex, fs.Start, fs.End, fs.GoingUp,
+        fs.Body, fs.Invariants, fs.Modifies, fs.AllDecreases
+      );
     }
   }
 
   public class Writer : ILoopWriter {
-    public bool CanWriteLoop(Loop loop) {
-      return loop.Guard is IndexLoopGuard;
+    public bool CanWriteLoop(ALoop loop) {
+      return loop is AIndexLoop;
     }
 
-    public Node WriteLoop(Loop loop) {
+    public Node WriteLoop(ALoop loop) {
       if (!CanWriteLoop(loop)) {
         throw new NotSupportedException($"ForLoop.Writer: Loop cannot be represented as for loop.");
       }
-      IndexLoopGuard guard = (IndexLoopGuard)loop.Guard;
-      var body = loop.Body is NoLoopBody ? null : ((BlockLoopBody)loop.Body).Block;
-      return new ForLoopStmt(guard.Index, guard.Start, guard.End, guard.Up, body, loop.Spec.Invariants, loop.Spec.Modifies, loop.Spec.Decreases);
+      AIndexLoop iLoop = (AIndexLoop)loop;
+      return new ForLoopStmt(
+        iLoop.Index, iLoop.IStart, iLoop.IEnd, iLoop.Up,
+        iLoop.Body, iLoop.Invariants, iLoop.Modifies, iLoop.Decreases
+      );
     }
 
   }

@@ -1,5 +1,3 @@
-using System.Diagnostics.Contracts;
-
 namespace Fuzzer;
 
 public class LoopUnroll {
@@ -11,17 +9,17 @@ public class LoopUnroll {
       Rand = rand ?? new RandomGenerator();
     }
 
-    public bool CanWriteLoop(Loop loop) {
+    public bool CanWriteLoop(ALoop loop) {
       // TODO: non-guarded and index-based loops.
-      return loop.Guard is ConditionalLoopGuard;
+      return loop is AConditionalLoop;
     }
 
-    public Node WriteLoop(Loop loop) {
+    public Node WriteLoop(ALoop loop) {
       if (!CanWriteLoop(loop)) {
         throw new NotSupportedException($"LoopUnroll.Writer: Loop unrolling not handled.");
       }
-      if (loop.Guard is ConditionalLoopGuard) {
-        return UnrollConditionalLoop(loop);
+      if (loop is AConditionalLoop cl) {
+        return UnrollConditionalLoop(cl);
       }
       throw new NotImplementedException();
     }
@@ -30,12 +28,8 @@ public class LoopUnroll {
     // - Implement cloning
     // - Refactor usage of while loop writer
     // - Add invariant asserts
-    private Node UnrollConditionalLoop(Loop loop) {
-      Contract.Requires(loop.Guard is ConditionalLoopGuard);
-      ConditionalLoopGuard guard = (ConditionalLoopGuard)loop.Guard;
-      // Assume has body
-      BlockLoopBody body = (BlockLoopBody)loop.Body;
-      IfStmt ifs = new IfStmt(guard.Condition.Clone(), body.Block.Clone());
+    private Node UnrollConditionalLoop(AConditionalLoop loop) {
+      IfStmt ifs = new IfStmt(loop.Condition.Clone(), loop.Body.Clone());
       Statement ws = (Statement)new WhileLoop.Writer().WriteLoop(loop);
       Node res;
       var nest = Rand.Bool();
