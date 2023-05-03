@@ -5,4 +5,5 @@ public class RandomGenerator {
   public bool Bool() {
     return Generator.NextDouble() < 0.5;
   }
+
 }

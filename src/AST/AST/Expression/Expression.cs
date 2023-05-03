@@ -26,7 +26,9 @@ public abstract class Expression
         => ChainingExpression.FromDafny(ce),
       Dafny.SeqSelectExpr sse
         => SeqSelectExpr.FromDafny(sse),
-      _ => throw new NotImplementedException($"{dafnyNode.GetType()}"),
+      Dafny.WildcardExpr wce
+        => WildcardExpr.FromDafny(wce),
+      _ => throw new NotImplementedException($"Unhandled translation from Dafny for `{dafnyNode.GetType()}`"),
     };
   }
 }

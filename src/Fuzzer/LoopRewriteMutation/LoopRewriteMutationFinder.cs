@@ -15,7 +15,7 @@ public class LoopRewriteMutationFinder : ASTVisitor {
   }
 
   private bool IsCandidateForLoopRewrite(Statement s) {
-    return s is WhileStmt;
+    return s is WhileStmt or ForLoopStmt;
   }
 
   public override void VisitStmt(Statement s) {

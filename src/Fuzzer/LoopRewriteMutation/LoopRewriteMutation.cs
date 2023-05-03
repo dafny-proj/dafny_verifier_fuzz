@@ -1,8 +1,8 @@
 namespace Fuzzer;
 
 public class LoopRewriteMutation {
-  public LoopParser? Parser { get; set; }
-  public LoopWriter? Writer { get; set; }
+  public ILoopParser? Parser { get; set; }
+  public ILoopWriter? Writer { get; set; }
   public Node Parent { get; set; }
   public Node OriginalLoop { get; set; }
 

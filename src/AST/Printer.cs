@@ -345,6 +345,9 @@ public class Printer {
       case SeqSelectExpr seqSelectExpr:
         PrintSeqSelectExpr(seqSelectExpr);
         break;
+      case WildcardExpr:
+        Wr.Write("*");
+        break;
       default:
         throw new NotImplementedException();
     }
@@ -498,13 +501,14 @@ public class Printer {
     } else {
       PrintExpression(fs.End);
     }
-    Wr.WriteLine();
 
     IncIndent();
     PrintSpec("invariant", fs.Invariants);
     PrintDecreasesSpec(fs.ProvidedDecreases);
     PrintFrameSpec("modifies", fs.Modifies);
     DecIndent();
+
+    Wr.WriteLine();
 
     if (fs.Body != null) {
       Indent();

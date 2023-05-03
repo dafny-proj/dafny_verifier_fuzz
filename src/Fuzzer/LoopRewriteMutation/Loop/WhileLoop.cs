@@ -3,7 +3,7 @@ using System.Diagnostics.Contracts;
 namespace Fuzzer;
 
 public static class WhileLoop {
-  public class Parser : LoopParser {
+  public class Parser : ILoopParser {
     public bool CanParseLoop(Node node) {
       return node is WhileStmt;
     }
@@ -30,7 +30,7 @@ public static class WhileLoop {
     }
   }
 
-  public class Writer : LoopWriter {
+  public class Writer : ILoopWriter {
     public bool CanWriteLoop(Loop loop) {
       return true;
     }
