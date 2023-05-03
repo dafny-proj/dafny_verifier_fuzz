@@ -31,4 +31,8 @@ public abstract class Expression
       _ => throw new NotImplementedException($"Unhandled translation from Dafny for `{dafnyNode.GetType()}`"),
     };
   }
+
+  public override Expression Clone() {
+    throw new NotSupportedException($"Cloning unhandled for {this.GetType()}");
+  }
 }

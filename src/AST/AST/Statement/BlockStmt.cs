@@ -9,7 +9,7 @@ public class BlockStmt
     Body.AddRange(blockStmtDafny.Body.Select(Statement.FromDafny));
   }
 
-  public BlockStmt(List<Statement>? body = null) {
+  public BlockStmt(IEnumerable<Statement>? body = null) {
     if (body != null) {
       Body.AddRange(body);
     }
@@ -39,5 +39,9 @@ public class BlockStmt
     } else {
       Body[i] = (Statement)newChild;
     }
+  }
+
+  public override BlockStmt Clone() {
+    return new BlockStmt(Body.Select(s => s.Clone()));
   }
 }

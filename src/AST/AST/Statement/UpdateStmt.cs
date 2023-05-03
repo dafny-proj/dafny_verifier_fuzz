@@ -6,6 +6,9 @@ public abstract class ConcreteUpdateStatement
 : Statement, ConstructableFromDafny<Dafny.ConcreteUpdateStatement, ConcreteUpdateStatement> {
   public List<Expression> Lhss = new List<Expression>();
 
+  protected ConcreteUpdateStatement(IEnumerable<Expression> lhss) {
+    Lhss.AddRange(lhss);
+  }
   protected ConcreteUpdateStatement(Expression lhs) {
     Lhss.Add(lhs);
   }
@@ -25,10 +28,15 @@ public abstract class ConcreteUpdateStatement
 public class UpdateStmt
 : ConcreteUpdateStatement, ConstructableFromDafny<Dafny.UpdateStmt, UpdateStmt> {
   public override IEnumerable<Node> Children => Lhss.Concat<Node>(Rhss);
-  
+
   public List<AssignmentRhs> Rhss = new List<AssignmentRhs>();
 
-  public UpdateStmt(Expression lhs, AssignmentRhs rhs): base(lhs) {
+  public UpdateStmt(IEnumerable<Expression> lhss, IEnumerable<AssignmentRhs> rhss)
+  : base(lhss) {
+    Rhss.AddRange(rhss);
+  }
+
+  public UpdateStmt(Expression lhs, AssignmentRhs rhs) : base(lhs) {
     Rhss.Add(rhs);
   }
 
@@ -38,5 +46,12 @@ public class UpdateStmt
 
   public static UpdateStmt FromDafny(Dafny.UpdateStmt dafnyNode) {
     return new UpdateStmt(dafnyNode);
+  }
+
+  public override Statement Clone() {
+    return new UpdateStmt(
+      Lhss.Select(l => l.Clone()),
+      Rhss.Select(r => r.Clone())
+    );
   }
 }

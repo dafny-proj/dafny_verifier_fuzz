@@ -18,6 +18,12 @@ public class IfStmt
   public BlockStmt Thn { get; set; }
   public Statement? Els { get; set; }
 
+  public IfStmt(Expression? guard, BlockStmt thn, Statement? els = null) {
+    Guard = guard;
+    Thn = thn;
+    Els = els;
+  }
+
   private IfStmt(Dafny.IfStmt ifStmtDafny) {
     Guard = ifStmtDafny.Guard == null ? null : Expression.FromDafny(ifStmtDafny.Guard);
     Thn = BlockStmt.FromDafny(ifStmtDafny.Thn);

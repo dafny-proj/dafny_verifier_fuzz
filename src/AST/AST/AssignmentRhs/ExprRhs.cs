@@ -15,4 +15,8 @@ public class ExprRhs
   public static ExprRhs FromDafny(Dafny.ExprRhs dafnyNode) {
     return new ExprRhs(dafnyNode);
   }
+
+  public override AssignmentRhs Clone() {
+    return new ExprRhs(Expr.Clone());
+  }
 }

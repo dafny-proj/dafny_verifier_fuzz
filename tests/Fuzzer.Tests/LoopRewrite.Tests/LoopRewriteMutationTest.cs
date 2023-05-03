@@ -383,4 +383,64 @@ public class LoopRewriteMutationTest {
     """;
     Assert.AreEqual(whileDown, mutant);
   }
+
+  [TestMethod]
+  public void WriteWhileLoopUnrolledOnce() {
+    var finder = new LoopRewriteMutationFinder();
+    var whileWhole = """
+    method Foo(n: nat)
+    {
+      var i := 0;
+      while i < n
+      {
+        i := i + 1;
+      }
+    }
+    """;
+    var programDafny = DafnyW.ParseDafnyProgramFromString(whileWhole);
+    DafnyW.ResolveDafnyProgram(programDafny);
+    var program = Program.FromDafny(programDafny);
+    finder.FindMutations(program);
+    Assert.AreEqual(1, finder.NumMutationsFound);
+
+    var loopMutation = finder.Mutations[0];
+    var originalLoop = loopMutation.OriginalLoop;
+    var parser = new WhileLoop.Parser();
+    Assert.IsTrue(parser.CanParseLoop(originalLoop));
+
+    var parsedLoop = parser.ParseLoop(originalLoop);
+    var writer = new LoopUnroll.Writer();
+    Assert.IsTrue(writer.CanWriteLoop(parsedLoop));
+
+    var rewrittenLoop = writer.WriteLoop(parsedLoop);
+    finder.Mutations[0].RewriteLoop(rewrittenLoop);
+    var mutant = Printer.ProgramToString(program).TrimEnd();
+    var whileUnrolledOnceV1 = """
+    method Foo(n: nat)
+    {
+      var i := 0;
+      if i < n {
+        i := i + 1;
+        while (i < n)
+        {
+          i := i + 1;
+        }
+      }
+    }
+    """;
+    var whileUnrolledOnceV2 = """
+    method Foo(n: nat)
+    {
+      var i := 0;
+      if i < n {
+        i := i + 1;
+      }
+      while i < n
+      {
+        i := i + 1;
+      }
+    }
+    """;
+    CollectionAssert.Contains(new[] { whileUnrolledOnceV1, whileUnrolledOnceV2 }, mutant);
+  }
 }

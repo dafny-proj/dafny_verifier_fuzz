@@ -138,4 +138,8 @@ public class BinaryExpr
   public static bool HasTypeEquivOperands(Opcode op) {
     return GetEquivOperands(op).Count > 0;
   }
+
+  public override Expression Clone() {
+    return new BinaryExpr(Op, E0.Clone(), E1.Clone());
+  }
 }

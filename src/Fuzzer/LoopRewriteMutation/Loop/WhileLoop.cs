@@ -98,11 +98,12 @@ public static class WhileLoop {
         new ExprRhs(
           new BinaryExpr(indexUpdateOp, indexIdent, new IntLiteralExpr(1))));
 
-      // TODO: implement cloning
       // Compose body of while loop as original body and index update statement.
-      BlockStmt wBody = new BlockStmt();
+      BlockStmt wBody;
       if (loop.Body is BlockLoopBody b) {
-        wBody.Append(b.Block.Body);
+        wBody = b.Block.Clone();
+      } else {
+        wBody = new BlockStmt();
       }
       if (iGuard.Up) {
         wBody.Append(indexUpdate);

@@ -34,6 +34,10 @@ public class IntLiteralExpr
   public static new IntLiteralExpr FromDafny(Dafny.LiteralExpr dafnyNode) {
     return new IntLiteralExpr(dafnyNode);
   }
+
+  public override Expression Clone() {
+    return new IntLiteralExpr(Value);
+  }
 }
 
 public class BoolLiteralExpr
@@ -49,6 +53,10 @@ public class BoolLiteralExpr
 
   public static new BoolLiteralExpr FromDafny(Dafny.LiteralExpr dafnyNode) {
     return new BoolLiteralExpr(dafnyNode);
+  }
+
+  public override Expression Clone() {
+    return new BoolLiteralExpr(Value);
   }
 }
 

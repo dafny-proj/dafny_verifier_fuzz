@@ -20,4 +20,9 @@ public class IdentifierExpr
   public static IdentifierExpr FromDafny(Dafny.IdentifierExpr dafnyNode) {
     return new IdentifierExpr(dafnyNode);
   }
+
+  public override Expression Clone() {
+    // TODO: clone type?
+    return new IdentifierExpr(Name, Type);
+  }
 }

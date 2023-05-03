@@ -1,6 +1,6 @@
 namespace AST;
 
-public class Statement
+public abstract class Statement
 : Node, ConstructableFromDafny<Dafny.Statement, Statement> {
   public static Statement FromDafny(Dafny.Statement dafnyNode) {
     return dafnyNode switch {
@@ -20,5 +20,9 @@ public class Statement
         => LoopStmt.FromDafny(loopStmt),
       _ => throw new NotImplementedException($"Unhandled translation from Dafny for `{dafnyNode.GetType()}`"),
     };
+  }
+
+  public override Statement Clone() {
+    throw new NotSupportedException($"Cloning unhandled for {this.GetType()}");
   }
 }

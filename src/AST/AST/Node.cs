@@ -13,6 +13,9 @@ public abstract class Node : ConstructableFromDafny<Dafny.Node, Node> {
   public virtual void ReplaceChild(Node oldChild, Node newChild) {
     throw new NotSupportedException();
   }
+  public virtual Node Clone() {
+    throw new NotSupportedException();
+  }
 
   public static Node FromDafny(Dafny.Node dafnyNode) {
     return dafnyNode switch {

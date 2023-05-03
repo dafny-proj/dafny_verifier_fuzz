@@ -9,4 +9,8 @@ public abstract class AssignmentRhs
       _ => throw new NotImplementedException(),
     };
   }
+
+  public override AssignmentRhs Clone() {
+    throw new NotSupportedException($"Cloning unhandled for {this.GetType()}");
+  }
 }
