@@ -7,6 +7,11 @@ public class IdentifierExpr
   protected Type _Type;
   public override Type Type { get => _Type; }
 
+  public IdentifierExpr(string name, Type type) {
+    Name = name;
+    _Type = type;
+  }
+
   private IdentifierExpr(Dafny.IdentifierExpr identExprDafny) {
     Name = identExprDafny.Name;
     _Type = Type.FromDafny(identExprDafny.Type);

@@ -23,6 +23,11 @@ public class IntLiteralExpr
 : LiteralExpr, ConstructableFromDafny<Dafny.LiteralExpr, IntLiteralExpr> {
   public BigInteger Value { get; set; }
   public override Type Type { get => Type.Int; }
+
+  public IntLiteralExpr(BigInteger value) {
+    Value = value;
+  }
+
   private IntLiteralExpr(Dafny.LiteralExpr literalExprDafny) {
     Value = (BigInteger)literalExprDafny.Value;
   }

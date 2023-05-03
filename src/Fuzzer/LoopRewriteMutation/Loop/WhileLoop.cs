@@ -63,9 +63,67 @@ public static class WhileLoop {
       return WriteLoop(guard, loop);
     }
 
+    // Assumes that index has not been declared yet.
     private Node WriteIndexBasedLoop(Loop loop) {
       Contract.Requires(loop.Guard is IndexLoopGuard);
-      throw new NotImplementedException();
+      IndexLoopGuard iGuard = (IndexLoopGuard)loop.Guard;  
+      // Create variable declaration for index.
+      // `var index := start`
+      string indexName = iGuard.Index.Name;
+      Type indexType = iGuard.Index.Type;
+      LocalVariable index = new LocalVariable(indexName, indexType);
+      IdentifierExpr indexIdent = new IdentifierExpr(indexName, indexType);
+      ExprRhs indexInit = new ExprRhs(iGuard.Start);
+      VarDeclStmt indexDecl 
+        = new VarDeclStmt(index, new UpdateStmt(indexIdent, indexInit));
+
+      // Create guard for while loop.
+      Expression wGuard;
+      if (iGuard.End == null) {
+        // non-deterministic loop 
+        // `while true`
+        wGuard = new BoolLiteralExpr(true);
+      } else {
+        // TODO: extract iGuard.End into another variable?
+        // `while index != end`
+        wGuard = new BinaryExpr(BinaryExpr.Opcode.Neq, indexIdent, iGuard.End);
+      }
+
+      // Create index update statement.
+      // `index := index +/- 1`
+      BinaryExpr.Opcode indexUpdateOp
+        = iGuard.Up ? BinaryExpr.Opcode.Add : BinaryExpr.Opcode.Sub;
+      UpdateStmt indexUpdate = new UpdateStmt(
+        indexIdent,
+        new ExprRhs(
+          new BinaryExpr(indexUpdateOp, indexIdent, new IntLiteralExpr(1))));
+
+      // TODO: implement cloning
+      // Compose body of while loop as original body and index update statement.
+      BlockStmt wBody = new BlockStmt();
+      if (loop.Body is BlockLoopBody b) {
+        wBody.Append(b.Block.Body);
+      }
+      if (iGuard.Up) {
+        wBody.Append(indexUpdate);
+      } else {
+        wBody.Prepend(indexUpdate);
+      }
+
+      // Create while loop.
+      WhileStmt ws = new WhileStmt(
+        wGuard,
+        wBody,
+        loop.Spec.Invariants,
+        loop.Spec.Modifies,
+        loop.Spec.Decreases
+      );
+
+      // Compose index declaration and index-based while loop.
+      BlockStmt res = new BlockStmt(
+        new List<Statement>() { indexDecl, ws });
+
+      return res;
     }
 
   }

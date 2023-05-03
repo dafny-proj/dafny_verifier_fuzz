@@ -46,6 +46,11 @@ public class LocalVariable
   // where a proxy type represents the absence of type declaration.
   public Type? ExplicitType { get; set; }
 
+  public LocalVariable(string name, Type? type) {
+    Name = name;
+    ExplicitType = type;
+  }
+
   private LocalVariable(Dafny.LocalVariable localVarDafny) {
     Name = localVarDafny.Name;
     ExplicitType = localVarDafny.IsTypeExplicit

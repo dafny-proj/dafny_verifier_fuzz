@@ -14,6 +14,11 @@ public class VarDeclStmt
   public List<LocalVariable> Locals = new List<LocalVariable>();
   public ConcreteUpdateStatement? Update;
 
+  public VarDeclStmt(LocalVariable lv, ConcreteUpdateStatement us) {
+    Locals.Add(lv);
+    Update = us;
+  }
+
   private VarDeclStmt(Dafny.VarDeclStmt vdStmt) {
     Locals.AddRange(vdStmt.Locals.Select(LocalVariable.FromDafny));
     Update = vdStmt.Update == null ? null : ConcreteUpdateStatement.FromDafny(vdStmt.Update);
