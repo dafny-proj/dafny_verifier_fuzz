@@ -10,6 +10,8 @@ public abstract class Expression
         => NameSegment.FromDafny(nameSeg),
       Dafny.BinaryExpr binExpr
         => BinaryExpr.FromDafny(binExpr),
+      Dafny.UnaryOpExpr unExpr
+      => UnaryExpr.FromDafny(unExpr),
       Dafny.LiteralExpr litExpr
         => LiteralExpr.FromDafny(litExpr),
       Dafny.ParensExpression parensExpr

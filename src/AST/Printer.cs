@@ -160,6 +160,9 @@ public class Printer {
   }
 
   private void PrintStatement(Statement stmt) {
+    if (stmt.Label != null) {
+      Wr.WriteLine($"label {stmt.Label}:");
+    }
     switch (stmt) {
       case BlockStmt blockStmt:
         Wr.WriteLine("{");
@@ -200,8 +203,14 @@ public class Printer {
       case ForLoopStmt forLoopStmt:
         PrintForLoopStmt(forLoopStmt);
         break;
+      case PrintStmt printStmt:
+        PrintPrintStmt(printStmt);
+        break;
+      case BreakStmt breakStmt:
+        PrintBreakStmt(breakStmt);
+        break;
       default:
-        throw new NotImplementedException();
+        throw new NotSupportedException($"Unhandled printing for `{stmt.GetType()}` ");
     }
   }
 
@@ -304,6 +313,10 @@ public class Printer {
         PrintExpression(binExpr.E0);
         Wr.Write($" {BinaryExpr.OpcodeString(binExpr.Op)} ");
         PrintExpression(binExpr.E1);
+        break;
+      case UnaryExpr unExpr:
+        Wr.Write(UnaryExpr.OpcodeString(unExpr.Op));
+        PrintExpression(unExpr.E);
         break;
       case IntLiteralExpr intLitExpr:
         Wr.Write(intLitExpr.Value);
@@ -492,7 +505,7 @@ public class Printer {
     // TODO: Handle case where type is inferred and not explicitly stated
     Wr.Write(": ");
     PrintType(fs.LoopIndex.Type);
-    
+
     Wr.Write(" := ");
     PrintExpression(fs.Start);
     Wr.Write(fs.GoingUp ? " to " : " downto ");
@@ -513,6 +526,29 @@ public class Printer {
     if (fs.Body != null) {
       Indent();
       PrintStatement(fs.Body);
+    }
+  }
+
+  private void PrintPrintStmt(PrintStmt ps) {
+    Wr.Write("print ");
+    ResetSep();
+    foreach (var arg in ps.Args) {
+      WriteSep();
+      PrintExpression(arg);
+    }
+    Wr.Write(";");
+  }
+
+  private void PrintBreakStmt(BreakStmt bs) {
+    if (bs.TargetLabel != null) {
+      Wr.Write($"break {bs.TargetLabel};");
+    } else {
+      ResetSep(sep: " ");
+      for (int i = 0; i < bs.Count; i++) {
+        WriteSep();
+        Wr.Write("break");
+      }
+      Wr.Write(";");
     }
   }
 }
