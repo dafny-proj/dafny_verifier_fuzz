@@ -162,6 +162,7 @@ public class Printer {
   private void PrintStatement(Statement stmt) {
     if (stmt.Label != null) {
       Wr.WriteLine($"label {stmt.Label}:");
+      Indent();
     }
     switch (stmt) {
       case BlockStmt blockStmt:
@@ -222,7 +223,7 @@ public class Printer {
   private void PrintCallArguments(ArgumentBindings abs) {
     Wr.Write("(");
     ResetSep();
-    foreach (ArgumentBinding ab in abs.providedArguments) {
+    foreach (ArgumentBinding ab in abs.ProvidedArgs) {
       WriteSep();
       if (!ab.IsPositional) {
         Wr.Write($"{ab.FormalParameterName} := ");
@@ -419,15 +420,17 @@ public class Printer {
     DecIndent();
     Wr.WriteLine();
 
-    Indent();
-    Wr.WriteLine("{");
-    IncIndent();
-    Indent();
-    PrintExpression(f.Body);
-    Wr.WriteLine();
-    DecIndent();
-    Indent();
-    Wr.WriteLine("}");
+    if (f.Body != null) {
+      Indent();
+      Wr.WriteLine("{");
+      IncIndent();
+      Indent();
+      PrintExpression(f.Body);
+      Wr.WriteLine();
+      DecIndent();
+      Indent();
+      Wr.WriteLine("}");
+    }
   }
 
   private void PrintIfStmt(IfStmt ifStmt) {

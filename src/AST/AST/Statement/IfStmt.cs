@@ -33,4 +33,8 @@ public class IfStmt
   public static IfStmt FromDafny(Dafny.IfStmt dafnyNode) {
     return new IfStmt(dafnyNode);
   }
+
+  public override Statement Clone() {
+    return new IfStmt(Guard?.Clone(), Thn.Clone(), Els?.Clone());
+  }
 }

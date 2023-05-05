@@ -14,15 +14,9 @@ public static class WhileLoop {
       }
       WhileStmt ws = (WhileStmt)node;
       Contract.Assert(ws.Body != null);
-      if (ws.Guard == null) {
-        return new ANoGuardLoop(
-          ws.Body, ws.Invariants, ws.Modifies, ws.AllDecreases
-        );
-      } else {
-        return new AConditionalLoop(
-          ws.Guard, ws.Body, ws.Invariants, ws.Modifies, ws.AllDecreases
-        );
-      }
+      return new AConditionalLoop(
+        ws.Guard, ws.Body, ws.Invariants, ws.Modifies, ws.AllDecreases
+      );
     }
   }
 
@@ -36,7 +30,6 @@ public static class WhileLoop {
         throw new NotSupportedException($"WhileLoop.Writer: Loop cannot be represented as while loop.");
       }
       return loop switch {
-        ANoGuardLoop l => WriteNoGuardLoop(l),
         AConditionalLoop l => WriteConditionalLoop(l),
         AIndexLoop l => WriteIndexLoop(l),
         _ => throw new NotSupportedException("WhileLoop.Writer: Unhandled loop type.")
@@ -46,10 +39,6 @@ public static class WhileLoop {
     private Node WriteLoop(Expression? guard, ALoop loop) {
       var body = loop.Body;
       return new WhileStmt(guard, body, loop.Invariants, loop.Modifies, loop.Decreases);
-    }
-
-    private Node WriteNoGuardLoop(ANoGuardLoop loop) {
-      return WriteLoop(null, loop);
     }
 
     private Node WriteConditionalLoop(AConditionalLoop loop) {

@@ -29,20 +29,11 @@ public abstract class ALoop {
   }
 }
 
-/*  e.g. while * {...} */
-public class ANoGuardLoop : ALoop {
-  public ANoGuardLoop(BlockStmt body,
-    List<AttributedExpression> inv,
-    Specification<Dafny.FrameExpression, FrameExpression> mod,
-    Specification<Dafny.Expression, Expression> dec)
-  : base(body, inv, mod, dec) { }
-}
-
 /*  e.g. while condition {...} */
 public class AConditionalLoop : ALoop {
-  public Expression Condition { get; set; }
+  public Expression? Condition { get; set; }
 
-  public AConditionalLoop(Expression cond,
+  public AConditionalLoop(Expression? cond,
     BlockStmt body,
     List<AttributedExpression> inv,
     Specification<Dafny.FrameExpression, FrameExpression> mod,

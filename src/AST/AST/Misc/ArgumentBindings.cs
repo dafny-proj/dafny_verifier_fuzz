@@ -5,24 +5,34 @@ namespace AST;
 public class ArgumentBindings
 : Node, ConstructableFromDafny<Dafny.ActualBindings, ArgumentBindings> {
   // TODO: refactor providedArguments and allArguments into a single structure
-  public override IEnumerable<Node> Children => providedArguments;
+  public override IEnumerable<Node> Children => ProvidedArgs;
 
   // Arguments provided in the program text and the parameters they correspond to.
-  public List<ArgumentBinding> providedArguments = new List<ArgumentBinding>();
+  public List<ArgumentBinding> ProvidedArgs = new List<ArgumentBinding>();
   // Arguments provided in the program text + default arguments, arguments are 
   // given in positional order of parameters hence binding is not required here.
-  public List<Expression>? allArguments { get; set; }
+  public List<Expression>? AllArgs { get; set; }
+
+  public ArgumentBindings(IEnumerable<ArgumentBinding> args) {
+    ProvidedArgs.AddRange(args);
+  }
 
   private ArgumentBindings(Dafny.ActualBindings abd) {
     Contract.Requires(abd.WasResolved); // For abd.Arguments to be available
-    providedArguments.AddRange(abd.ArgumentBindings.Select(ArgumentBinding.FromDafny));
+    ProvidedArgs.AddRange(abd.ArgumentBindings.Select(ArgumentBinding.FromDafny));
     if (abd.Arguments != null) {
-      allArguments = abd.Arguments.Select(Expression.FromDafny).ToList();
+      AllArgs = abd.Arguments.Select(Expression.FromDafny).ToList();
     }
   }
 
   public static ArgumentBindings FromDafny(Dafny.ActualBindings dafnyNode) {
     return new ArgumentBindings(dafnyNode);
+  }
+
+  public override ArgumentBindings Clone() {
+    var clone = new ArgumentBindings(ProvidedArgs.Select(a => a.Clone()));
+    clone.AllArgs = AllArgs?.Select(a => a.Clone()).ToList();
+    return clone;
   }
 }
 
@@ -35,13 +45,19 @@ public class ArgumentBinding
 
   public bool IsPositional => FormalParameterName == null;
 
-  private ArgumentBinding(Dafny.ActualBinding abd) {
-    FormalParameterName = abd.FormalParameterName == null ? null
-      : abd.FormalParameterName.val;
-    Argument = Expression.FromDafny(abd.Actual);
+  public ArgumentBinding(Expression arg, string? paramName = null) {
+    Argument = arg;
+    FormalParameterName = paramName;
   }
+
+  private ArgumentBinding(Dafny.ActualBinding abd)
+  : this(Expression.FromDafny(abd.Actual), abd.FormalParameterName?.val) { }
 
   public static ArgumentBinding FromDafny(Dafny.ActualBinding dafnyNode) {
     return new ArgumentBinding(dafnyNode);
+  }
+
+  public override ArgumentBinding Clone() {
+    return new ArgumentBinding(Argument.Clone(), FormalParameterName);
   }
 }

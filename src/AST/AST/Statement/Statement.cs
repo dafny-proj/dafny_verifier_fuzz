@@ -3,7 +3,7 @@ namespace AST;
 public abstract class Statement
 : Node, ConstructableFromDafny<Dafny.Statement, Statement> {
 
-  // TODO: handle label initialisation and propagation
+  // TODO: handle label initialisation and propagation.
   public string? Label { get; set; }
 
   public static Statement FromDafny(Dafny.Statement dafnyNode) {

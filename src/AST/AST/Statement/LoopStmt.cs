@@ -83,6 +83,16 @@ public class WhileStmt
       }
     }
   }
+
+  public override Statement Clone() {
+    return new WhileStmt(
+      Guard?.Clone(),
+      Body?.Clone(),
+      Invariants.Select(i => i.Clone()),
+      Modifies.Clone(),
+      AllDecreases.Clone()
+    );
+  }
 }
 
 public class ForLoopStmt :

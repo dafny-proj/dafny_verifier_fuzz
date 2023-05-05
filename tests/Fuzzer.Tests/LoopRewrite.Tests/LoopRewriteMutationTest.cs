@@ -384,9 +384,36 @@ public class LoopRewriteMutationTest {
     Assert.AreEqual(whileDown, mutant);
   }
 
-  [TestMethod]
-  public void WriteWhileLoopUnrolledOnce() {
+  public void TestLoopUnroll(
+    string input,
+    string expectedOutput,
+    int expectedNumMutationsFound = 1,
+    int mutationToTrigger = 0
+  ) {
     var finder = new LoopRewriteMutationFinder();
+    var programDafny = DafnyW.ParseDafnyProgramFromString(input);
+    DafnyW.ResolveDafnyProgram(programDafny);
+    var program = Program.FromDafny(programDafny);
+    finder.FindMutations(program);
+    Assert.AreEqual(expectedNumMutationsFound, finder.NumMutationsFound);
+
+    var loopMutation = finder.Mutations[mutationToTrigger];
+    var originalLoop = loopMutation.OriginalLoop;
+    var parser = new WhileLoop.Parser();
+    Assert.IsTrue(parser.CanParseLoop(originalLoop));
+
+    var parsedLoop = parser.ParseLoop(originalLoop);
+    var writer = new LoopUnroll.Writer();
+    Assert.IsTrue(writer.CanWriteLoop(parsedLoop));
+
+    var rewrittenLoop = writer.WriteLoop(parsedLoop);
+    loopMutation.RewriteLoop(rewrittenLoop);
+    var mutant = Printer.ProgramToString(program).TrimEnd();
+    Assert.AreEqual(expectedOutput, mutant);
+  }
+
+  [TestMethod]
+  public void UnrollSimpleWhileLoop() {
     var whileWhole = """
     method Foo(n: nat)
     {
@@ -397,38 +424,7 @@ public class LoopRewriteMutationTest {
       }
     }
     """;
-    var programDafny = DafnyW.ParseDafnyProgramFromString(whileWhole);
-    DafnyW.ResolveDafnyProgram(programDafny);
-    var program = Program.FromDafny(programDafny);
-    finder.FindMutations(program);
-    Assert.AreEqual(1, finder.NumMutationsFound);
-
-    var loopMutation = finder.Mutations[0];
-    var originalLoop = loopMutation.OriginalLoop;
-    var parser = new WhileLoop.Parser();
-    Assert.IsTrue(parser.CanParseLoop(originalLoop));
-
-    var parsedLoop = parser.ParseLoop(originalLoop);
-    var writer = new LoopUnroll.Writer();
-    Assert.IsTrue(writer.CanWriteLoop(parsedLoop));
-
-    var rewrittenLoop = writer.WriteLoop(parsedLoop);
-    finder.Mutations[0].RewriteLoop(rewrittenLoop);
-    var mutant = Printer.ProgramToString(program).TrimEnd();
-    var whileUnrolledOnceV1 = """
-    method Foo(n: nat)
-    {
-      var i := 0;
-      if i < n {
-        i := i + 1;
-        while (i < n)
-        {
-          i := i + 1;
-        }
-      }
-    }
-    """;
-    var whileUnrolledOnceV2 = """
+    var whileUnrolled = """
     method Foo(n: nat)
     {
       var i := 0;
@@ -441,6 +437,364 @@ public class LoopRewriteMutationTest {
       }
     }
     """;
-    CollectionAssert.Contains(new[] { whileUnrolledOnceV1, whileUnrolledOnceV2 }, mutant);
+    TestLoopUnroll(whileWhole, whileUnrolled);
   }
+
+  [TestMethod]
+  public void UnrollWhileLoopWithUnconditionalBreak() {
+    var whileWhole = """
+    method Foo(n: nat)
+    {
+      print 0;
+      while *
+      {
+        print 1;
+        break;
+        print 2;
+      }
+      print 3;
+    }
+    """;
+    var whileUnrolled = """
+    method Foo(n: nat)
+    {
+      print 0;
+      var breakVar: bool := false;
+      label breakLabel:
+      if * {
+        print 1;
+        breakVar := true;
+        break breakLabel;
+        print 2;
+      }
+      if !breakVar {
+        while *
+        {
+          print 1;
+          break;
+          print 2;
+        }
+      }
+      print 3;
+    }
+    """;
+    TestLoopUnroll(whileWhole, whileUnrolled);
+  }
+
+  [TestMethod]
+  public void UnrollWhileLoopWithConditionalBreak() {
+    var whileWhole = """
+    function Bool(n: nat): bool
+
+    method Foo(n: nat)
+    {
+      print 0;
+      while Bool(0)
+      {
+        print 1;
+        if Bool(1) {
+          print 2;
+          break;
+          print 3;
+        } else {
+          print 4;
+        }
+        print 5;
+      }
+      print 6;
+    }
+    """;
+    var whileUnrolled = """
+    function Bool(n: nat): bool
+
+    method Foo(n: nat)
+    {
+      print 0;
+      var breakVar: bool := false;
+      label breakLabel:
+      if Bool(0) {
+        print 1;
+        if Bool(1) {
+          print 2;
+          breakVar := true;
+          break breakLabel;
+          print 3;
+        } else {
+          print 4;
+        }
+        print 5;
+      }
+      if !breakVar {
+        while Bool(0)
+        {
+          print 1;
+          if Bool(1) {
+            print 2;
+            break;
+            print 3;
+          } else {
+            print 4;
+          }
+          print 5;
+        }
+      }
+      print 6;
+    }
+    """;
+    TestLoopUnroll(whileWhole, whileUnrolled);
+  }
+
+  [TestMethod]
+  public void UnrollWhileLoopWithNestedConditionalBreak() {
+    var whileWhole = """
+    function Bool(n: nat): bool
+
+    method Foo(n: nat)
+    {
+      print 0;
+      while Bool(0)
+      {
+        print 1;
+        if Bool(1) {
+          print 2;
+          if Bool(2) {
+            print 3;
+            break;
+            print 4;
+          }
+          print 5;
+        }
+        print 6;
+      }
+      print 7;
+    }
+    """;
+    var whileUnrolled = """
+    function Bool(n: nat): bool
+
+    method Foo(n: nat)
+    {
+      print 0;
+      var breakVar: bool := false;
+      label breakLabel:
+      if Bool(0) {
+        print 1;
+        if Bool(1) {
+          print 2;
+          if Bool(2) {
+            print 3;
+            breakVar := true;
+            break breakLabel;
+            print 4;
+          }
+          print 5;
+        }
+        print 6;
+      }
+      if !breakVar {
+        while Bool(0)
+        {
+          print 1;
+          if Bool(1) {
+            print 2;
+            if Bool(2) {
+              print 3;
+              break;
+              print 4;
+            }
+            print 5;
+          }
+          print 6;
+        }
+      }
+      print 7;
+    }
+    """;
+    TestLoopUnroll(whileWhole, whileUnrolled);
+  }
+
+  [TestMethod]
+  public void UnrollNestedWhileLoopWithInnerBreak() {
+    var whileWhole = """
+    function Bool(n: nat): bool
+
+    method Foo(n: nat)
+    {
+      print 0;
+      while Bool(0)
+      {
+        print 1;
+        while Bool(1)
+        {
+          print 2;
+          break;
+          print 3;
+        }
+        print 4;
+      }
+      print 5;
+    }
+    """;
+    var outerWhileUnrolled = """
+    function Bool(n: nat): bool
+
+    method Foo(n: nat)
+    {
+      print 0;
+      if Bool(0) {
+        print 1;
+        while Bool(1)
+        {
+          print 2;
+          break;
+          print 3;
+        }
+        print 4;
+      }
+      while Bool(0)
+      {
+        print 1;
+        while Bool(1)
+        {
+          print 2;
+          break;
+          print 3;
+        }
+        print 4;
+      }
+      print 5;
+    }
+    """;
+    var innerWhileUnrolled = """
+    function Bool(n: nat): bool
+
+    method Foo(n: nat)
+    {
+      print 0;
+      while Bool(0)
+      {
+        print 1;
+        var breakVar: bool := false;
+        label breakLabel:
+        if Bool(1) {
+          print 2;
+          breakVar := true;
+          break breakLabel;
+          print 3;
+        }
+        if !breakVar {
+          while Bool(1)
+          {
+            print 2;
+            break;
+            print 3;
+          }
+        }
+        print 4;
+      }
+      print 5;
+    }
+    """;
+    TestLoopUnroll(whileWhole,
+      outerWhileUnrolled,
+      expectedNumMutationsFound: 2,
+      mutationToTrigger: 0);
+    TestLoopUnroll(whileWhole,
+      innerWhileUnrolled,
+      expectedNumMutationsFound: 2,
+      mutationToTrigger: 1);
+  }
+
+  [TestMethod]
+  public void UnrollNestedWhileLoopWithInnerBreakBreak() {
+    var whileWhole = """
+    function Bool(n: nat): bool
+
+    method Foo(n: nat)
+    {
+      print 0;
+      while Bool(0)
+      {
+        print 1;
+        while Bool(1)
+        {
+          print 2;
+          break break;
+          print 3;
+        }
+        print 4;
+      }
+      print 5;
+    }
+    """;
+    var outerWhileUnrolled = """
+    function Bool(n: nat): bool
+
+    method Foo(n: nat)
+    {
+      print 0;
+      var breakVar: bool := false;
+      label breakLabel:
+      if Bool(0) {
+        print 1;
+        while Bool(1)
+        {
+          print 2;
+          breakVar := true;
+          break breakLabel;
+          print 3;
+        }
+        print 4;
+      }
+      if !breakVar {
+        while Bool(0)
+        {
+          print 1;
+          while Bool(1)
+          {
+            print 2;
+            break break;
+            print 3;
+          }
+          print 4;
+        }
+      }
+      print 5;
+    }
+    """;
+    var innerWhileUnrolled = """
+    function Bool(n: nat): bool
+
+    method Foo(n: nat)
+    {
+      print 0;
+      while Bool(0)
+      {
+        print 1;
+        if Bool(1) {
+          print 2;
+          break;
+          print 3;
+        }
+        while Bool(1)
+        {
+          print 2;
+          break break;
+          print 3;
+        }
+        print 4;
+      }
+      print 5;
+    }
+    """;
+    TestLoopUnroll(whileWhole,
+      outerWhileUnrolled,
+      expectedNumMutationsFound: 2,
+      mutationToTrigger: 0);
+    TestLoopUnroll(whileWhole,
+      innerWhileUnrolled,
+      expectedNumMutationsFound: 2,
+      mutationToTrigger: 1);
+  }
+
 }
