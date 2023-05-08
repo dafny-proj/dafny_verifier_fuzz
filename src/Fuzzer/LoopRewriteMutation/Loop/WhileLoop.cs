@@ -51,11 +51,10 @@ public static class WhileLoop {
       // `var index := start`
       string indexName = loop.Index.Name;
       Type indexType = loop.Index.Type;
-      LocalVariable index = new LocalVariable(indexName, indexType);
-      IdentifierExpr indexIdent = new IdentifierExpr(indexName, indexType);
-      ExprRhs indexInit = new ExprRhs(loop.IStart);
+      Expression indexInit = loop.IStart;
       VarDeclStmt indexDecl
-        = new VarDeclStmt(index, new UpdateStmt(indexIdent, indexInit));
+        = new VarDeclStmt(new VarDecl(indexName, indexType, indexInit));
+      IdentifierExpr indexIdent = new IdentifierExpr(indexName, indexType);
 
       // Create guard for while loop.
       Expression wGuard;

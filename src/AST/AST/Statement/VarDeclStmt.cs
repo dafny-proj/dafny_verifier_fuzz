@@ -24,6 +24,12 @@ public class VarDecl : Node {
   public string Name { get; private set; }
   public Type? ExplicitType { get; private set; }
   public Type? InferredType { get; private set; }
+  public Type Type {
+    get {
+      Contract.Assert(ExplicitType != null || InferredType != null);
+      return (ExplicitType ?? InferredType)!;
+    }
+  }
   public VarDeclInitialiser? Initialiser { get; private set; }
 
   public VarDecl(string name,
@@ -34,6 +40,18 @@ public class VarDecl : Node {
     ExplicitType = explicitType;
     InferredType = inferredType;
     Initialiser = initialiser;
+  }
+
+  public VarDecl(string name, Type type, Expression init)
+  : this(name: name,
+    explicitType: type,
+    initialiser: new AssignmentInitialiser(new ExprRhs(init))) {
+    // Note that the explicitly declared `type` may not be equal to the 
+    // initialiser type `init.Type`, e.g. in the case of unsoundness, though 
+    // there are sound examples with non-matching types.
+    // A sound example: `var i: nat := 0`. 0 is inferred as `int`.
+    // An unsound example: `var n: nat := -1`.
+    //  - This example fails the verifier but passes the resolver.    
   }
 
   public void SetInferredType(Type t) => InferredType = t;
@@ -49,11 +67,19 @@ public class VarDecl : Node {
   }
 }
 
-public class VarDecls
-: Statement, ConstructableFromDafny<Dafny.VarDeclStmt, VarDecls> {
+public class VarDeclStmt
+: Statement, ConstructableFromDafny<Dafny.VarDeclStmt, VarDeclStmt> {
   public List<VarDecl> Decls = new();
 
-  private VarDecls(Dafny.VarDeclStmt vds) {
+  public VarDeclStmt(VarDecl decl) {
+    Decls.Add(decl);
+  }
+
+  public VarDeclStmt(IEnumerable<VarDecl> decls) {
+    Decls.AddRange(decls);
+  }
+
+  private VarDeclStmt(Dafny.VarDeclStmt vds) {
     vds.Locals.ForEach(l => {
       var et = l.IsTypeExplicit ? Type.FromDafny(l.OptionalType) : null;
       Decls.Add(new VarDecl(l.Name, explicitType: et));
@@ -75,8 +101,8 @@ public class VarDecls
     }
   }
 
-  public static VarDecls FromDafny(Dafny.VarDeclStmt dafnyNode) {
-    return new VarDecls(dafnyNode);
+  public static VarDeclStmt FromDafny(Dafny.VarDeclStmt dafnyNode) {
+    return new VarDeclStmt(dafnyNode);
   }
 
   public bool HasInitialiser() {
@@ -93,33 +119,4 @@ public class VarDecls
   }
 
   public override IEnumerable<Node> Children => Decls;
-}
-
-public class VarDeclStmt
-: Statement, ConstructableFromDafny<Dafny.VarDeclStmt, VarDeclStmt> {
-  public override IEnumerable<Node> Children {
-    get {
-      var children = Locals;
-      if (Update != null) {
-        children.Append<Node>(Update);
-      }
-      return children;
-    }
-  }
-  public List<LocalVariable> Locals = new List<LocalVariable>();
-  public ConcreteUpdateStatement? Update;
-
-  public VarDeclStmt(LocalVariable lv, ConcreteUpdateStatement us) {
-    Locals.Add(lv);
-    Update = us;
-  }
-
-  private VarDeclStmt(Dafny.VarDeclStmt vdStmt) {
-    Locals.AddRange(vdStmt.Locals.Select(LocalVariable.FromDafny));
-    Update = vdStmt.Update == null ? null : ConcreteUpdateStatement.FromDafny(vdStmt.Update);
-  }
-
-  public static VarDeclStmt FromDafny(Dafny.VarDeclStmt dafnyNode) {
-    return new VarDeclStmt(dafnyNode);
-  }
 }

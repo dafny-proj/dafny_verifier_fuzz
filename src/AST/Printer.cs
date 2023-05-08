@@ -195,9 +195,6 @@ public class Printer {
       case VarDeclStmt varDeclStmt:
         PrintVarDeclStmt(varDeclStmt);
         break;
-      case VarDecls varDecls:
-        PrintVarDecls(varDecls);
-        break;
       case CallStmt callStmt:
         PrintCall(callStmt.Callee, callStmt.ArgumentBindings);
         break;
@@ -236,7 +233,7 @@ public class Printer {
     Wr.Write(")");
   }
 
-  private void PrintVarDecls(VarDecls varDecls) {
+  private void PrintVarDeclStmt(VarDeclStmt varDecls) {
     // TODO: Handle ghost, wildcard names.
     Wr.Write("var");
     ResetSep(init: " ");
@@ -260,24 +257,6 @@ public class Printer {
           throw new NotImplementedException($"Printing unhandled for {init.GetType()}.");
         }
       }
-    }
-    Wr.Write(";");
-  }
-
-  private void PrintVarDeclStmt(VarDeclStmt vdStmt) {
-    // TODO: handle ghost, wildcard names
-    Wr.Write("var");
-    ResetSep(init: " ");
-    foreach (LocalVariable lv in vdStmt.Locals) {
-      WriteSep();
-      Wr.Write($"{lv.Name}");
-      if (lv.ExplicitType != null) {
-        Wr.Write($": ");
-        PrintType(lv.ExplicitType);
-      }
-    }
-    if (vdStmt.Update != null) {
-      PrintCUpdateRHS(vdStmt.Update);
     }
     Wr.Write(";");
   }

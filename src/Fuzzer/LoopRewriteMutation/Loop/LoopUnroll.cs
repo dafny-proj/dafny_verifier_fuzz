@@ -65,11 +65,8 @@ public class LoopUnroll {
     private VarDeclStmt GenBreakVarDecl(IdentifierExpr breakVI) {
       // TODO: Refactor general variable declaration utility.
       // `var breakVar: bool := false;`
-      LocalVariable breakVar = new LocalVariable(breakVI.Name, breakVI.Type);
-      ExprRhs breakInit = new ExprRhs(new BoolLiteralExpr(false));
-      VarDeclStmt breakDecl
-        = new VarDeclStmt(breakVar, new UpdateStmt(breakVI.Clone(), breakInit));
-      return breakDecl;
+      return new VarDeclStmt(
+        new VarDecl(breakVI.Name, Type.Bool, new BoolLiteralExpr(false)));
     }
   }
 }
