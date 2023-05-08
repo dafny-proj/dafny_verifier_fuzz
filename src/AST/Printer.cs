@@ -195,6 +195,9 @@ public class Printer {
       case VarDeclStmt varDeclStmt:
         PrintVarDeclStmt(varDeclStmt);
         break;
+      case VarDecls varDecls:
+        PrintVarDecls(varDecls);
+        break;
       case CallStmt callStmt:
         PrintCall(callStmt.Callee, callStmt.ArgumentBindings);
         break;
@@ -231,6 +234,34 @@ public class Printer {
       PrintExpression(ab.Argument);
     }
     Wr.Write(")");
+  }
+
+  private void PrintVarDecls(VarDecls varDecls) {
+    // TODO: Handle ghost, wildcard names.
+    Wr.Write("var");
+    ResetSep(init: " ");
+    foreach (var vd in varDecls.Decls) {
+      WriteSep();
+      Wr.Write(vd.Name);
+      if (vd.ExplicitType != null) {
+        Wr.Write(": ");
+        PrintType(vd.ExplicitType);
+      }
+    }
+    if (varDecls.HasInitialiser()) {
+      // TODO: Handle other initialiser types.
+      Wr.Write(" := ");
+      ResetSep();
+      foreach (var init in varDecls.GetDeclInitialisers()) {
+        if (init is AssignmentInitialiser aInit) {
+          WriteSep();
+          PrintAssignRHS(aInit.Value);
+        } else {
+          throw new NotImplementedException($"Printing unhandled for {init.GetType()}.");
+        }
+      }
+    }
+    Wr.Write(";");
   }
 
   private void PrintVarDeclStmt(VarDeclStmt vdStmt) {
