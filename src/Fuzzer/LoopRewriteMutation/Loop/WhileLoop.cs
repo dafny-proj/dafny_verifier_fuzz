@@ -72,7 +72,7 @@ public static class WhileLoop {
       // `index := index +/- 1`
       BinaryExpr.Opcode indexUpdateOp
         = loop.Up ? BinaryExpr.Opcode.Add : BinaryExpr.Opcode.Sub;
-      UpdateStmt indexUpdate = new UpdateStmt(
+      AssignStmt indexUpdate = new AssignStmt(
         indexIdent,
         new ExprRhs(
           new BinaryExpr(indexUpdateOp, indexIdent, new IntLiteralExpr(1))));

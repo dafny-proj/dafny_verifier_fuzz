@@ -23,4 +23,8 @@ public class MemberSelectExpr
   public static MemberSelectExpr FromDafny(Dafny.MemberSelectExpr dafnyNode) {
     return new MemberSelectExpr(dafnyNode);
   }
+
+  public override MemberSelectExpr Clone() {
+    throw new NotImplementedException("Unhandled cloning for `MemberSelectExpr`.");
+  }
 }

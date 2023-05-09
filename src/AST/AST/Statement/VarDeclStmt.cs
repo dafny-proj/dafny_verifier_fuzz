@@ -86,14 +86,11 @@ public class VarDeclStmt
     });
     var initStmt = vds.Update == null ? null : ConcreteUpdateStatement.FromDafny(vds.Update);
     if (initStmt != null) {
-      if (initStmt is UpdateStmt us) {
-        // Lhss and Rhss should match up exactly in a declaration statement.
-        Contract.Assert(Decls.Count == us.Lhss.Count);
-        Contract.Assert(Decls.Count == us.Rhss.Count);
+      if (initStmt is AssignStmt ass) {
         for (var i = 0; i < Decls.Count; i++) {
           // TODO: Is this the correct inferred type? Or should we try and get type from Rhs?
-          Decls[i].SetInferredType(us.Lhss[i].Type);
-          Decls[i].SetInitialiser(new AssignmentInitialiser(us.Rhss[i]));
+          Decls[i].SetInferredType(ass.Assignments[i].Lhs.Type);
+          Decls[i].SetInitialiser(new AssignmentInitialiser(ass.Assignments[i].Rhs));
         }
       } else {
         throw new NotImplementedException($"VarDecls: Unhandled initialiser from {initStmt.GetType()}.");

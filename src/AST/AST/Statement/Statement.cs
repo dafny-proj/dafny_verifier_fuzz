@@ -18,8 +18,6 @@ public abstract class Statement
         => ReturnStmt.FromDafny(retStmt),
       Dafny.VarDeclStmt varDeclStmt
         => VarDeclStmt.FromDafny(varDeclStmt),
-      Dafny.CallStmt callStmt
-        => CallStmt.FromDafny(callStmt),
       Dafny.LoopStmt loopStmt
         => LoopStmt.FromDafny(loopStmt),
       Dafny.PrintStmt printStmt

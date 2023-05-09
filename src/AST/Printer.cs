@@ -177,9 +177,6 @@ public class Printer {
         Indent();
         Wr.Write("}");
         break;
-      case ConcreteUpdateStatement updateStmt:
-        PrintCUpdateStmt(updateStmt);
-        break;
       case IfStmt ifStmt:
         PrintIfStmt(ifStmt);
         break;
@@ -197,6 +194,7 @@ public class Printer {
         break;
       case CallStmt callStmt:
         PrintCall(callStmt.Callee, callStmt.ArgumentBindings);
+        Wr.Write(";");
         break;
       case WhileStmt whileStmt:
         PrintWhileStmt(whileStmt);
@@ -210,9 +208,27 @@ public class Printer {
       case BreakStmt breakStmt:
         PrintBreakStmt(breakStmt);
         break;
+      case AssignStmt assignStmt:
+        PrintAssignStmt(assignStmt);
+        break;
       default:
         throw new NotSupportedException($"Unhandled printing for `{stmt.GetType()}` ");
     }
+  }
+
+  private void PrintAssignStmt(AssignStmt ass) {
+    ResetSep();
+    foreach (var lhs in ass.Lhss) {
+      WriteSep();
+      PrintExpression(lhs);
+    }
+    Wr.Write(" := ");
+    ResetSep();
+    foreach (var rhs in ass.Rhss) {
+      WriteSep();
+      PrintAssignRHS(rhs);
+    }
+    Wr.Write(";");
   }
 
   private void PrintCall(Expression callee, ArgumentBindings arguments) {
@@ -258,33 +274,6 @@ public class Printer {
         }
       }
     }
-    Wr.Write(";");
-  }
-
-  private void PrintCUpdateRHS(ConcreteUpdateStatement cus) {
-    switch (cus) {
-      case UpdateStmt us:
-        if (us.Lhss.Count > 0) {
-          Wr.Write(" := ");
-        }
-        ResetSep();
-        foreach (AssignmentRhs rhs in us.Rhss) {
-          WriteSep();
-          PrintAssignRHS(rhs);
-        }
-        break;
-      default:
-        throw new NotImplementedException();
-    }
-  }
-
-  private void PrintCUpdateStmt(ConcreteUpdateStatement cus) {
-    ResetSep();
-    foreach (Expression lhs in cus.Lhss) {
-      WriteSep();
-      PrintExpression(lhs);
-    }
-    PrintCUpdateRHS(cus);
     Wr.Write(";");
   }
 

@@ -92,7 +92,7 @@ public class BreakReconditioner : ASTVisitor {
     return BreakLabel;
   }
   private UpdateStmt GenBreakVarSetToTrue() {
-    return new UpdateStmt(GetOrGenBreakVar().Clone(),
+    return new AssignStmt(GetOrGenBreakVar().Clone(),
       new ExprRhs(new BoolLiteralExpr(true)));
   }
   private BreakStmt GenBreakToLabel() {
