@@ -338,6 +338,9 @@ public class Printer {
       case StringLiteralExpr stringLitExpr:
         Wr.Write($"\"{stringLitExpr.Value}\"");
         break;
+      case MapDisplayExpr mapDisplayExpr:
+        PrintMapDisplayExpr(mapDisplayExpr);
+        break;
       case ParensExpression parensExpr:
         // Note that this deviates from the original Dafny printer which prints 
         // parentheses optimally instead of following the program
@@ -369,8 +372,11 @@ public class Printer {
       case ChainingExpression chainingExpr:
         PrintChainingExpr(chainingExpr);
         break;
-      case SeqSelectExpr seqSelectExpr:
+      case CollectionSelectExpr seqSelectExpr:
         PrintSeqSelectExpr(seqSelectExpr);
+        break;
+      case CollectionUpdateExpr collectionUpdateExpr:
+        PrintCollectionUpdateExpr(collectionUpdateExpr);
         break;
       case WildcardExpr:
         Wr.Write("*");
@@ -500,17 +506,17 @@ public class Printer {
     }
   }
 
-  private void PrintSeqSelectExpr(SeqSelectExpr sse) {
+  private void PrintSeqSelectExpr(CollectionSelectExpr sse) {
     // TODO: parentheses?
-    PrintExpression(sse.Seq);
+    PrintExpression(sse.Collection);
     Wr.Write("[");
-    if (sse.E0 != null) {
-      PrintExpression(sse.E0);
+    if (sse.Index0 != null) {
+      PrintExpression(sse.Index0);
     }
     if (sse.IsSlice) {
       Wr.Write("..");
-      if (sse.E1 != null) {
-        PrintExpression(sse.E1);
+      if (sse.Index1 != null) {
+        PrintExpression(sse.Index1);
       }
     }
     Wr.Write("]");
@@ -566,5 +572,27 @@ public class Printer {
       }
       Wr.Write(";");
     }
+  }
+
+  private void PrintMapDisplayExpr(MapDisplayExpr mde) {
+    Wr.Write("map");
+    Wr.Write("[");
+    ResetSep();
+    foreach (var (k, v) in mde.Items) {
+      WriteSep();
+      PrintExpression(k);
+      Wr.Write(" := ");
+      PrintExpression(v);
+    }
+    Wr.Write("]");
+  }
+
+  private void PrintCollectionUpdateExpr(CollectionUpdateExpr cue) {
+    PrintExpression(cue.Collection);
+    Wr.Write("[");
+    PrintExpression(cue.Index);
+    Wr.Write(" := ");
+    PrintExpression(cue.Value);
+    Wr.Write("]");
   }
 }

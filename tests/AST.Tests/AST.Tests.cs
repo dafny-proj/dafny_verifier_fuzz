@@ -46,6 +46,7 @@ public class ASTTests {
       var s: string := "hello";
       var a := new int[1];
       var a2: array2<int> := new int[1, 2];
+      var m: map<string, int> := map["a" := 1, "b" := 2];
     }
     """;
     CanParseAndPrintFeature(sourceStr);
@@ -203,5 +204,19 @@ public class ASTTests {
     """;
     CanParseAndPrintFeature(sourceStr);
   }
-  
+
+  [TestMethod]
+  public void CanParseAndPrintMaps() {
+    var sourceStr = """
+    method M()
+    {
+      var m: map<string, int> := map[];
+      m := map["a" := 0, "b" := 1];
+      m := m["a" := 1];
+      print m["a"];
+    }
+    """;
+    CanParseAndPrintFeature(sourceStr);
+  }
+
 }

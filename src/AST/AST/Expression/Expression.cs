@@ -27,10 +27,14 @@ public abstract class Expression
       Dafny.ChainingExpression ce
         => ChainingExpression.FromDafny(ce),
       Dafny.SeqSelectExpr sse
-        => SeqSelectExpr.FromDafny(sse),
+        => CollectionSelectExpr.FromDafny(sse),
+      Dafny.SeqUpdateExpr sue
+        => CollectionUpdateExpr.FromDafny(sue),
       Dafny.WildcardExpr wce
         => WildcardExpr.FromDafny(wce),
-      _ => throw new NotImplementedException($"Unhandled translation from Dafny for `{dafnyNode.GetType()}`"),
+      Dafny.MapDisplayExpr mde
+        => MapDisplayExpr.FromDafny(mde),
+      _ => throw new NotImplementedException($"Unhandled translation from Dafny for `{dafnyNode.GetType()}`."),
     };
   }
 

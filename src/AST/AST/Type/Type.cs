@@ -14,6 +14,7 @@ public abstract class Type : Node, ConstructableFromDafny<Dafny.Type, Type> {
     return dafnyNode switch {
       Dafny.IntType intType => Type.Int,
       Dafny.BoolType boolType => Type.Bool,
+      Dafny.MapType mapType => MapType.FromDafny(mapType),
       Dafny.UserDefinedType udType => UserDefinedTypeHelper(udType),
       _ => Type.Other,
       // _ => throw new NotImplementedException($"{dafnyNode.GetType()}"),
