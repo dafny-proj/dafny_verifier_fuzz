@@ -9,6 +9,9 @@ public abstract class LiteralExpr
     if (dafnyNode is Dafny.StaticReceiverExpr sred) {
       return StaticReceiverExpr.FromDafny(sred);
     }
+    if (dafnyNode is Dafny.StringLiteralExpr sled) {
+      return StringLiteralExpr.FromDafny(sled);
+    }
     if (dafnyNode.Value is BigInteger) {
       return IntLiteralExpr.FromDafny(dafnyNode);
     }
@@ -57,6 +60,27 @@ public class BoolLiteralExpr
 
   public override Expression Clone() {
     return new BoolLiteralExpr(Value);
+  }
+}
+
+public class StringLiteralExpr
+: LiteralExpr, ConstructableFromDafny<Dafny.StringLiteralExpr, StringLiteralExpr> {
+  public override Type Type => Type.String;
+  public string Value { get; set; }
+
+  public StringLiteralExpr(string s) {
+    Value = s;
+  }
+
+  private StringLiteralExpr(Dafny.StringLiteralExpr sled)
+  : this((sled.Value as string)!) { }
+
+  public static StringLiteralExpr FromDafny(Dafny.StringLiteralExpr dafnyNode) {
+    return new StringLiteralExpr(dafnyNode);
+  }
+
+  public override Expression Clone() {
+    return new StringLiteralExpr(Value);
   }
 }
 

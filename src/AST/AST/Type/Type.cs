@@ -3,8 +3,11 @@ namespace AST;
 public abstract class Type : Node, ConstructableFromDafny<Dafny.Type, Type> {
   public abstract string Name { get; }
 
+  // Instance types.
   public static readonly BoolType Bool = BoolType.Instance;
   public static readonly IntType Int = IntType.Instance;
+  public static readonly NatType Nat = NatType.Instance;
+  public static readonly StringType String = StringType.Instance;
   public static readonly OtherType Other = OtherType.Instance;
 
   public static Type FromDafny(Dafny.Type dafnyNode) {
@@ -17,12 +20,15 @@ public abstract class Type : Node, ConstructableFromDafny<Dafny.Type, Type> {
     };
   }
 
-  private static Type UserDefinedTypeHelper(Dafny.UserDefinedType udType) {
-    if (udType.Name == "nat") {
-      return NatType.FromDafny(udType);
+  private static Type UserDefinedTypeHelper(Dafny.UserDefinedType udt) {
+    if (udt.Name == "nat") {
+      return Type.Nat;
     }
-    if (udType.IsArrayType) {
-      return ArrayType.FromDafny(udType);
+    if (udt.IsStringType) {
+      return Type.String;
+    }
+    if (udt.IsArrayType) {
+      return ArrayType.FromDafny(udt);
     }
     return Type.Other;
     // throw new NotImplementedException($"{udType.GetType()}");
