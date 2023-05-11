@@ -31,6 +31,7 @@ public class VarDecl : Node {
     }
   }
   public VarDeclInitialiser? Initialiser { get; private set; }
+  public bool HasInitialiser() => Initialiser != null;
 
   public VarDecl(string name,
     Type? explicitType = null,
@@ -113,6 +114,20 @@ public class VarDeclStmt
       inits.AddRange(Decls.Select(d => d.Initialiser!));
     }
     return inits;
+  }
+
+  public void RemoveVarDecl(VarDecl vd) {
+    Decls.Remove(vd);
+  }
+
+  public void RemoveVarDecls(IEnumerable<VarDecl> vds) {
+    foreach (var vd in vds) {
+      RemoveVarDecl(vd);
+    }
+  }
+
+  public bool IsEmpty() {
+    return Decls.Count == 0;
   }
 
   public override IEnumerable<Node> Children => Decls;

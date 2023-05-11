@@ -3,7 +3,7 @@ namespace AST;
 // Subclasses: AutoGhostIdentExpr, ResolverIdentExpr
 public class IdentifierExpr
 : Expression, ConstructableFromDafny<Dafny.IdentifierExpr, IdentifierExpr> {
-  public string Name { get; set; }
+  public string Name { get; }
   protected Type _Type;
   public override Type Type { get => _Type; }
 

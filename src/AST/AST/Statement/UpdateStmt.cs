@@ -77,9 +77,19 @@ public class AssignStmt
     return new AssignStmt(dafnyNodes);
   }
 
-  public override IEnumerable<Node> Children => Assignments.SelectMany(a => a.Children);
+  public override IEnumerable<Node> Children => Assignments;
   public override Statement Clone() {
     return new AssignStmt(Assignments.Select(a => a.Clone()));
+  }
+  public override void ReplaceChild(Node oldChild, Node newChild) {
+    if (oldChild is not Assignment || newChild is not Assignment) {
+      throw new ArgumentException("Children of assign statement should be of assignment type.");
+    }
+    var i = Assignments.FindIndex(c => c == oldChild);
+    if (i == -1) {
+      throw new Exception("Cannot find child in assign statement.");
+    }
+    Assignments[i] = (newChild as Assignment)!;
   }
 }
 

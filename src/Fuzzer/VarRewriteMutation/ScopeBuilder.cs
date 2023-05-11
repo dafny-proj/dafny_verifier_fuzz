@@ -4,24 +4,28 @@ public class Scope {
   // The variables declared in this scope.
   // Not inclusive of variables declared in the parent or any child scope.
   public Dictionary<string, VarDecl> Vars = new();
-  public Scope Parent;
+  public Scope Parent { get; }
   public List<Scope> Children = new();
+  // The node at which the scope was introduced.
+  public Node Node { get; }
 
   // This constructor should only be used for the top-level program scope
   // with no parent. The parent is then set to itself. 
-  private Scope() {
+  private Scope(Program p) {
     Parent = this;
+    Node = p;
   }
-  public static Scope CreateProgramScope() {
-    return new Scope();
+  public static Scope CreateProgramScope(Program p) {
+    return new Scope(p);
   }
 
-  public Scope(Scope parent) {
+  public Scope(Scope parent, Node node) {
     Parent = parent;
+    Node = node;
   }
 
-  public Scope AddChild() {
-    var child = new Scope(parent: this);
+  public Scope AddChild(Node n) {
+    var child = new Scope(parent: this, node: n);
     Children.Add(child);
     return child;
   }
@@ -39,15 +43,22 @@ public class Scope {
 // Other declarations, e.g. parameters, fields, are currently ignored.
 public class ScopeBuilder : ASTVisitor {
   public Scope ProgramScope { get; }
+  public List<Scope> Scopes { get; }
   private Scope CurrentScope;
 
-  public ScopeBuilder() {
-    ProgramScope = Scope.CreateProgramScope();
+  public ScopeBuilder(Program p) {
+    ProgramScope = Scope.CreateProgramScope(p);
+    Scopes = new() { ProgramScope };
     CurrentScope = ProgramScope;
   }
 
-  private void PushScope() {
-    CurrentScope = CurrentScope.AddChild();
+  public void Build() {
+    VisitNode(CurrentScope.Node);
+  }
+
+  private void PushScope(Node n) {
+    CurrentScope = CurrentScope.AddChild(n);
+    Scopes.Add(CurrentScope);
   }
 
   private void PopScope() {
@@ -69,7 +80,7 @@ public class ScopeBuilder : ASTVisitor {
   }
 
   public void VisitBlockStmt(BlockStmt bs) {
-    PushScope();
+    PushScope(bs);
     VisitChildren(bs);
     PopScope();
   }

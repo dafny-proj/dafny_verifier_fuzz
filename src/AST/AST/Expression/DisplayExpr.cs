@@ -5,12 +5,15 @@ public class MapDisplayExpr
   private Type _Type;
   public override Type Type => _Type;
 
+  // TODO: Dict may not preserve order.
   public Dictionary<Expression, Expression> Items = new();
 
-  public MapDisplayExpr(MapType t, Dictionary<Expression, Expression> items) {
+  public MapDisplayExpr(MapType t, Dictionary<Expression, Expression>? items = null) {
     _Type = t;
-    foreach (var (k, v) in items) {
-      Items.Add(k, v);
+    if (items != null) {
+      foreach (var (k, v) in items) {
+        Items.Add(k, v);
+      }
     }
   }
 

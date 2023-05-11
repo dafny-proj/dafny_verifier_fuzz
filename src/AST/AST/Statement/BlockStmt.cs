@@ -24,6 +24,14 @@ public class BlockStmt
     return new BlockStmt(dafnyNode);
   }
 
+  // TODO: Make this a method of the Node class?
+  public void RemoveChild(Statement s) {
+    var removed = Body.Remove(s);
+    if (!removed) {
+      throw new Exception("Failed to remove child in block statement.");
+    }
+  }
+  
   public override void ReplaceChild(Node oldChild, Node newChild) {
     if (oldChild is not Statement || newChild is not Statement) {
       throw new ArgumentException("Children of block statement should be of statement type.");
