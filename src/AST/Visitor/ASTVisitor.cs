@@ -1,23 +1,10 @@
-using System.Diagnostics.Contracts;
-
 namespace AST;
 
 public abstract class ASTVisitor : IASTVisitor {
-
-  public Stack<Node> Hierarchy = new Stack<Node>();
-  public Node GetParent() => Hierarchy.Peek();
-  public void EnterParent(Node n) => Hierarchy.Push(n);
-  public void ExitParent(Node n) {
-    var top = Hierarchy.Pop();
-    Contract.Assert(top == n);
-  }
-
   public void VisitChildren(Node n) {
-    EnterParent(n);
     foreach (var c in n.Children) {
       VisitNode(c);
     }
-    ExitParent(n);
   }
 
   public virtual void VisitNode(Node n) {

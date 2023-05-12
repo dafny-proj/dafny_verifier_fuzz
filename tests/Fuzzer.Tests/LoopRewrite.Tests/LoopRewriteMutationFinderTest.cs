@@ -4,7 +4,6 @@ namespace Fuzzer.Tests;
 public class LoopRewriteMutationFinderTest {
   [TestMethod]
   public void FindsWhileLoop() {
-    var finder = new LoopRewriteMutationFinder();
     var sourceStr = """
     method Foo() {
       while (true) {}
@@ -13,6 +12,8 @@ public class LoopRewriteMutationFinderTest {
     var programDafny = DafnyW.ParseDafnyProgramFromString(sourceStr);
     DafnyW.ResolveDafnyProgram(programDafny);
     var program = Program.FromDafny(programDafny);
+    var parentMap = new ParentMap(program);
+    var finder = new LoopRewriteMutationFinder(parentMap);
     finder.FindMutations(program);
     Assert.AreEqual(1, finder.NumMutationsFound);   
   }

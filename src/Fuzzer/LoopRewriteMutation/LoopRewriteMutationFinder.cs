@@ -2,12 +2,17 @@ namespace Fuzzer;
 
 public class LoopRewriteMutationFinder : ASTVisitor {
   private List<LoopRewriteMutation> _Mutations = new List<LoopRewriteMutation>();
-  private void AddMutation(Node loop) {
-    _Mutations.Add(new LoopRewriteMutation(GetParent(), loop));
+  private void AddMutation(Node loop, Node parent) {
+    _Mutations.Add(new LoopRewriteMutation(parent, loop));
   }
+  private ParentMap PM;
 
   public IReadOnlyList<LoopRewriteMutation> Mutations => _Mutations.AsReadOnly();
   public int NumMutationsFound => Mutations.Count();
+
+  public LoopRewriteMutationFinder(ParentMap pm) {
+    PM = pm;
+  }
 
   public IReadOnlyList<LoopRewriteMutation> FindMutations(Program p) {
     VisitProgram(p);
@@ -27,7 +32,7 @@ public class LoopRewriteMutationFinder : ASTVisitor {
 
   public override void VisitStmt(Statement s) {
     if (IsCandidateForLoopRewrite(s)) {
-      AddMutation(s);
+      AddMutation(s, PM.GetParent(s));
     }
     base.VisitStmt(s);
   }

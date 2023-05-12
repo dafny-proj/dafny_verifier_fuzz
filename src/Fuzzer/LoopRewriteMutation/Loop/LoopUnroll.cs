@@ -2,6 +2,12 @@ namespace Fuzzer;
 
 public class LoopUnroll {
   public class Writer : ILoopWriter {
+    private ParentMap PM;
+
+    public Writer(ParentMap pm) {
+      PM = pm;
+    }
+
     public bool CanWriteLoop(ALoop loop) {
       // TODO: Index-based loops.
       // TODO: Add condition for break to labels + continues.
@@ -33,7 +39,7 @@ public class LoopUnroll {
       Statement remIter = GenRemIterOfLoop(loop);
 
       // Recondition break statements in the out-of-loop iteration.
-      var breakReconditioner = new BreakReconditioner();
+      var breakReconditioner = new BreakReconditioner(PM);
       breakReconditioner.Recondition(firstIter.Thn);
 
       // Generate break variable declaration and label if used during reconditioning.
@@ -72,6 +78,7 @@ public class LoopUnroll {
 }
 
 public class BreakReconditioner : ASTVisitor {
+  private ParentMap PM;
   private int LoopNestingDepth = 1;
   private bool IsALoop(Node n) {
     return n is WhileStmt or ForLoopStmt;
@@ -97,6 +104,10 @@ public class BreakReconditioner : ASTVisitor {
   }
   private BreakStmt GenBreakToLabel() {
     return new BreakStmt(GetOrGenBreakLabel());
+  }
+
+  public BreakReconditioner(ParentMap pm) {
+    PM = pm;
   }
 
   public void Recondition(Statement loopBody) {
@@ -130,7 +141,7 @@ public class BreakReconditioner : ASTVisitor {
     var bsReplacement = new BlockStmt(
       new Statement[] { GenBreakVarSetToTrue(), GenBreakToLabel() });
     // Don't replace immediately as it will interfere with AST traversal.
-    BreakReplaceTasks.Add(new ReplaceChildTask(GetParent(), bs, bsReplacement));
+    BreakReplaceTasks.Add(new ReplaceChildTask(PM.GetParent(bs), bs, bsReplacement));
   }
 
 }
