@@ -66,7 +66,6 @@ public class VarMap {
 public class VarMapRewriteTaskManager : TaskManager {
   private VarMap VM { get; }
   private ParentMap PM { get; }
-  private Dictionary<Node, List<Task>> NodeTasks = new();
 
   public VarMapRewriteTaskManager(VarMap vm, ParentMap pm) {
     VM = vm;
@@ -75,35 +74,23 @@ public class VarMapRewriteTaskManager : TaskManager {
 
   public void AddIdentifierRewriteTask(IdentifierExpr ie) {
     var task = new VarMapIdentifierRewrite(VM, ie, PM.GetParent(ie));
-    AddTaskForNode(ie, task);
+    AddTask(task);
   }
 
   public void AddVarDeclRewriteTask(VarDeclStmt vds) {
     var parent = PM.GetParent(vds);
     Contract.Assert(parent is BlockStmt);
     var task = new VarMapVarDeclRewrite(VM, vds, (parent as BlockStmt)!);
-    AddTaskForNode(vds, task);
+    AddTask(task);
   }
 
   public void AddAssignmentRewriteTask(AssignStmt.Assignment a) {
     var parent = PM.GetParent(a);
     Contract.Assert(parent is AssignStmt);
     var task = new VarMapAssignRewrite(VM, a, (parent as AssignStmt)!);
-    AddTaskForNode(a, task);
+    AddTask(task);
   }
 
-  private void AddTaskForNode(Node n, Task t) {
-    // Add child tasks as dependencies.
-    foreach (var c in n.Children) {
-      if (NodeTasks.ContainsKey(c)) {
-        // TODO: This is not accurate as it only checks direct children.
-        t.AddBlockingDependency(NodeTasks[c]);
-      }
-    }
-    // Record the task belonging to the node.
-    NodeTasks.GetValueOrDefault(n, new()).Add(t);
-    AddTask(t);
-  }
 }
 
 public class VarMapIdentifierRewrite : Task {
