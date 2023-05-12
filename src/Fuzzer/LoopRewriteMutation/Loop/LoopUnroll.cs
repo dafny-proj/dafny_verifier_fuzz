@@ -39,8 +39,8 @@ public class LoopUnroll {
       Statement remIter = GenRemIterOfLoop(loop);
 
       // Recondition break statements in the out-of-loop iteration.
-      var breakReconditioner = new BreakReconditioner(PM);
-      breakReconditioner.Recondition(firstIter.Thn);
+      var breakReconditioner = new BreakReconditioner(firstIter.Thn);
+      breakReconditioner.Recondition();
 
       // Generate break variable declaration and label if used during reconditioning.
       var breakVar = breakReconditioner.BreakVar;
@@ -79,6 +79,7 @@ public class LoopUnroll {
 
 public class BreakReconditioner : ASTVisitor {
   private ParentMap PM;
+  private Statement BodyToRecondition;
   private int LoopNestingDepth = 1;
   private bool IsALoop(Node n) {
     return n is WhileStmt or ForLoopStmt;
@@ -106,12 +107,13 @@ public class BreakReconditioner : ASTVisitor {
     return new BreakStmt(GetOrGenBreakLabel());
   }
 
-  public BreakReconditioner(ParentMap pm) {
-    PM = pm;
+  public BreakReconditioner(Statement bodyToRecondition) {
+    PM = new ParentMap(bodyToRecondition);
+    BodyToRecondition = bodyToRecondition;
   }
 
-  public void Recondition(Statement loopBody) {
-    VisitNode(loopBody);
+  public void Recondition() {
+    VisitNode(BodyToRecondition);
     BreakReplaceTasks.ForEach(t => t.Execute());
   }
 
