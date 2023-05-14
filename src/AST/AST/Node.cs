@@ -11,10 +11,14 @@ public abstract class Node : ConstructableFromDafny<Dafny.Node, Node> {
     get => Enumerable.Empty<Node>(); 
   }
   public virtual void ReplaceChild(Node oldChild, Node newChild) {
-    throw new NotSupportedException();
+    throw new NotSupportedException(
+      $"Unsupported child replacement operation for `{this.GetType()}`."
+    );
   }
   public virtual Node Clone() {
-    throw new NotSupportedException();
+    throw new NotSupportedException(
+      $"Unsupported cloning operation for `{this.GetType()}`."
+    );
   }
 
   public static Node FromDafny(Dafny.Node dafnyNode) {

@@ -29,6 +29,21 @@ public class CollectionSelectExpr
   private Type _Type;
   public override Type Type { get => _Type; }
 
+  private CollectionSelectExpr(Expression collection, Expression? index0,
+    Expression? index1, SelectTypeT selectType, Type type) {
+    Collection = collection;
+    Index0 = index0;
+    Index1 = index1;
+    _Type = type;
+    SelectType = selectType;
+  }
+
+  public static CollectionSelectExpr
+  Element(Expression collection, Expression index, Type type) {
+    return new CollectionSelectExpr(
+      collection, index, null, SelectTypeT.Element, type);
+  }
+
   private CollectionSelectExpr(Dafny.SeqSelectExpr ssed) {
     Collection = Expression.FromDafny(ssed.Seq);
     Index0 = ssed.E0 == null ? null : Expression.FromDafny(ssed.E0);

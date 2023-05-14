@@ -2,7 +2,6 @@ namespace AST;
 
 public class BinaryExpr
 : Expression, ConstructableFromDafny<Dafny.BinaryExpr, BinaryExpr> {
-  public override IEnumerable<Node> Children => new Node[] { E0, E1 };
   public enum Opcode {
     Iff,
     Imp,
@@ -139,7 +138,21 @@ public class BinaryExpr
     return GetEquivOperands(op).Count > 0;
   }
 
+  public override IEnumerable<Node> Children => new Node[] { E0, E1 };
   public override Expression Clone() {
     return new BinaryExpr(Op, E0.Clone(), E1.Clone());
+  }
+  public override void ReplaceChild(Node oldChild, Node newChild) {
+    if (oldChild is not Expression || newChild is not Expression) {
+      throw new ArgumentException($"Children of `{this.GetType()}` should be of expression type.");
+    }
+    var newE = (newChild as Expression)!;
+    if (oldChild == E0) {
+      E0 = newE;
+    } else if (oldChild == E1) {
+      E1 = newE;
+    } else {
+      throw new ArgumentException("Cannot find child in binary expression.");
+    }
   }
 }

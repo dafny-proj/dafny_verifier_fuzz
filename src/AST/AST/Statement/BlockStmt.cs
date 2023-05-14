@@ -38,7 +38,7 @@ public class BlockStmt
     }
     var i = Body.FindIndex(c => c == oldChild);
     if (i == -1) {
-      throw new Exception("Cannot find child in block statement.");
+      throw new ArgumentException("Cannot find child in block statement.");
     }
     if (newChild is BlockStmt b) {
       // To allow replacement of a node within a block with multiple nodes.
