@@ -54,14 +54,12 @@ public class VarMapRewriter : ASTVisitor {
     }
   }
 
-  // `a` -> `m["a"]`
   private void VisitIdentifierExpr(IdentifierExpr ie) {
     if (VM.ContainsVar(ie.Name)) {
       TM.AddIdentifierRewriteTask(ie);
     }
   }
 
-  // `var a := 1` -> `m := m["a" := 1]`
   private void VisitVarDeclStmt(VarDeclStmt vds) {
     VisitChildren(vds);
     foreach (var vd in vds.Decls) {
@@ -73,20 +71,20 @@ public class VarMapRewriter : ASTVisitor {
   }
 
   private void VisitAssignStmt(AssignStmt ass) {
-    ass.Assignments.ForEach(VisitAssignment);
-  }
-
-  // `a := 1` -> `m := m["a" := 1]`
-  private void VisitAssignment(AssignStmt.Assignment a) {
-    // Only visit the Rhs. Lhs identifiers are to be rewritten differently.
-    VisitAssignRhs(a.Rhs);
-
-    if ((a.Lhs is IdentifierExpr ie)) {
-      if (VM.ContainsVar(ie.Name)) {
-        TM.AddAssignmentRewriteTask(a);
+    bool needsRewrite = false;
+    foreach (var a in ass.Assignments) {
+      // Only visit the Rhs. Lhs identifiers are to be rewritten differently.
+      VisitAssignRhs(a.Rhs);
+      if ((a.Lhs is IdentifierExpr ie)) {
+        if (VM.ContainsVar(ie.Name)) {
+          needsRewrite = true;
+        }
+      } else {
+        throw new NotImplementedException();
       }
-    } else {
-      throw new NotImplementedException();
+    }
+    if (needsRewrite) {
+      TM.AddAssignStmtRewriteTask(ass);
     }
   }
 }

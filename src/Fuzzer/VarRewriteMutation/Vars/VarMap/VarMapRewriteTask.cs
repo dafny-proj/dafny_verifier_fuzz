@@ -1,3 +1,5 @@
+using System.Diagnostics.Contracts;
+
 namespace Fuzzer;
 
 public abstract class VarMapRewriteTask : Task {
@@ -37,59 +39,118 @@ public class VarMapVarDeclRewrite : VarMapRewriteTask {
   // mutate the order of declarations in a statement without semantic changes.
   protected override void Action() {
     List<VarDecl> declsToRemove = new();
-    List<AssignStmt.Assignment> assignmentsToGen = new();
+    List<VarDecl> declsToConvert = new();
     foreach (var vd in Target.Decls) {
-      if (!VM.ContainsVar(vd.Name)) { continue; }
-      declsToRemove.Add(vd);
-      if (!vd.HasInitialiser()) { continue; }
-      if (vd.Initialiser is AssignmentInitialiser ai) {
-        if (ai.Value is ExprRhs er) {
-          assignmentsToGen.Add(VM.GenMapVarAssignment(vd.Name, er.Expr));
-        } else {
-          throw new NotImplementedException();
+      if (VM.ContainsVar(vd.Name)) {
+        declsToRemove.Add(vd);
+        if (vd.HasInitialiser()) {
+          declsToConvert.Add(vd);
         }
-      } else {
-        throw new NotImplementedException();
       }
     }
-    Target.RemoveVarDecls(declsToRemove);
+
     List<Statement> replacement = new();
+    Target.RemoveVarDecls(declsToRemove);
     if (!Target.IsEmpty()) {
       replacement.Add(Target);
     }
-    if (assignmentsToGen.Count > 0) {
-      replacement.Add(new AssignStmt(assignmentsToGen));
+
+    if (declsToConvert.Count > 0) {
+      Expression rhs;
+      if (declsToConvert.Count == 1) {
+        rhs = SingleDeclToMapUpdate(declsToConvert[0]);
+      } else {
+        rhs = new BinaryExpr(BinaryExpr.Opcode.Add,
+          VM.GenMapVarIdent(), MultipleDeclsToMap(declsToConvert));
+      }
+      replacement.Add(new AssignStmt(VM.GenMapVarIdent(), new ExprRhs(rhs)));
     }
+
     if (replacement.Count == 0) {
       Parent.RemoveChild(Target);
     } else {
       Parent.ReplaceChild(Target, new BlockStmt(replacement));
     }
   }
+
+  private Expression ExtractInitialiser(VarDeclInitialiser init) {
+    if (init is AssignmentInitialiser ai) {
+      if (ai.Value is ExprRhs er) {
+        return er.Expr;
+      }
+    }
+    throw new NotImplementedException();
+  }
+
+  private CollectionUpdateExpr
+  SingleDeclToMapUpdate(VarDecl vd) {
+    Contract.Assert(vd.Initialiser != null);
+    return VM.GenMapVarUpdate(vd.Name, ExtractInitialiser(vd.Initialiser!));
+  }
+
+  private MapDisplayExpr
+  MultipleDeclsToMap(List<VarDecl> vds) {
+    List<MapDisplayExprElement> elements = new();
+    foreach (var vd in vds) {
+      Contract.Assert(vd.Initialiser != null);
+      var lhs = VM.GenMapVarIndex(vd.Name);
+      elements.Add(new MapDisplayExprElement(lhs, ExtractInitialiser(vd.Initialiser!)));
+    }
+    return new MapDisplayExpr(VM.MapType, elements);
+  }
 }
 
-public class VarMapAssignRewrite : VarMapRewriteTask {
-  private AssignStmt.Assignment Target { get; }
-  private AssignStmt Parent { get; }
+public class VarMapAssignStmtRewrite : VarMapRewriteTask {
+  private AssignStmt Target { get; }
+  private BlockStmt Parent { get; }
 
-  public VarMapAssignRewrite(VarMap vm, AssignStmt.Assignment target, AssignStmt parent)
+  public VarMapAssignStmtRewrite(VarMap vm, AssignStmt target, BlockStmt parent)
   : base(vm) {
     Target = target;
     Parent = parent;
   }
 
+  private bool NeedsRewrite(AssignStmt.Assignment a) {
+    return (a.Lhs is IdentifierExpr ie) && VM.ContainsVar(ie.Name);
+  }
+
   protected override void Action() {
-    if ((Target.Lhs is IdentifierExpr ie) && VM.ContainsVar(ie.Name)) {
-      if (Target.Rhs is ExprRhs er) {
-        var newAssignment = VM.GenMapVarAssignment(ie.Name, er.Expr);
-        Parent.ReplaceChild(Target, newAssignment);
-      } else {
-        // e.g. TypeRhs values need to be assigned on a new statement. Map 
-        // updates cannot contain an inline TypeRhs.
-        throw new NotImplementedException();
-      }
+    // Get all assignments that need to be rewritten.
+    var assignmentsToRewrite = Target.Assignments.Where(NeedsRewrite).ToList();
+    Expression newRhs;
+    if (assignmentsToRewrite.Count == 1) {
+      newRhs = SingleAssignmentToMapUpdate(assignmentsToRewrite[0]);
     } else {
-      throw new NotImplementedException();
+      newRhs = new BinaryExpr(BinaryExpr.Opcode.Add,
+        VM.GenMapVarIdent(),
+        MultipleAssignmentsToMap(assignmentsToRewrite));
     }
+    Target.RemoveAssignments(assignmentsToRewrite);
+    Target.AddAssignment(VM.GenMapVarAssignment(newRhs));
+  }
+
+  private Expression ExtractRhs(AssignmentRhs rhs) {
+    if (rhs is ExprRhs er) {
+      return er.Expr;
+    }
+    // e.g. TypeRhs values need to be assigned on a new statement. Map 
+    // updates cannot contain an inline TypeRhs.
+    throw new NotImplementedException();
+  }
+
+  private CollectionUpdateExpr
+  SingleAssignmentToMapUpdate(AssignStmt.Assignment assignment) {
+    return VM.GenMapVarUpdate(assignment.Lhs, ExtractRhs(assignment.Rhs));
+  }
+
+  private MapDisplayExpr
+  MultipleAssignmentsToMap(List<AssignStmt.Assignment> assignments) {
+    List<MapDisplayExprElement> elements = new();
+    foreach (var a in assignments) {
+      Contract.Assert(a.Lhs is IdentifierExpr);
+      var lhs = VM.GenMapVarIndex(a.Lhs);
+      elements.Add(new MapDisplayExprElement(lhs, ExtractRhs(a.Rhs)));
+    }
+    return new MapDisplayExpr(VM.MapType, elements);
   }
 }

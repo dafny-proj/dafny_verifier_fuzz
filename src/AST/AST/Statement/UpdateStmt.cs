@@ -77,6 +77,20 @@ public class AssignStmt
     return new AssignStmt(dafnyNodes);
   }
 
+  public void AddAssignment(Assignment a) {
+    Assignments.Add(a);
+  }
+
+  public void RemoveAssignment(Assignment a) {
+    Assignments.Remove(a);
+  }
+
+  public void RemoveAssignments(IEnumerable<Assignment> ass) {
+    foreach (var a in ass) {
+      RemoveAssignment(a);
+    }
+  }
+
   public override IEnumerable<Node> Children => Assignments;
   public override Statement Clone() {
     return new AssignStmt(Assignments.Select(a => a.Clone()));

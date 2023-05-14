@@ -23,10 +23,10 @@ public class VarMapRewriteTaskManager : TaskManager {
     AddTask(task);
   }
 
-  public void AddAssignmentRewriteTask(AssignStmt.Assignment a) {
+  public void AddAssignStmtRewriteTask(AssignStmt a) {
     var parent = PM.GetParent(a);
-    Contract.Assert(parent is AssignStmt);
-    var task = new VarMapAssignRewrite(VM, a, (parent as AssignStmt)!);
+    Contract.Assert(parent is BlockStmt);
+    var task = new VarMapAssignStmtRewrite(VM, a, (parent as BlockStmt)!);
     AddTask(task);
   }
 

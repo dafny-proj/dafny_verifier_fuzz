@@ -567,11 +567,11 @@ public class Printer {
     Wr.Write("map");
     Wr.Write("[");
     ResetSep();
-    foreach (var (k, v) in mde.Items) {
+    foreach (var e in mde.Elements) {
       WriteSep();
-      PrintExpression(k);
+      PrintExpression(e.Index);
       Wr.Write(" := ");
-      PrintExpression(v);
+      PrintExpression(e.Value);
     }
     Wr.Write("]");
   }
