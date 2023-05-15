@@ -43,8 +43,8 @@ public class UpdateStmt
 public class AssignStmt
 : UpdateStmt, ConstructableFromDafny<IEnumerable<Dafny.AssignStmt>, AssignStmt> {
   public class Assignment : Node {
-    public Expression Lhs { get; }
-    public AssignmentRhs Rhs { get; }
+    public Expression Lhs { get; private set; }
+    public AssignmentRhs Rhs { get; private set; }
     public Assignment(Expression lhs, AssignmentRhs rhs) {
       Lhs = lhs;
       Rhs = rhs;
@@ -53,6 +53,26 @@ public class AssignStmt
     public override IEnumerable<Node> Children => new Node[] { Lhs, Rhs };
     public override Assignment Clone() {
       return new Assignment(Lhs.Clone(), Rhs.Clone());
+    }
+
+    public override void ReplaceChild(Node oldChild, Node newChild) {
+      if (oldChild == Lhs) {
+        if (newChild is Expression newLhs) {
+          Lhs = newLhs;
+        } else {
+          throw new ArgumentException(
+            $"Assignment.Lhs must be of type `Expression`. Got type `{newChild.GetType()}`");
+        }
+      } else if (oldChild == Rhs) {
+        if (newChild is AssignmentRhs newRhs) {
+          Rhs = newRhs;
+        } else {
+          throw new ArgumentException(
+            $"Assignment.Rhs must be of type `AssignmentRhs`. Got type `{newChild.GetType()}`");
+        }
+      } else {
+        throw new ArgumentException($"Cannot find child in assignment.");
+      }
     }
   }
 

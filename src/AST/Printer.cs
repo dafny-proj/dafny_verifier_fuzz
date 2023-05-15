@@ -405,7 +405,7 @@ public class Printer {
 
   private void PrintMemberSelectExpr(MemberSelectExpr mse) {
     // TODO: parentheses
-    if (!mse.ReceiverIsImplicit) {
+    if (mse.Receiver != null && !mse.ReceiverIsImplicit) {
       PrintExpression(mse.Receiver);
       Wr.Write(".");
     }

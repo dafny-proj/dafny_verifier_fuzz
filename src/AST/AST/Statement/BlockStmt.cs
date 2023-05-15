@@ -31,7 +31,7 @@ public class BlockStmt
       throw new Exception("Failed to remove child in block statement.");
     }
   }
-  
+
   public override void ReplaceChild(Node oldChild, Node newChild) {
     if (oldChild is not Statement || newChild is not Statement) {
       throw new ArgumentException("Children of block statement should be of statement type.");
@@ -47,6 +47,10 @@ public class BlockStmt
     } else {
       Body[i] = (Statement)newChild;
     }
+  }
+
+  public static BlockStmt Empty() {
+    return new BlockStmt();
   }
 
   public override BlockStmt Clone() {

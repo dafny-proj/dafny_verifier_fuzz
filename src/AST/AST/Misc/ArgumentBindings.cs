@@ -13,6 +13,8 @@ public class ArgumentBindings
   // given in positional order of parameters hence binding is not required here.
   public List<Expression>? AllArgs { get; set; }
 
+  public ArgumentBindings() { }
+
   public ArgumentBindings(IEnumerable<ArgumentBinding> args) {
     ProvidedArgs.AddRange(args);
   }
@@ -27,6 +29,10 @@ public class ArgumentBindings
 
   public static ArgumentBindings FromDafny(Dafny.ActualBindings dafnyNode) {
     return new ArgumentBindings(dafnyNode);
+  }
+
+  public static ArgumentBindings Empty() {
+    return new ArgumentBindings();
   }
 
   public override ArgumentBindings Clone() {

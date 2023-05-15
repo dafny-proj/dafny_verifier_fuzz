@@ -24,7 +24,7 @@ public abstract class Type : Node, ConstructableFromDafny<Dafny.Type, Type> {
 
 public class UserDefinedType
 : Type, ConstructableFromDafny<Dafny.UserDefinedType, Type> {
-  private Dafny.UserDefinedType DafnyType { get; }
+  private Dafny.UserDefinedType? DafnyType { get; }
   private string _Name { get; }
   public override string Name {
     get {
@@ -38,6 +38,13 @@ public class UserDefinedType
     }
   }
   public List<Type> TypeArgs = new();
+
+  public UserDefinedType(string name, List<Type>? typeArgs = null) {
+    _Name = name;
+    if (typeArgs != null) {
+      TypeArgs.AddRange(typeArgs);
+    }
+  }
 
   private UserDefinedType(Dafny.UserDefinedType udt) {
     _Name = udt.Name;

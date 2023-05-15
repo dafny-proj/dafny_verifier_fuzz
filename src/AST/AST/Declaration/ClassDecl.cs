@@ -6,13 +6,21 @@ public class ClassDecl
   public List<MemberDecl> Members = new List<MemberDecl>();
   public bool IsDefaultClass => Name == null;
 
-  private ClassDecl(Dafny.ClassDecl cdd) {
+  public ClassDecl(string? name = null) {
+    Name = name;
+  }
+
+  private ClassDecl(Dafny.ClassDecl cdd)
+  : this(cdd.IsDefaultClass ? null : cdd.Name) {
     Members.AddRange(cdd.Members.Select(MemberDecl.FromDafny));
-    Name = cdd.IsDefaultClass ? null : cdd.Name;
   }
 
   public static ClassDecl FromDafny(Dafny.ClassDecl dafnyNode) {
     return new ClassDecl(dafnyNode);
+  }
+
+  public void AddMember(MemberDecl md) {
+    Members.Add(md);
   }
 
   public override IEnumerable<Node> Children => Members;

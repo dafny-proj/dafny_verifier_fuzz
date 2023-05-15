@@ -14,4 +14,12 @@ public class ModuleDefinition
   public static ModuleDefinition FromDafny(Dafny.ModuleDefinition dafnyNode) {
     return new ModuleDefinition(dafnyNode);
   }
+
+  public void AppendDecl(TopLevelDecl tld) {
+    TopLevelDecls.Add(tld);
+  }
+
+  public void PrependDecl(TopLevelDecl tld) {
+    TopLevelDecls.Insert(0, tld);
+  }
 }

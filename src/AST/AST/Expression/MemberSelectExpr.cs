@@ -2,14 +2,29 @@ namespace AST;
 
 public class MemberSelectExpr
 : Expression, ConstructableFromDafny<Dafny.MemberSelectExpr, MemberSelectExpr> {
-  public override IEnumerable<Node> Children => new Node[] { Receiver };
+  public override IEnumerable<Node> Children {
+    get {
+      if (Receiver != null) {
+        yield return Receiver;
+      }
+    }
+  }
 
-  public Expression Receiver { get; set; }
+  public Expression? Receiver { get; set; }
   public bool ReceiverIsImplicit { get; }
   public string MemberName { get; set; }
   public MemberDecl Member { get; set; } // TODO: Is this field needed?
   private Type _Type;
   public override Type Type { get => _Type; }
+
+  // TODO: Redesign this class.
+  public MemberSelectExpr(Expression? receiver, MemberDecl member, Type type, string memberName, bool receiverIsImplicit) {
+    Receiver = receiver;
+    Member = member;
+    MemberName = memberName;
+    _Type = type;
+    ReceiverIsImplicit = receiverIsImplicit;
+  }
 
   private MemberSelectExpr(Dafny.MemberSelectExpr mse) {
     Receiver = Expression.FromDafny(mse.Obj);

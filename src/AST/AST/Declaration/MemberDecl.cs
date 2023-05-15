@@ -41,6 +41,12 @@ public class Method
   public List<AttributedExpression> Ens = new List<AttributedExpression>();
   public Specification<Dafny.FrameExpression, FrameExpression> Mod { get; set; }
 
+  public Method() {
+    Body = BlockStmt.Empty();
+    _Decreases = Specification<Dafny.Expression, Expression>.Empty();
+    Mod = Specification<Dafny.FrameExpression, FrameExpression>.Empty();
+  }
+
   protected Method(Dafny.Method methodDafny) {
     Name = methodDafny.Name;
     Body = BlockStmt.FromDafny(methodDafny.Body);
@@ -71,6 +77,15 @@ public class Constructor
 : Method, ConstructableFromDafny<Dafny.Constructor, Constructor> {
   // TODO: Divided block stmt.
   public string Path { get; }
+
+  public Constructor(ClassDecl cd, string? name = null) : base() {
+    Name = name;
+    Path = cd.Name ?? "";
+    if (!this.IsAnonymous()) {
+      Path += "." + Name;
+    }
+  }
+
   private Constructor(Dafny.Constructor cd) : base(cd) {
     Name = cd.HasName ? cd.Name : null;
     Path = cd.EnclosingClass.Name;

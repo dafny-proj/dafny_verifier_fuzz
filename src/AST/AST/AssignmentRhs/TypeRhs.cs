@@ -19,13 +19,18 @@ public abstract class TypeRhs
 public class ConstructorCallRhs
 : TypeRhs, ConstructableFromDafny<Dafny.TypeRhs, ConstructorCallRhs> {
   public CallStmt ConstructorCall { get; }
+
   public Constructor GetConstructor() {
     return (ConstructorCall.Callee.Member as Constructor)!;
   }
 
-  private ConstructorCallRhs(Dafny.TypeRhs trd) {
-    ConstructorCall = CallStmt.FromDafny(trd.InitCall);
+  public ConstructorCallRhs(CallStmt constructorCall) {
+    Contract.Requires(constructorCall.Callee.Member is Constructor);
+    ConstructorCall = constructorCall;
   }
+
+  private ConstructorCallRhs(Dafny.TypeRhs trd)
+  : this(CallStmt.FromDafny(trd.InitCall)) { }
 
   public static new ConstructorCallRhs FromDafny(Dafny.TypeRhs dafnyNode) {
     return new ConstructorCallRhs(dafnyNode);

@@ -43,6 +43,11 @@ public class VarDecl : Node {
     Initialiser = initialiser;
   }
 
+  public VarDecl(string name, Type type, AssignmentRhs init)
+  : this(name: name,
+    explicitType: type,
+    initialiser: new AssignmentInitialiser(init)) { }
+
   public VarDecl(string name, Type type, Expression init)
   : this(name: name,
     explicitType: type,
