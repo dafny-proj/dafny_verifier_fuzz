@@ -34,6 +34,14 @@ public abstract class Expression
         => WildcardExpr.FromDafny(wce),
       Dafny.MapDisplayExpr mde
         => MapDisplayExpr.FromDafny(mde),
+      Dafny.MemberSelectExpr mse
+        => MemberSelectExpr.FromDafny(mse),
+      Dafny.ThisExpr te
+        => ThisExpr.FromDafny(te),
+      Dafny.ExprDotName edn
+        => Expression.FromDafny(edn.ResolvedExpression),
+      Dafny.DatatypeValue dv
+        => DatatypeValue.FromDafny(dv),
       _ => throw new NotImplementedException($"Unhandled translation from Dafny for `{dafnyNode.GetType()}`."),
     };
   }

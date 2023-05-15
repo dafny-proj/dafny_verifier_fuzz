@@ -220,4 +220,25 @@ public class ASTTests {
     CanParseAndPrintFeature(sourceStr);
   }
 
+    [TestMethod]
+  public void CanParseAndPrintInductiveDatatype() {
+    var sourceStr = """
+    datatype Optional<T> = Empty | Some(value: T)
+    {
+      function Get(): T
+        requires this.Some?
+      {
+        value
+      }
+    }
+
+    method M()
+    {
+      var s: Optional<int> := Empty;
+      s := Some(1);
+    }
+    """;
+    CanParseAndPrintFeature(sourceStr);
+  }
+
 }

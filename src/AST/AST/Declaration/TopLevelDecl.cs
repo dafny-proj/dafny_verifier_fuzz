@@ -8,7 +8,13 @@ public class TopLevelDecl
         => ModuleDecl.FromDafny(moduleDecl),
       Dafny.ClassDecl classDecl
         => ClassDecl.FromDafny(classDecl),
-      _ => throw new NotImplementedException(),
+      Dafny.IndDatatypeDecl indDatatypeDecl
+        => InductiveDatatypeDecl.FromDafny(indDatatypeDecl),
+      Dafny.TypeParameter typeParam
+        => TypeParameter.FromDafny(typeParam),
+      _ => throw new NotImplementedException(
+          $"Unhandled translation from Dafny for `{dafnyNode.GetType()}`."
+        ),
     };
   }
 }
@@ -38,18 +44,19 @@ public class LiteralModuleDecl
   }
 }
 
-public class ClassDecl
-: TopLevelDecl, ConstructableFromDafny<Dafny.ClassDecl, ClassDecl> {
-  public override IEnumerable<Node> Children => Members;
-  public List<MemberDecl> Members = new List<MemberDecl>();
-  public readonly bool IsDefaultClass = false;
+public class TypeParameter
+: TopLevelDecl, ConstructableFromDafny<Dafny.TypeParameter, TypeParameter> {
+  // TODO: ParentType, Variance, Characteristics
+  public string Name { get; }
 
-  private ClassDecl(Dafny.ClassDecl classDeclDafny) {
-    Members.AddRange(classDeclDafny.Members.Select(MemberDecl.FromDafny));
-    IsDefaultClass = classDeclDafny.IsDefaultClass;
+  public TypeParameter(string name) {
+    Name = name;
   }
 
-  public static ClassDecl FromDafny(Dafny.ClassDecl dafnyNode) {
-    return new ClassDecl(dafnyNode);
+  private TypeParameter(Dafny.TypeParameter tpd)
+  : this(tpd.Name) { }
+
+  public static TypeParameter FromDafny(Dafny.TypeParameter dafnyNode) {
+    return new TypeParameter(dafnyNode);
   }
 }

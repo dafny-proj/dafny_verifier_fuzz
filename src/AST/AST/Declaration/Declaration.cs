@@ -6,6 +6,8 @@ public class Declaration
     return dafnyNode switch {
       Dafny.TopLevelDecl topLevelDecl
         => TopLevelDecl.FromDafny(topLevelDecl),
+      Dafny.DatatypeCtor datatypeCtor
+        => DatatypeConstructor.FromDafny(datatypeCtor),
       _ => throw new NotImplementedException(),
     };
   }

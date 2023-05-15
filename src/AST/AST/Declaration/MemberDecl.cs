@@ -6,7 +6,13 @@ public class MemberDecl
     return dafnyNode switch {
       Dafny.Method method => Method.FromDafny(method),
       Dafny.Function func => Function.FromDafny(func),
-      _ => throw new NotImplementedException(),
+      Dafny.DatatypeDestructor datatypeDestructor
+        => DatatypeDestructor.FromDafny(datatypeDestructor),
+      Dafny.DatatypeDiscriminator datatypeDiscriminator
+        => DatatypeDiscriminator.FromDafny(datatypeDiscriminator),
+      _ => throw new NotImplementedException(
+          $"Unhandled translation from Dafny for `{dafnyNode.GetType()}`."
+        ),
     };
 
   }

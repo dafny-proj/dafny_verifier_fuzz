@@ -1,7 +1,8 @@
 namespace AST;
 
+// TODO: Translate from resolved expression instead.
 public class ApplySuffix
-: Expression, ConstructableFromDafny<Dafny.ApplySuffix, ApplySuffix> {
+: Expression, ConstructableFromDafny<Dafny.ApplySuffix, Expression> {
   public override IEnumerable<Node> Children => new Node[] { Lhs, ArgumentBindings };
   public Expression Lhs { get; set; }
   public ArgumentBindings ArgumentBindings { get; set; }
@@ -18,7 +19,10 @@ public class ApplySuffix
   : this(Expression.FromDafny(asd.Lhs),
          ArgumentBindings.FromDafny(asd.Bindings)) { }
 
-  public static ApplySuffix FromDafny(Dafny.ApplySuffix dafnyNode) {
+  public static Expression FromDafny(Dafny.ApplySuffix dafnyNode) {
+    if (dafnyNode.ResolvedExpression != null) {
+      return Expression.FromDafny(dafnyNode.ResolvedExpression);
+    }
     return new ApplySuffix(dafnyNode);
   }
 
