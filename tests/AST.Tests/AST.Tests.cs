@@ -220,7 +220,7 @@ public class ASTTests {
     CanParseAndPrintFeature(sourceStr);
   }
 
-    [TestMethod]
+  [TestMethod]
   public void CanParseAndPrintInductiveDatatype() {
     var sourceStr = """
     datatype Optional<T> = Empty | Some(value: T)
@@ -236,6 +236,36 @@ public class ASTTests {
     {
       var s: Optional<int> := Empty;
       s := Some(1);
+    }
+    """;
+    CanParseAndPrintFeature(sourceStr);
+  }
+
+  [TestMethod]
+  public void CanParseAndPrintClass() {
+    var sourceStr = """
+    class C {
+      var s: string;
+      var b: bool;
+
+      constructor()
+      {
+        s := "";
+        b := false;
+      }
+
+      constructor Named(s: string)
+      {
+        this.s := s;
+        b := true;
+      }
+    }
+
+    method M()
+    {
+      var c0: C := new C();
+      var c1: C := new C.Named("c1");
+      print c0.s;
     }
     """;
     CanParseAndPrintFeature(sourceStr);

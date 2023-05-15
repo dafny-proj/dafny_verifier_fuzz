@@ -9,7 +9,30 @@ public abstract class TypeRhs
     if (NewArrayRHS.IsNewArrayRHS(dafnyNode)) {
       return NewArrayRHS.FromDafny(dafnyNode);
     }
+    if (ConstructorCallRhs.IsConstructorCallRHS(dafnyNode)) {
+      return ConstructorCallRhs.FromDafny(dafnyNode);
+    }
     throw new NotImplementedException();
+  }
+}
+
+public class ConstructorCallRhs
+: TypeRhs, ConstructableFromDafny<Dafny.TypeRhs, ConstructorCallRhs> {
+  public CallStmt ConstructorCall { get; }
+  public Constructor GetConstructor() {
+    return (ConstructorCall.Callee.Member as Constructor)!;
+  }
+
+  private ConstructorCallRhs(Dafny.TypeRhs trd) {
+    ConstructorCall = CallStmt.FromDafny(trd.InitCall);
+  }
+
+  public static new ConstructorCallRhs FromDafny(Dafny.TypeRhs dafnyNode) {
+    return new ConstructorCallRhs(dafnyNode);
+  }
+
+  public static bool IsConstructorCallRHS(Dafny.TypeRhs trd) {
+    return trd.InitCall != null;
   }
 }
 

@@ -1,15 +1,19 @@
+using System.Diagnostics.Contracts;
+
 namespace AST;
 
 public class MemberDecl
 : Declaration, ConstructableFromDafny<Dafny.MemberDecl, MemberDecl> {
   public static MemberDecl FromDafny(Dafny.MemberDecl dafnyNode) {
     return dafnyNode switch {
+      Dafny.Constructor constructor => Constructor.FromDafny(constructor),
       Dafny.Method method => Method.FromDafny(method),
       Dafny.Function func => Function.FromDafny(func),
       Dafny.DatatypeDestructor datatypeDestructor
         => DatatypeDestructor.FromDafny(datatypeDestructor),
       Dafny.DatatypeDiscriminator datatypeDiscriminator
         => DatatypeDiscriminator.FromDafny(datatypeDiscriminator),
+      Dafny.Field field => Field.FromDafny(field),
       _ => throw new NotImplementedException(
           $"Unhandled translation from Dafny for `{dafnyNode.GetType()}`."
         ),
@@ -20,18 +24,9 @@ public class MemberDecl
 
 public class Method
 : MemberDecl, ConstructableFromDafny<Dafny.Method, Method> {
-  // TODO: do we include auto generated nodes in children?
-  public override IEnumerable<Node> Children => new Node[] { }
-      .Concat(Ins)
-      .Concat(Outs)
-      .Concat(Req)
-      .Concat(Ens)
-      .Append(AllDecreases)
-      .Append(Mod)
-      .Append(Body);
-
   // TODO: TypeArgs
-  public string Name { get; set; }
+  public string? Name { get; set; }
+  public bool IsAnonymous() => Name == null;
   public BlockStmt Body { get; set; }
   private Specification<Dafny.Expression, Expression> _Decreases { get; set; }
   public Specification<Dafny.Expression, Expression> AllDecreases {
@@ -46,8 +41,7 @@ public class Method
   public List<AttributedExpression> Ens = new List<AttributedExpression>();
   public Specification<Dafny.FrameExpression, FrameExpression> Mod { get; set; }
 
-
-  private Method(Dafny.Method methodDafny) {
+  protected Method(Dafny.Method methodDafny) {
     Name = methodDafny.Name;
     Body = BlockStmt.FromDafny(methodDafny.Body);
     _Decreases = Specification<Dafny.Expression, Expression>.FromDafny(methodDafny.Decreases);
@@ -57,8 +51,36 @@ public class Method
     Ens.AddRange(methodDafny.Ens.Select(AttributedExpression.FromDafny));
     Mod = Specification<Dafny.FrameExpression, FrameExpression>.FromDafny(methodDafny.Mod);
   }
+
   public static Method FromDafny(Dafny.Method dafnyNode) {
     return new Method(dafnyNode);
+  }
+
+  // TODO: do we include auto generated nodes in children?
+  public override IEnumerable<Node> Children => new Node[] { }
+      .Concat(Ins)
+      .Concat(Outs)
+      .Concat(Req)
+      .Concat(Ens)
+      .Append(AllDecreases)
+      .Append(Mod)
+      .Append(Body);
+}
+
+public class Constructor
+: Method, ConstructableFromDafny<Dafny.Constructor, Constructor> {
+  // TODO: Divided block stmt.
+  public string Path { get; }
+  private Constructor(Dafny.Constructor cd) : base(cd) {
+    Name = cd.HasName ? cd.Name : null;
+    Path = cd.EnclosingClass.Name;
+    if (!this.IsAnonymous()) {
+      Path += "." + Name;
+    }
+  }
+
+  public static Constructor FromDafny(Dafny.Constructor dafnyNode) {
+    return new Constructor(dafnyNode);
   }
 }
 
@@ -112,5 +134,21 @@ public class Function
 
   public static Function FromDafny(Dafny.Function dafnyNode) {
     return new Function(dafnyNode);
+  }
+}
+
+public class Field : MemberDecl, ConstructableFromDafny<Dafny.Field, Field> {
+  public string Name { get; }
+  public Type Type { get; }
+
+  public Field(string name, Type type) {
+    Name = name;
+    Type = type;
+  }
+
+  private Field(Dafny.Field fd) : this(fd.Name, Type.FromDafny(fd.Type)) { }
+
+  public static Field FromDafny(Dafny.Field dafnyNode) {
+    return new Field(dafnyNode);
   }
 }
