@@ -1,7 +1,7 @@
 namespace AST_new;
 
 public partial class ClassDecl : TopLevelDecl {
-  public string Name { get; }
+  public override string Name { get; protected set; }
   public readonly List<MemberDecl> Members = new();
 
   public ClassDecl(string name, IEnumerable<MemberDecl>? members = null) {
@@ -21,7 +21,5 @@ public partial class DefaultClassDecl : ClassDecl {
   public DefaultClassDecl(IEnumerable<MemberDecl>? members = null)
   : base("_default_class", members) { }
 
-  public static DefaultClassDecl Skeleton() {
-    return new DefaultClassDecl();
-  }
+  public static DefaultClassDecl Skeleton() => new DefaultClassDecl();
 }

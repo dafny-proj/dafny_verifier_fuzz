@@ -21,6 +21,9 @@ public abstract partial class TopLevelDecl : Declaration { }
 public partial class ModuleDecl : TopLevelDecl { }
 public partial class ClassDecl : TopLevelDecl { }
 public partial class DefaultClassDecl : ClassDecl { }
+public partial class ArrayClassDecl : ClassDecl { }
+// public partial class TypeSynonymDecl: TopLevelDecl {}
+// public partial class SubsetTypeDecl: TypeSynonymDecl {}
 public abstract partial class MemberDecl : Declaration { }
 public partial class MethodDecl : MemberDecl { }
 
@@ -42,21 +45,21 @@ public abstract partial class LiteralExpr : Expression { }
 public abstract partial class Type : Node { }
 public abstract partial class BasicType : Type { }
 public partial class BoolType : BasicType { }
-// public partial class CharType : BasicType { }
+public partial class CharType : BasicType { }
 public partial class IntType : BasicType { }
-// public partial class RealType : BasicType { }
+public partial class RealType : BasicType { }
 // public partial class OrdinalType : BasicType { }
 // public partial class BitVectorType : BasicType { }
-public abstract partial class BuiltInType : Type { }
-// public partial class NatType : BuiltInType { }
+public abstract partial class BuiltInType : UserDefinedType { }
+public partial class NatType : BuiltInType { }
 public partial class StringType : BuiltInType { }
-// public partial class ArrayType : BuiltInType { }
-// public abstract partial class CollectionType : BuiltInType { }
-// public partial class MapType : CollectionType { }
-// public partial class SeqType : CollectionType { }
-// public partial class SetType : CollectionType { }
-// public partial class MultiSetType : CollectionType { }
-// public partial class UserDefinedType : Type { }
+public partial class ArrayType : BuiltInType { }
+public abstract partial class CollectionType : Type { }
+public partial class MapType : CollectionType { }
+public partial class SeqType : CollectionType { }
+public partial class SetType : CollectionType { }
+public partial class MultiSetType : CollectionType { }
+public partial class UserDefinedType : Type { }
 
 public partial class Formal : Node { }
 public partial class Specification : Node { }

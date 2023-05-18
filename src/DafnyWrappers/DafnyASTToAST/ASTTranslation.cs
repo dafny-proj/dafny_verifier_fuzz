@@ -9,6 +9,7 @@ public class UnsupportedTranslationException : Exception {
   : this($"Unsupported AST translation from `{trigger.GetType()}`.") { }
 }
 
+// Requires Dafny program to be resolved.
 public partial class DafnyASTTranslator {
   private Dictionary<Dafny.Declaration, Declaration> TranslatedDecls = new();
   private void AddTranslatedDecl(Dafny.Declaration dd, Declaration d) {
@@ -34,6 +35,15 @@ public partial class DafnyASTTranslator {
   private Declaration CreateSkeleton(Dafny.Declaration dd) {
     if (dd is Dafny.ModuleDecl)
       return ModuleDecl.Skeleton();
+    if (dd is Dafny.ClassDecl) {
+      if (dd is Dafny.DefaultClassDecl) {
+        return DefaultClassDecl.Skeleton();
+      } else if (dd is Dafny.ArrayClassDecl ad) {
+        // TODO: Add to a built-ins list?
+        return ArrayClassDecl.Skeleton(ad.Dims);
+      }
+      return ClassDecl.Skeleton(dd.Name);
+    }
     if (dd is Dafny.DefaultClassDecl)
       return DefaultClassDecl.Skeleton();
     if (dd is Dafny.ClassDecl)
@@ -51,7 +61,7 @@ public partial class DafnyASTTranslator {
     return new DafnyASTTranslator().TranslateProgram(p);
   }
 
-  public Program TranslateProgram(Dafny.Program p) {
+  private Program TranslateProgram(Dafny.Program p) {
     return new Program(TranslateModule(p.DefaultModule));
   }
 

@@ -4,7 +4,7 @@ using Dafny = Microsoft.Dafny;
 namespace AST_new.Translation;
 
 public partial class DafnyASTTranslator {
-  public Expression TranslateExpression(Dafny.Node n) {
+  private Expression TranslateExpression(Dafny.Node n) {
     // For now, ignore differences between attributed/frame expressions 
     // and expressions.
     return n switch {
@@ -15,14 +15,14 @@ public partial class DafnyASTTranslator {
     };
   }
 
-  public Expression TranslateExpression(Dafny.Expression e) {
+  private Expression TranslateExpression(Dafny.Expression e) {
     return e switch {
       Dafny.LiteralExpr le => TranslateLiteralExpr(le),
       _ => throw new UnsupportedTranslationException(e),
     };
   }
 
-  public LiteralExpr TranslateLiteralExpr(Dafny.LiteralExpr le) {
+  private LiteralExpr TranslateLiteralExpr(Dafny.LiteralExpr le) {
     if (le.Value is bool b) {
       return new BoolLiteralExpr(b);
     } else if (le.Value is BigInteger i) {

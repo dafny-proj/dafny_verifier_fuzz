@@ -51,7 +51,7 @@ public partial class ASTPrinter {
     if (t.HasTypeArgs()) {
       Write("<");
       ResetSeparator();
-      foreach (var a in t.TypeArgs) {
+      foreach (var a in t.GetTypeArgs()) {
         WriteSeparator();
         PrintType(a);
       }
