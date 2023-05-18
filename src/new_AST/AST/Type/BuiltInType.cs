@@ -5,16 +5,25 @@ public abstract partial class BuiltInType : UserDefinedType {
   IEnumerable<Type>? typeArgs = null) : base(typeDecl, typeArgs) { }
 }
 
-// TODO: Create subset type.
 public partial class NatType : BuiltInType {
-  public static NatType Instance => new NatType();
-  private NatType() : base(typeDecl: new SubsetTypeDecl("nat")) { }
+  public readonly static NatType Instance = new NatType();
+
+  private static SubsetTypeDecl NatDecl = new SubsetTypeDecl(
+    name: "nat",
+    baseIdent: new BoundVar("x", Type.Int),
+    constraint: new BoolLiteralExpr(true));
+  // FIXME: Correct constraint should be x >= 0.
+
+  private NatType() : base(typeDecl: NatDecl) { }
 }
 
-// TODO: Create type synonym seq<char>.
 public partial class StringType : BuiltInType {
-  public static StringType Instance => new StringType();
-  private StringType() : base(typeDecl: new TypeSynonymDecl("string")) { }
+  public readonly static StringType Instance = new StringType();
+
+  private static TypeSynonymDecl _stringDecl
+    = new TypeSynonymDecl(name: "string", baseType: new SeqType(Type.Char));
+
+  private StringType() : base(typeDecl: _stringDecl) { }
 }
 
 public partial class ArrayType : BuiltInType {

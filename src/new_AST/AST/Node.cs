@@ -22,8 +22,9 @@ public partial class ModuleDecl : TopLevelDecl { }
 public partial class ClassDecl : TopLevelDecl { }
 public partial class DefaultClassDecl : ClassDecl { }
 public partial class ArrayClassDecl : ClassDecl { }
-// public partial class TypeSynonymDecl: TopLevelDecl {}
-// public partial class SubsetTypeDecl: TypeSynonymDecl {}
+public partial class TypeParameter : TopLevelDecl { }
+public partial class TypeSynonymDecl : TopLevelDecl { }
+public partial class SubsetTypeDecl : TopLevelDecl { }
 public abstract partial class MemberDecl : Declaration { }
 public partial class MethodDecl : MemberDecl { }
 
@@ -61,5 +62,6 @@ public partial class SetType : CollectionType { }
 public partial class MultiSetType : CollectionType { }
 public partial class UserDefinedType : Type { }
 
+public partial class BoundVar : Node { }
 public partial class Formal : Node { }
 public partial class Specification : Node { }

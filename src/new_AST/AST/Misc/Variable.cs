@@ -1,5 +1,15 @@
 namespace AST_new;
 
+public partial class BoundVar : Node {
+  public string Name { get; }
+  public Type Type { get; }
+
+  public BoundVar(string name, Type type) {
+    Name = name;
+    Type = type;
+  }
+}
+
 public partial class Formal : Node {
   public string Name { get; }
   public Type Type { get; }

@@ -28,33 +28,9 @@ public partial class DafnyASTTranslator {
   }
   private Declaration GetTranslatedDeclOrCreateSkeleton(Dafny.Declaration dd) {
     if (!TranslatedDecls.ContainsKey(dd)) {
-      AddTranslatedDecl(dd, CreateSkeleton(dd));
+      AddTranslatedDecl(dd, CreateDeclSkeleton(dd));
     }
     return TranslatedDecls[dd];
-  }
-  private Declaration CreateSkeleton(Dafny.Declaration dd) {
-    if (dd is Dafny.ModuleDecl)
-      return ModuleDecl.Skeleton();
-    if (dd is Dafny.ClassDecl) {
-      if (dd is Dafny.DefaultClassDecl) {
-        return DefaultClassDecl.Skeleton();
-      } else if (dd is Dafny.ArrayClassDecl ad) {
-        // TODO: Add to a built-ins list?
-        return ArrayClassDecl.Skeleton(ad.Dims);
-      }
-      return ClassDecl.Skeleton(dd.Name);
-    }
-    if (dd is Dafny.DefaultClassDecl)
-      return DefaultClassDecl.Skeleton();
-    if (dd is Dafny.ClassDecl)
-      return ClassDecl.Skeleton(dd.Name);
-    if (dd is Dafny.MemberDecl md) {
-      var enclosingDecl
-        = (TopLevelDecl)GetTranslatedDeclOrCreateSkeleton(md.EnclosingClass);
-      if (dd is Dafny.Method)
-        return MethodDecl.Skeleton(enclosingDecl, dd.Name);
-    }
-    throw new NotImplementedException();
   }
 
   public static Program TranslateDafnyProgram(Dafny.Program p) {
