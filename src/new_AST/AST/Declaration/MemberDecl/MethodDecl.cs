@@ -1,7 +1,10 @@
 namespace AST_new;
 
+public partial class MethodDecl : MemberDecl { }
+public partial class ConstructorDecl : MethodDecl { }
+
 public partial class MethodDecl : MemberDecl {
-  public string Name { get; }
+  public override string Name { get; protected set; }
   public BlockStmt? Body { get; set; }
   public readonly List<Formal> Ins = new();
   public readonly List<Formal> Outs = new();
@@ -38,4 +41,17 @@ public partial class MethodDecl : MemberDecl {
 
   public static MethodDecl Skeleton(TopLevelDecl enclosingDecl, string name)
     => new MethodDecl(enclosingDecl, name);
+}
+
+public partial class ConstructorDecl : MethodDecl {
+  public bool IsAnonymous() => Name == "_ctor";
+
+  public ConstructorDecl(TopLevelDecl enclosingDecl, string name,
+  BlockStmt? body = null, IEnumerable<Formal>? ins = null,
+  IEnumerable<Formal>? outs = null, Specification? pre = null,
+  Specification? post = null, Specification? mod = null, Specification? dec = null)
+  : base(enclosingDecl, name, body, ins, outs, pre, post, mod, dec) { }
+
+  new public static ConstructorDecl Skeleton(TopLevelDecl enclosingDecl, string name)
+    => new ConstructorDecl(enclosingDecl, name);
 }

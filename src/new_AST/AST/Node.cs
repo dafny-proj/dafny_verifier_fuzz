@@ -20,13 +20,14 @@ public abstract partial class Declaration : Node { }
 public abstract partial class TopLevelDecl : Declaration { }
 public partial class ModuleDecl : TopLevelDecl { }
 public partial class ClassDecl : TopLevelDecl { }
-public partial class DefaultClassDecl : ClassDecl { }
-public partial class ArrayClassDecl : ClassDecl { }
 public partial class TypeParameter : TopLevelDecl { }
 public partial class TypeSynonymDecl : TopLevelDecl { }
 public partial class SubsetTypeDecl : TopLevelDecl { }
+// public partial class DatatypeDecl: TopLevelDecl { }
 public abstract partial class MemberDecl : Declaration { }
 public partial class MethodDecl : MemberDecl { }
+// public partial class FunctionDecl : MemberDecl { }
+// public partial class FieldDecl : MemberDecl { }
 
 public abstract partial class Statement : Node { }
 public partial class BlockStmt : Statement { }
@@ -50,6 +51,8 @@ public abstract partial class CollectionDisplayExpr<T> : Expression { }
 public abstract partial class AssignmentRhs : Node { }
 public partial class ExprRhs : AssignmentRhs { }
 public partial class MethodCallRhs : AssignmentRhs { }
+public partial class NewArrayRhs : AssignmentRhs { }
+public partial class NewObjectRhs : AssignmentRhs { }
 
 public abstract partial class Type : Node { }
 public abstract partial class BasicType : Type { }

@@ -28,6 +28,9 @@ public partial class DafnyASTTranslator {
       var enclosingDecl
         = (TopLevelDecl)GetTranslatedDeclOrCreateSkeleton(md.EnclosingClass);
       if (dd is Dafny.Method) {
+        if (dd is Dafny.Constructor) {
+          return ConstructorDecl.Skeleton(enclosingDecl, dd.Name);
+        }
         return MethodDecl.Skeleton(enclosingDecl, dd.Name);
       }
     }
@@ -95,6 +98,10 @@ public partial class DafnyASTTranslator {
     tm.Decreases
       = TranslateSpecification(Specification.Type.Precondition, m.Decreases);
     return tm;
+  }
+
+  private ConstructorDecl TranslateConstructor(Dafny.Constructor c) {
+    return (ConstructorDecl)TranslateMethod(c);
   }
 
 }
