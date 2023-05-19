@@ -84,8 +84,8 @@ public partial class DafnyASTTranslator {
     return new MapDisplayExpr(mde.Elements.Select(TranslateExpressionPair));
   }
 
-  private KeyValuePair TranslateExpressionPair(Dafny.ExpressionPair ep) {
-    return new KeyValuePair(
+  private ExpressionPair TranslateExpressionPair(Dafny.ExpressionPair ep) {
+    return new ExpressionPair(
       TranslateExpression(ep.A), TranslateExpression(ep.B));
   }
 

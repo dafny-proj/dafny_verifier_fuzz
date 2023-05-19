@@ -1,5 +1,11 @@
 namespace AST_new;
 
+public abstract partial class CollectionType : Type { }
+public partial class MapType : CollectionType { }
+public partial class SeqType : CollectionType { }
+public partial class SetType : CollectionType { }
+public partial class MultiSetType : CollectionType { }
+
 public partial class MapType : CollectionType {
   public override string BaseName => "map";
   public Type KeyType { get; }

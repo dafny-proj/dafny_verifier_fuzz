@@ -1,11 +1,25 @@
 namespace AST_new;
 
-public partial class KeyValuePair : Node {
-  public Expression E0 { get; }
-  public Expression E1 { get; }
+public partial class KeyValuePair<K, V> : Node { }
+public partial class ExpressionPair : KeyValuePair<Expression, Expression> { }
+public partial class AssignmentPair : KeyValuePair<Expression, AssignmentRhs> { }
 
-  public KeyValuePair(Expression key, Expression value) {
-    E0 = key;
-    E1 = value;
+public partial class KeyValuePair<K, V> : Node {
+  public K Key { get; }
+  public V Value { get; }
+
+  public KeyValuePair(K key, V value) {
+    Key = key;
+    Value = value;
   }
+}
+
+public partial class ExpressionPair : KeyValuePair<Expression, Expression> {
+  public ExpressionPair(Expression key, Expression value)
+  : base(key, value) { }
+}
+
+public partial class AssignmentPair : KeyValuePair<Expression, AssignmentRhs> {
+  public AssignmentPair(Expression key, AssignmentRhs value)
+  : base(key, value) { }
 }

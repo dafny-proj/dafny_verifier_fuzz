@@ -1,6 +1,12 @@
 namespace AST_new;
 
-public abstract partial class Variable {
+public abstract partial class Variable : Node { }
+public partial class LocalVar : Variable { }
+public partial class BoundVar : Variable { }
+public partial class Formal : Variable { }
+
+
+public abstract partial class Variable : Node {
   public virtual string Name { get; protected set; }
   public virtual Type Type { get; protected set; }
 
@@ -8,6 +14,10 @@ public abstract partial class Variable {
     Name = name;
     Type = type;
   }
+}
+
+public partial class LocalVar : Variable {
+  public LocalVar(string name, Type type) : base(name, type) { }
 }
 
 public partial class BoundVar : Variable {

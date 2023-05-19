@@ -5,6 +5,7 @@ namespace AST_new.Translation;
 public partial class DafnyASTTranslator {
   private Variable CreateVariable(Dafny.IVariable dv) {
     return dv switch {
+      Dafny.LocalVariable lv => new LocalVar(lv.Name, TranslateType(lv.Type)),
       Dafny.BoundVar bv => new BoundVar(bv.Name, TranslateType(bv.Type)),
       Dafny.Formal f => new Formal(
         f.Name, TranslateType(f.Type),
@@ -15,6 +16,10 @@ public partial class DafnyASTTranslator {
 
   private Variable TranslateVariable(Dafny.IVariable v) {
     return GetOrCreateTranslatedVar(v);
+  }
+
+  private LocalVar TranslateLocalVar(Dafny.LocalVariable lv) {
+    return (LocalVar)GetOrCreateTranslatedVar(lv);
   }
 
   private BoundVar TranslateBoundVar(Dafny.BoundVar bv) {

@@ -1,5 +1,11 @@
 namespace AST_new;
 
+public abstract partial class BasicType : Type { }
+public partial class BoolType : BasicType { }
+public partial class CharType : BasicType { }
+public partial class IntType : BasicType { }
+public partial class RealType : BasicType { }
+
 public partial class BoolType : BasicType {
   public override string BaseName => "bool";
 

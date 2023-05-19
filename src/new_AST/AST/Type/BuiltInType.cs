@@ -1,5 +1,10 @@
 namespace AST_new;
 
+public abstract partial class BuiltInType : UserDefinedType { }
+public partial class NatType : BuiltInType { }
+public partial class StringType : BuiltInType { }
+public partial class ArrayType : BuiltInType { }
+
 public abstract partial class BuiltInType : UserDefinedType {
   protected BuiltInType(TopLevelDecl typeDecl,
   IEnumerable<Type>? typeArgs = null) : base(typeDecl, typeArgs) { }
