@@ -97,17 +97,4 @@ public partial class DafnyASTTranslator {
     return tm;
   }
 
-  private Specification? TranslateSpecification<T>(Specification.Type st,
-  Dafny.Specification<T> es) where T : Dafny.Node {
-    return TranslateSpecification<T>(st, es.Expressions);
-  }
-
-  private Specification? TranslateSpecification<T>(Specification.Type st,
-  List<T> es) where T : Dafny.Node {
-    if (es.Count > 0) {
-      return new Specification(st, es.Select(TranslateExpression));
-    }
-    return null;
-  }
-
 }

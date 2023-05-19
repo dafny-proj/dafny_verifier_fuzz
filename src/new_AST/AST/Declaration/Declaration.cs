@@ -2,7 +2,7 @@ namespace AST_new;
 
 public abstract partial class Declaration : Node {
   public virtual string Name {
-    get => throw new UnsupportedNodeOperationException(
+    get => throw new UnsupportedASTOperationException(
       this, "declaration naming");
     protected set => Name = value;
   }

@@ -38,10 +38,14 @@ public partial class PrintStmt : Statement { }
 // public partial class ReturnStmt : Statement { }
 
 public abstract partial class Expression : Node { }
-// public partial class IdentifierExpr : Expression { }
-// public partial class BinaryExpr : Expression { }
-// public partial class UnaryExpr : Expression { }
 public abstract partial class LiteralExpr : Expression { }
+public partial class IdentifierExpr : Expression { }
+public partial class ParensExpr : Expression { }
+public partial class BinaryExpr : Expression { }
+public partial class UnaryExpr : Expression { }
+public partial class MemberSelectExpr : Expression { }
+public abstract partial class CollectionSelectExpr : Expression { }
+public abstract partial class CollectionDisplayExpr<T> : Expression { }
 
 public abstract partial class Type : Node { }
 public abstract partial class BasicType : Type { }
@@ -62,6 +66,9 @@ public partial class SetType : CollectionType { }
 public partial class MultiSetType : CollectionType { }
 public partial class UserDefinedType : Type { }
 
-public partial class BoundVar : Node { }
-public partial class Formal : Node { }
+public abstract partial class Variable : Node { }
+public partial class BoundVar : Variable { }
+public partial class Formal : Variable { }
+
 public partial class Specification : Node { }
+public partial class KeyValuePair : Node { }

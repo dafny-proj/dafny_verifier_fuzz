@@ -5,7 +5,7 @@ namespace AST_new.Translation;
 public class UnsupportedTranslationException : Exception {
   public UnsupportedTranslationException(string message) : base(message) { }
 
-  public UnsupportedTranslationException(Dafny.Node trigger)
+  public UnsupportedTranslationException(object trigger)
   : this($"Unsupported AST translation from `{trigger.GetType()}`.") { }
 }
 
@@ -33,6 +33,28 @@ public partial class DafnyASTTranslator {
     return TranslatedDecls[dd];
   }
 
+  private Dictionary<Dafny.IVariable, Variable> TranslatedVariables = new();
+  private void AddTranslatedVar(Dafny.IVariable dv, Variable v) {
+    if (TranslatedVariables.ContainsKey(dv)) {
+      throw new ArgumentException(
+        $"Translated variable already exists for `{dv}`.");
+    }
+    TranslatedVariables[dv] = v;
+  }
+  private Variable GetTranslatedVar(Dafny.IVariable dv) {
+    if (!TranslatedVariables.ContainsKey(dv)) {
+      throw new ArgumentException(
+        $"Could not find translated variable for `{dv}`.");
+    }
+    return TranslatedVariables[dv];
+  }
+  private Variable GetOrCreateTranslatedVar(Dafny.IVariable dv) {
+    if (!TranslatedVariables.ContainsKey(dv)) {
+      AddTranslatedVar(dv, CreateVariable(dv));
+    }
+    return TranslatedVariables[dv];
+  }
+
   public static Program TranslateDafnyProgram(Dafny.Program p) {
     return new DafnyASTTranslator().TranslateProgram(p);
   }
@@ -40,5 +62,4 @@ public partial class DafnyASTTranslator {
   private Program TranslateProgram(Dafny.Program p) {
     return new Program(TranslateModule(p.DefaultModule));
   }
-
 }
