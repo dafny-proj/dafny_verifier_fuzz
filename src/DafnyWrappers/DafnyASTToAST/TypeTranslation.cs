@@ -28,10 +28,11 @@ public partial class DafnyASTTranslator {
     } else if (udt.Name == "nat") {
       return Type.Nat;
     } else if (udt.IsArrayType) {
-      var arrDecl = GetTranslatedDeclOrCreateSkeleton(udt.AsArrayType);
-      return new ArrayType((ArrayClassDecl)arrDecl, TranslateType(udt.TypeArgs[0]));
+      var arrDecl = (ArrayClassDecl)TranslateDeclRef(udt.AsArrayType);
+      return new ArrayType(arrDecl, TranslateType(udt.TypeArgs[0]));
     } else {
-      return new UserDefinedType(TranslateTopLevelDecl(udt.ResolvedClass),
+      return new UserDefinedType(
+        (TopLevelDecl)TranslateDeclRef(udt.ResolvedClass),
         udt.TypeArgs.Select(TranslateType));
     }
   }

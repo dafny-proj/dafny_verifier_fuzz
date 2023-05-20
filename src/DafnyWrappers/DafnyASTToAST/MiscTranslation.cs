@@ -43,4 +43,9 @@ public partial class DafnyASTTranslator {
     return null;
   }
 
+  private ExpressionPair TranslateExpressionPair(Dafny.ExpressionPair ep) {
+    return new ExpressionPair(
+      TranslateExpression(ep.A), TranslateExpression(ep.B));
+  }
+
 }

@@ -11,26 +11,23 @@ public class UnsupportedTranslationException : Exception {
 
 // Requires Dafny program to be resolved.
 public partial class DafnyASTTranslator {
+  private Dictionary<Dafny.Declaration, Declaration> SkeletonDecls = new();
   private Dictionary<Dafny.Declaration, Declaration> TranslatedDecls = new();
-  private void AddTranslatedDecl(Dafny.Declaration dd, Declaration d) {
-    if (TranslatedDecls.ContainsKey(dd)) {
-      throw new ArgumentException(
-        $"Translated declaration already exists for `{dd}`.");
-    }
-    TranslatedDecls[dd] = d;
+
+  private bool HasTranslatedDecl(Dafny.Declaration dd)
+    => TranslatedDecls.ContainsKey(dd);
+  private Declaration GetTranslatedDecl(Dafny.Declaration dd)
+    => TranslatedDecls[dd];
+  private bool HasSkeletonDecl(Dafny.Declaration dd)
+    => SkeletonDecls.ContainsKey(dd);
+  private Declaration GetSkeletonDecl(Dafny.Declaration dd)
+    => TranslatedDecls[dd];
+  private void MarkDeclSkeleton(Dafny.Declaration dd, Declaration d) {
+    SkeletonDecls.Add(dd, d);
   }
-  private Declaration GetTranslatedDecl(Dafny.Declaration dd) {
-    if (!TranslatedDecls.ContainsKey(dd)) {
-      throw new ArgumentException(
-        $"Could not find translated declaration for `{dd}`.");
-    }
-    return TranslatedDecls[dd];
-  }
-  private Declaration GetTranslatedDeclOrCreateSkeleton(Dafny.Declaration dd) {
-    if (!TranslatedDecls.ContainsKey(dd)) {
-      AddTranslatedDecl(dd, CreateDeclSkeleton(dd));
-    }
-    return TranslatedDecls[dd];
+  private void MarkDeclTranslated(Dafny.Declaration dd, Declaration d) {
+    SkeletonDecls.Remove(dd);
+    TranslatedDecls.Add(dd, d);
   }
 
   private Dictionary<Dafny.IVariable, Variable> TranslatedVariables = new();
@@ -60,6 +57,6 @@ public partial class DafnyASTTranslator {
   }
 
   private Program TranslateProgram(Dafny.Program p) {
-    return new Program(TranslateModule(p.DefaultModule));
+    return new Program(TranslateModuleDecl(p.DefaultModule));
   }
 }

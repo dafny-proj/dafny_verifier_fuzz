@@ -23,11 +23,11 @@ public partial class ClassDecl : TopLevelDecl { }
 public partial class TypeParameter : TopLevelDecl { }
 public partial class TypeSynonymDecl : TopLevelDecl { }
 public partial class SubsetTypeDecl : TopLevelDecl { }
-// public partial class DatatypeDecl: TopLevelDecl { }
+public partial class DatatypeDecl : TopLevelDecl { }
 public abstract partial class MemberDecl : Declaration { }
 public partial class MethodDecl : MemberDecl { }
 // public partial class FunctionDecl : MemberDecl { }
-// public partial class FieldDecl : MemberDecl { }
+public partial class FieldDecl : MemberDecl { }
 
 public abstract partial class Statement : Node { }
 public partial class BlockStmt : Statement { }
@@ -47,6 +47,7 @@ public partial class UnaryExpr : Expression { }
 public partial class MemberSelectExpr : Expression { }
 public abstract partial class CollectionSelectExpr : Expression { }
 public abstract partial class CollectionDisplayExpr<T> : Expression { }
+public partial class DatatypeValue : Expression { }
 
 public abstract partial class AssignmentRhs : Node { }
 public partial class ExprRhs : AssignmentRhs { }

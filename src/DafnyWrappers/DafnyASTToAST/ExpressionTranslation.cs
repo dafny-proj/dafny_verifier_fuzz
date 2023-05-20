@@ -25,6 +25,7 @@ public partial class DafnyASTTranslator {
       Dafny.SeqSelectExpr sse => TranslateCollectionSelectExpr(sse),
       Dafny.DisplayExpression de => TranslateDisplayExpr(de),
       Dafny.MapDisplayExpr mde => TranslateMapDisplayExpr(mde),
+      Dafny.DatatypeValue dv => TranslateDatatypeValue(dv),
       Dafny.ConcreteSyntaxExpression cse => cse switch {
         Dafny.ParensExpression pe => TranslateParensExpr(pe),
         _ => TranslateExpression(cse.ResolvedExpression),
@@ -55,7 +56,7 @@ public partial class DafnyASTTranslator {
 
   private MemberSelectExpr TranslateMemberSelectExpr(Dafny.MemberSelectExpr mse) {
     return new MemberSelectExpr(
-      TranslateExpression(mse.Obj), TranslateMemberDecl(mse.Member));
+      TranslateExpression(mse.Obj), (MemberDecl)TranslateDeclRef(mse.Member));
   }
 
   private CollectionSelectExpr TranslateCollectionSelectExpr(Dafny.SeqSelectExpr sse) {
@@ -84,9 +85,10 @@ public partial class DafnyASTTranslator {
     return new MapDisplayExpr(mde.Elements.Select(TranslateExpressionPair));
   }
 
-  private ExpressionPair TranslateExpressionPair(Dafny.ExpressionPair ep) {
-    return new ExpressionPair(
-      TranslateExpression(ep.A), TranslateExpression(ep.B));
+  private DatatypeValue TranslateDatatypeValue(Dafny.DatatypeValue dv) {
+    return new DatatypeValue(
+      (DatatypeConstructorDecl)TranslateDeclRef(dv.Ctor),
+      dv.Arguments.Select(TranslateExpression));
   }
 
   private BinaryExpr TranslateBinaryExpr(Dafny.BinaryExpr be) {
