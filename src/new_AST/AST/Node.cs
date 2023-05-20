@@ -37,6 +37,12 @@ public partial class AssignStmt : UpdateStmt { }
 public partial class CallStmt : UpdateStmt { }
 public partial class PrintStmt : Statement { }
 public partial class ReturnStmt : Statement { }
+public partial class IfStmt : Statement { }
+public abstract partial class LoopStmt : Statement { }
+public partial class WhileLoopStmt : LoopStmt { }
+public partial class ForLoopStmt : LoopStmt { }
+public partial class BreakStmt : Statement { }
+public partial class ContinueStmt : BreakStmt { }
 
 public abstract partial class Expression : Node { }
 public abstract partial class LiteralExpr : Expression { }
