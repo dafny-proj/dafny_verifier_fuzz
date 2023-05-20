@@ -26,7 +26,7 @@ public partial class SubsetTypeDecl : TopLevelDecl { }
 public partial class DatatypeDecl : TopLevelDecl { }
 public abstract partial class MemberDecl : Declaration { }
 public partial class MethodDecl : MemberDecl { }
-// public partial class FunctionDecl : MemberDecl { }
+public partial class FunctionDecl : MemberDecl { }
 public partial class FieldDecl : MemberDecl { }
 
 public abstract partial class Statement : Node { }

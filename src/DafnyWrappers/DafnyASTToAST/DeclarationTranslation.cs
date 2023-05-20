@@ -17,6 +17,7 @@ public partial class DafnyASTTranslator {
       Dafny.ModuleDecl m => CreateModuleDeclSkeleton(m),
       Dafny.ClassDecl c => CreateClassDeclSkeleton(c),
       Dafny.Method m => CreateMethodDeclSkeleton(m),
+      Dafny.Function f => CreateFunctionDeclSkeleton(f),
       Dafny.DatatypeDecl d => CreateDatatypeDeclSkeleton(d),
       _ => TranslateDeclaration(dd),
     };
@@ -45,9 +46,13 @@ public partial class DafnyASTTranslator {
 
   private MemberDecl TranslateMemberDecl(Dafny.MemberDecl md) {
     return md switch {
-      Dafny.Method mtd => TranslateMethod(mtd),
-      Dafny.DatatypeDestructor d => TranslateDatatypeDestructor(d),
-      Dafny.DatatypeDiscriminator d => TranslateDatatypeDiscriminator(d),
+      Dafny.Method m => TranslateMethod(m),
+      Dafny.Function f => TranslateFunction(f),
+      Dafny.Field f => f switch {
+        Dafny.DatatypeDestructor d => TranslateDatatypeDestructor(d),
+        Dafny.DatatypeDiscriminator d => TranslateDatatypeDiscriminator(d),
+        _ => TranslateFieldDecl(f),
+      },
       _ => throw new UnsupportedTranslationException(md),
     };
   }
@@ -158,6 +163,35 @@ public partial class DafnyASTTranslator {
     return m;
   }
 
+  private FunctionDecl CreateFunctionDeclSkeleton(Dafny.Function d) {
+    var enclosingDecl
+        = (TopLevelDecl)TranslateDeclRef(d.EnclosingClass);
+    var s = FunctionDecl.Skeleton(
+      enclosingDecl, d.Name, TranslateType(d.ResultType));
+    MarkDeclSkeleton(d, s);
+    return s;
+  }
+  private FunctionDecl TranslateFunction(Dafny.Function df) {
+    if (HasTranslatedDecl(df)) {
+      return (FunctionDecl)GetTranslatedDecl(df);
+    }
+    var f = HasSkeletonDecl(df) ?
+      (FunctionDecl)GetSkeletonDecl(df) : CreateFunctionDeclSkeleton(df);
+    f.Body = df.Body == null ? null : TranslateExpression(df.Body);
+    f.Ins.AddRange(df.Formals.Select(TranslateFormal));
+    f.Result = df.Result == null ? null : TranslateFormal(df.Result);
+    f.Precondition
+      = TranslateSpecification(Specification.Type.Precondition, df.Req);
+    f.Postcondition
+      = TranslateSpecification(Specification.Type.Precondition, df.Ens);
+    f.Reads
+      = TranslateSpecification(Specification.Type.Precondition, df.Reads);
+    f.Decreases
+      = TranslateSpecification(Specification.Type.Precondition, df.Decreases);
+    MarkDeclTranslated(df, f);
+    return f;
+  }
+
   private DatatypeDecl CreateDatatypeDeclSkeleton(Dafny.DatatypeDecl d) {
     var s = DatatypeDecl.Skeleton(d.Name,
       typeParams: d.TypeArgs.Select(TranslateTypeParameter));
@@ -229,6 +263,16 @@ public partial class DafnyASTTranslator {
     var dd = enclosingDecl.GetDiscriminator(ddd.Name);
     MarkDeclTranslated(ddd, dd);
     return dd;
+  }
+
+  private FieldDecl TranslateFieldDecl(Dafny.Field df) {
+    if (HasTranslatedDecl(df)) {
+      return (FieldDecl)GetTranslatedDecl(df);
+    }
+    var enclosingDecl = (TopLevelDecl)TranslateDeclRef(df.EnclosingClass);
+    var f = new FieldDecl(enclosingDecl, df.Name, TranslateType(df.Type));
+    MarkDeclTranslated(df, f);
+    return f;
   }
 
 }
