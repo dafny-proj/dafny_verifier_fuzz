@@ -42,11 +42,11 @@ public partial class DafnyASTTranslator {
 
   private NewObjectRhs TranslateNewObjectRhs(Dafny.TypeRhs tr) {
     var objectType = TranslateType(tr.EType);
-    if (tr.Arguments != null) {
+    if (tr.InitCall != null) {
       return new NewObjectWithConstructorRhs(objectType,
         constructor: (ConstructorDecl)
           TranslateDeclRef((Dafny.Constructor)tr.InitCall.Method),
-        constructorArguments: tr.Arguments.Select(TranslateExpression));
+        constructorArguments: tr.InitCall.Args.Select(TranslateExpression));
     } else {
       return new NewObjectRhs(objectType);
     }

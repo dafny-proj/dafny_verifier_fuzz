@@ -49,6 +49,7 @@ public partial class NewArrayRhs : AssignmentRhs {
 }
 
 public partial class NewArrayWithElementInitialiserRhs : NewArrayRhs {
+  // An expression that returns a function of type `index: nat -> element: T`.
   public Expression ElementInitialiser { get; }
 
   public NewArrayWithElementInitialiserRhs(Type elementType,

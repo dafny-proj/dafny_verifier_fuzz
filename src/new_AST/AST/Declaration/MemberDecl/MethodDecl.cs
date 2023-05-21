@@ -5,6 +5,7 @@ public partial class ConstructorDecl : MethodDecl { }
 
 public partial class MethodDecl : MemberDecl {
   public override string Name { get; protected set; }
+  public readonly List<TypeParameterDecl> TypeParams = new();
   public BlockStmt? Body { get; set; }
   public readonly List<Formal> Ins = new();
   public readonly List<Formal> Outs = new();
@@ -15,17 +16,23 @@ public partial class MethodDecl : MemberDecl {
 
   public bool HasBody() => Body != null;
   public bool HasOuts() => Outs.Count > 0;
-  public bool HasPrecondition() => Precondition != null;
-  public bool HasPostcondition() => Postcondition != null;
-  public bool HasModifiesSpec() => Modifies != null;
-  public bool HasDecreasesSpec() => Decreases != null;
+  public bool HasPrecondition() => Specification.HasUserDefinedSpec(Precondition);
+  public bool HasPostcondition() => Specification.HasUserDefinedSpec(Postcondition);
+  public bool HasModifiesSpec() => Specification.HasUserDefinedSpec(Modifies);
+  public bool HasDecreasesSpec() => Specification.HasUserDefinedSpec(Decreases);
+  public bool HasSpec() => HasPrecondition() || HasPostcondition()
+                          || HasModifiesSpec() || HasDecreasesSpec();
 
   public MethodDecl(TopLevelDecl enclosingDecl, string name,
-  BlockStmt? body = null, IEnumerable<Formal>? ins = null,
-  IEnumerable<Formal>? outs = null, Specification? pre = null,
-  Specification? post = null, Specification? mod = null, Specification? dec = null)
+  IEnumerable<TypeParameterDecl>? typeParams = null, BlockStmt? body = null,
+  IEnumerable<Formal>? ins = null, IEnumerable<Formal>? outs = null,
+  Specification? pre = null, Specification? post = null,
+  Specification? mod = null, Specification? dec = null)
   : base(enclosingDecl) {
     Name = name;
+    if (typeParams != null) {
+      TypeParams.AddRange(typeParams);
+    }
     Body = body;
     if (ins != null) {
       Ins.AddRange(ins);
@@ -47,10 +54,11 @@ public partial class ConstructorDecl : MethodDecl {
   public bool IsAnonymous() => Name == "_ctor";
 
   public ConstructorDecl(TopLevelDecl enclosingDecl, string name,
-  BlockStmt? body = null, IEnumerable<Formal>? ins = null,
-  IEnumerable<Formal>? outs = null, Specification? pre = null,
-  Specification? post = null, Specification? mod = null, Specification? dec = null)
-  : base(enclosingDecl, name, body, ins, outs, pre, post, mod, dec) { }
+  IEnumerable<TypeParameterDecl>? typeParams = null, BlockStmt? body = null,
+  IEnumerable<Formal>? ins = null, IEnumerable<Formal>? outs = null,
+  Specification? pre = null, Specification? post = null,
+  Specification? mod = null, Specification? dec = null)
+  : base(enclosingDecl, name, typeParams, body, ins, outs, pre, post, mod, dec) { }
 
   new public static ConstructorDecl Skeleton(TopLevelDecl enclosingDecl, string name)
     => new ConstructorDecl(enclosingDecl, name);

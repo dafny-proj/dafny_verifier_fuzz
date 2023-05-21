@@ -11,22 +11,22 @@ public abstract partial class BuiltInType : UserDefinedType {
 }
 
 public partial class NatType : BuiltInType {
-  public readonly static NatType Instance = new NatType();
-
   private static SubsetTypeDecl NatDecl = new SubsetTypeDecl(
     name: "nat",
     baseIdent: new BoundVar("x", Type.Int),
     constraint: new BoolLiteralExpr(true));
   // FIXME: Correct constraint should be x >= 0.
 
+  public readonly static NatType Instance = new NatType();
+
   private NatType() : base(typeDecl: NatDecl) { }
 }
 
 public partial class StringType : BuiltInType {
-  public readonly static StringType Instance = new StringType();
-
   private static TypeSynonymDecl _stringDecl
     = new TypeSynonymDecl(name: "string", baseType: new SeqType(Type.Char));
+
+  public readonly static StringType Instance = new StringType();
 
   private StringType() : base(typeDecl: _stringDecl) { }
 }

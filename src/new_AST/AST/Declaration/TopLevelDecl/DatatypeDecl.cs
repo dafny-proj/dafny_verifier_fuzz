@@ -4,7 +4,7 @@ namespace AST_new;
 
 public partial class DatatypeDecl : TopLevelDecl {
   public override string Name { get; protected set; }
-  public readonly List<TypeParameter> TypeParams = new();
+  public readonly List<TypeParameterDecl> TypeParams = new();
   public readonly List<DatatypeConstructorDecl> Constructors = new();
   // Auto-generated.
   public readonly Dictionary<string, DatatypeDestructorDecl> Destructors = new();
@@ -17,18 +17,21 @@ public partial class DatatypeDecl : TopLevelDecl {
     => Constructors.Select(c => c.Name).ToHashSet();
   public HashSet<string> AllDestructorNames()
     => Destructors.Keys.ToHashSet();
+  public bool HasConstructor(string name)
+    => Constructors.Exists(c => c.Name == name);
   public DatatypeConstructorDecl GetConstructor(string name)
     => Constructors.Find(c => c.Name == name)!;
   public DatatypeDiscriminatorDecl GetDiscriminator(string name)
     => Discriminators[name];
   public DatatypeDestructorDecl GetDestructor(string name)
     => Destructors[name];
+  public bool HasMembers() => Members.Count > 0;
 
   // Member declarations contain a reference to this enclosing declaration, so
   // before the declaration has been constructed, it shouldn't be possible to 
   // construct its members. Hence, member arguments are not included here.
   public DatatypeDecl(string name,
-  IEnumerable<TypeParameter>? typeParams = null) {
+  IEnumerable<TypeParameterDecl>? typeParams = null) {
     Name = name;
     if (typeParams != null) {
       TypeParams.AddRange(typeParams);
@@ -36,7 +39,7 @@ public partial class DatatypeDecl : TopLevelDecl {
   }
 
   public static DatatypeDecl Skeleton(string name,
-  IEnumerable<TypeParameter>? typeParams = null)
+  IEnumerable<TypeParameterDecl>? typeParams = null)
     => new DatatypeDecl(name, typeParams);
 
   public void AddConstructor(DatatypeConstructorDecl constructor) {
@@ -44,11 +47,11 @@ public partial class DatatypeDecl : TopLevelDecl {
       && !AllConstructorNames().Contains(constructor.Name));
     Constructors.Add(constructor);
     // Create discriminator for constructor.
-    Discriminators.Add(
-      constructor.Name, new DatatypeDiscriminatorDecl(constructor));
+    var discriminator = new DatatypeDiscriminatorDecl(constructor);
+    Discriminators.Add(discriminator.Name, discriminator);
     // Create destructors, if not already existed, for constructor formals.
     var seenFormals = AllDestructorNames();
-    foreach (var f in constructor.Formals) {
+    foreach (var f in constructor.Parameters) {
       if (seenFormals.Contains(f.Name)) {
         Contract.Requires(f.Type == Destructors[f.Name].Type);
         continue;

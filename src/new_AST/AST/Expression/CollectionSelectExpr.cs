@@ -12,6 +12,7 @@ public abstract partial class CollectionSelectExpr : Expression {
   }
 }
 
+// Only for sequences, multisets, maps, arrays. 
 public partial class CollectionElementExpr : CollectionSelectExpr {
   public Expression Index { get; }
 
@@ -21,6 +22,7 @@ public partial class CollectionElementExpr : CollectionSelectExpr {
   }
 }
 
+// Only for sequences, arrays.
 public partial class CollectionSliceExpr : CollectionSelectExpr {
   public Expression? Index0 { get; }
   public Expression? Index1 { get; }

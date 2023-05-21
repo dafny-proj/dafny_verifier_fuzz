@@ -4,6 +4,8 @@ public partial class VarDeclStmt : Statement {
   public readonly List<LocalVar> Vars = new();
   public UpdateStmt? Initialiser { get; }
 
+  public bool HasInitialiser() => Initialiser != null;
+
   public VarDeclStmt(IEnumerable<LocalVar> vars,
   UpdateStmt? initialiser = null) {
     Vars.AddRange(vars);

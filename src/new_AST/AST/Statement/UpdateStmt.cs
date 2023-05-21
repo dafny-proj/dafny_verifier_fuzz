@@ -9,6 +9,8 @@ public partial class CallStmt : UpdateStmt { }
 public abstract partial class UpdateStmt : Statement {
   public abstract IReadOnlyList<Expression> Lhss { get; }
   public abstract IReadOnlyList<AssignmentRhs> Rhss { get; }
+
+  public bool HasLhs() => Lhss.Count > 0;
 }
 
 public partial class AssignStmt : UpdateStmt {

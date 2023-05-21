@@ -29,6 +29,7 @@ public partial class DafnyASTTranslator {
         _ => throw new UnsupportedTranslationException(ls)
       },
       Dafny.BreakStmt bs => TranslateBreakStmt(bs),
+      Dafny.AssertStmt ats => TranslateAssertStmt(ats),
       _ => throw new UnsupportedTranslationException(ds),
     };
     SetStatementLabel(ds, s);
@@ -96,6 +97,12 @@ public partial class DafnyASTTranslator {
     } else {
       s = target != null ? new BreakStmt(target) : new BreakStmt(count);
     }
+    SetStatementLabel(ds, s);
+    return s;
+  }
+
+  private AssertStmt TranslateAssertStmt(Dafny.AssertStmt ds) {
+    var s = new AssertStmt(TranslateExpression(ds.Expr));
     SetStatementLabel(ds, s);
     return s;
   }

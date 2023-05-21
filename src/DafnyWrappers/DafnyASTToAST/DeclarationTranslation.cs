@@ -98,11 +98,11 @@ public partial class DafnyASTTranslator {
     return c;
   }
 
-  private TypeParameter TranslateTypeParameter(Dafny.TypeParameter dtp) {
+  private TypeParameterDecl TranslateTypeParameter(Dafny.TypeParameter dtp) {
     if (HasTranslatedDecl(dtp)) {
-      return (TypeParameter)GetTranslatedDecl(dtp);
+      return (TypeParameterDecl)GetTranslatedDecl(dtp);
     }
-    var tp = new TypeParameter(dtp.Name);
+    var tp = new TypeParameterDecl(dtp.Name);
     MarkDeclTranslated(dtp, tp);
     return tp;
   }
@@ -118,7 +118,10 @@ public partial class DafnyASTTranslator {
     return tsd;
   }
 
-  private SubsetTypeDecl TranslateSubsetTypeDecl(Dafny.SubsetTypeDecl dstd) {
+  private TopLevelDecl TranslateSubsetTypeDecl(Dafny.SubsetTypeDecl dstd) {
+    if (dstd is Dafny.NonNullTypeDecl ntd) {
+      return (ClassDecl)TranslateDeclRef(ntd.Class);
+    }
     if (HasTranslatedDecl(dstd)) {
       return (SubsetTypeDecl)GetTranslatedDecl(dstd);
     }
@@ -146,6 +149,7 @@ public partial class DafnyASTTranslator {
     }
     var m = HasSkeletonDecl(dm) ?
       (MethodDecl)GetSkeletonDecl(dm) : CreateMethodDeclSkeleton(dm);
+    m.TypeParams.AddRange(dm.TypeArgs.Select(TranslateTypeParameter));
     m.Body = dm.Body == null ? null : TranslateBlockStmt(dm.Body);
     m.Ins.AddRange(dm.Ins.Select(TranslateFormal));
     if (dm.Outs != null) {
@@ -154,11 +158,11 @@ public partial class DafnyASTTranslator {
     m.Precondition
       = TranslateSpecification(Specification.Type.Precondition, dm.Req);
     m.Postcondition
-      = TranslateSpecification(Specification.Type.Precondition, dm.Ens);
+      = TranslateSpecification(Specification.Type.Postcondition, dm.Ens);
     m.Modifies
-      = TranslateSpecification(Specification.Type.Precondition, dm.Mod);
+      = TranslateSpecification(Specification.Type.ModifiesFrame, dm.Mod);
     m.Decreases
-      = TranslateSpecification(Specification.Type.Precondition, dm.Decreases);
+      = TranslateSpecification(Specification.Type.Decreases, dm.Decreases);
     MarkDeclTranslated(dm, m);
     return m;
   }
@@ -183,11 +187,11 @@ public partial class DafnyASTTranslator {
     f.Precondition
       = TranslateSpecification(Specification.Type.Precondition, df.Req);
     f.Postcondition
-      = TranslateSpecification(Specification.Type.Precondition, df.Ens);
+      = TranslateSpecification(Specification.Type.Postcondition, df.Ens);
     f.Reads
-      = TranslateSpecification(Specification.Type.Precondition, df.Reads);
+      = TranslateSpecification(Specification.Type.ReadFrame, df.Reads);
     f.Decreases
-      = TranslateSpecification(Specification.Type.Precondition, df.Decreases);
+      = TranslateSpecification(Specification.Type.Decreases, df.Decreases);
     MarkDeclTranslated(df, f);
     return f;
   }
@@ -212,7 +216,9 @@ public partial class DafnyASTTranslator {
     var d = HasSkeletonDecl(dd) ?
       (DatatypeDecl)GetSkeletonDecl(dd) : CreateDatatypeDeclSkeleton(dd);
     PopulateDatatypeConstructors(dd, d);
-    foreach (var m in dd.Members) {
+    var userDefinedMembers = dd.Members.Where(
+      m => m is not (Dafny.DatatypeDestructor or Dafny.DatatypeDiscriminator));
+    foreach (var m in userDefinedMembers) {
       d.AddMember(TranslateMemberDecl(m));
     }
     MarkDeclTranslated(dd, d);
@@ -239,7 +245,7 @@ public partial class DafnyASTTranslator {
     // Don't try to create a destructor directly, it should be auto generated
     // when adding the corresponding constructor to the base datatype.
     var enclosingDecl = (DatatypeDecl)TranslateDeclRef(ddd.EnclosingClass);
-    if (!HasTranslatedDecl(ddd.EnclosingClass)) {
+    if (enclosingDecl.Constructors.Count <= 0) {
       PopulateDatatypeConstructors(
         (Dafny.DatatypeDecl)ddd.EnclosingClass, enclosingDecl);
     }
@@ -256,7 +262,7 @@ public partial class DafnyASTTranslator {
     // Don't try to create a discriminator directly, it should be auto generated
     // when adding the corresponding constructor to the base datatype.
     var enclosingDecl = (DatatypeDecl)TranslateDeclRef(ddd.EnclosingClass);
-    if (!HasTranslatedDecl(ddd.EnclosingClass)) {
+    if (enclosingDecl.Constructors.Count <= 0) {
       PopulateDatatypeConstructors(
         (Dafny.DatatypeDecl)ddd.EnclosingClass, enclosingDecl);
     }

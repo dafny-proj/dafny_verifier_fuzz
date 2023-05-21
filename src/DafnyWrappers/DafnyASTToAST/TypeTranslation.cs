@@ -14,10 +14,11 @@ public partial class DafnyASTTranslator {
       Dafny.SeqType sqt
         => new SeqType(TranslateType(sqt.Arg)),
       Dafny.SetType stt
-        => new SeqType(TranslateType(stt.Arg)),
+        => new SetType(TranslateType(stt.Arg)),
       Dafny.MultiSetType mst
-        => new SeqType(TranslateType(mst.Arg)),
+        => new MultiSetType(TranslateType(mst.Arg)),
       Dafny.UserDefinedType udt => TranslateUserDefinedType(udt),
+      Dafny.TypeProxy tp => TranslateTypeProxy(tp),
       _ => throw new UnsupportedTranslationException(t),
     };
   }
@@ -35,6 +36,13 @@ public partial class DafnyASTTranslator {
         (TopLevelDecl)TranslateDeclRef(udt.ResolvedClass),
         udt.TypeArgs.Select(TranslateType));
     }
+  }
+
+  private Type TranslateTypeProxy(Dafny.TypeProxy tp) {
+    if (tp.T != null) {
+      return TranslateType(tp.T);
+    }
+    return new TypeProxy();
   }
 
 }

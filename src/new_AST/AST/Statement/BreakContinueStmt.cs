@@ -7,6 +7,8 @@ public partial class BreakStmt : Statement {
   public int Count { get; }
   public string? TargetLabel { get; }
 
+  public bool HasTargetLabel() => TargetLabel != null;
+
   private BreakStmt(int _count = 1, string? _targetLabel = null) {
     Count = _count;
     TargetLabel = _targetLabel;

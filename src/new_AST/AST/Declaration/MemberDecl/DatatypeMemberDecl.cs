@@ -6,14 +6,17 @@ public partial class DatatypeDiscriminatorDecl : FieldDecl { }
 
 public partial class DatatypeConstructorDecl : MemberDecl {
   public override string Name { get; protected set; }
-  public readonly List<Formal> Formals = new();
+  public readonly List<Formal> Parameters = new();
+
+  public string DatatypeName => EnclosingDecl.Name;
+  public bool HasParameters() => Parameters.Count > 0;
 
   public DatatypeConstructorDecl(DatatypeDecl enclosingDecl,
-  string name, IEnumerable<Formal>? formals = null)
+  string name, IEnumerable<Formal>? parameters = null)
   : base(enclosingDecl) {
     Name = name;
-    if (formals != null) {
-      Formals.AddRange(formals);
+    if (parameters != null) {
+      Parameters.AddRange(parameters);
     }
   }
 

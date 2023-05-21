@@ -13,10 +13,12 @@ public partial class FunctionDecl : MemberDecl {
 
   public bool HasBody() => Body != null;
   public bool HasNamedResult() => Result != null;
-  public bool HasPrecondition() => Precondition != null;
-  public bool HasPostcondition() => Postcondition != null;
-  public bool HasReadsSpec() => Reads != null;
-  public bool HasDecreasesSpec() => Decreases != null;
+  public bool HasPrecondition() => Specification.HasUserDefinedSpec(Precondition);
+  public bool HasPostcondition() => Specification.HasUserDefinedSpec(Postcondition);
+  public bool HasReadsSpec() => Specification.HasUserDefinedSpec(Reads);
+  public bool HasDecreasesSpec() => Specification.HasUserDefinedSpec(Decreases);
+  public bool HasSpec() => HasPrecondition() || HasPostcondition()
+                          || HasReadsSpec() || HasDecreasesSpec();
 
   public FunctionDecl(TopLevelDecl enclosingDecl, string name, Type resultType,
   Expression? body = null, IEnumerable<Formal>? ins = null,
