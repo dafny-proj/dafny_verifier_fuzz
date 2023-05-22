@@ -24,6 +24,15 @@ public abstract partial class LoopStmt : Statement {
     Modifies = mod;
     Decreases = dec;
   }
+
+  public override IEnumerable<Node> Children {
+    get {
+      if (HasInvariants()) { yield return Invariants!; }
+      if (HasModifiesSpec()) { yield return Modifies!; }
+      if (HasDecreasesSpec()) { yield return Decreases!; }
+      if (Body != null) { yield return Body; }
+    }
+  }
 }
 
 public partial class WhileLoopStmt : LoopStmt {
@@ -34,6 +43,9 @@ public partial class WhileLoopStmt : LoopStmt {
   : base(body, inv, mod, dec) {
     Guard = guard;
   }
+
+  public override IEnumerable<Node> Children
+    => Guard == null ? base.Children : base.Children.Prepend(Guard);
 }
 
 public partial class ForLoopStmt : LoopStmt {
@@ -50,5 +62,14 @@ public partial class ForLoopStmt : LoopStmt {
     GoesUp = goesUp;
     LoopStart = loopStart;
     LoopEnd = loopEnd;
+  }
+
+  public override IEnumerable<Node> Children {
+    get {
+      yield return LoopIndex;
+      yield return LoopStart;
+      if (LoopEnd != null) { yield return LoopEnd; }
+      foreach (var c in base.Children) { yield return c; }
+    }
   }
 }

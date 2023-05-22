@@ -48,6 +48,19 @@ public partial class MethodDecl : MemberDecl {
 
   public static MethodDecl Skeleton(TopLevelDecl enclosingDecl, string name)
     => new MethodDecl(enclosingDecl, name);
+
+  public override IEnumerable<Node> Children {
+    get {
+      foreach (var t in TypeParams) { yield return t; }
+      foreach (var i in Ins) { yield return i; }
+      foreach (var o in Outs) { yield return o; }
+      if (HasPrecondition()) { yield return Precondition!; }
+      if (HasPostcondition()) { yield return Postcondition!; }
+      if (HasModifiesSpec()) { yield return Modifies!; }
+      if (HasDecreasesSpec()) { yield return Decreases!; }
+      if (Body != null) { yield return Body; }
+    }
+  }
 }
 
 public partial class ConstructorDecl : MethodDecl {

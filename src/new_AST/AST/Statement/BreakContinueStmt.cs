@@ -16,6 +16,8 @@ public partial class BreakStmt : Statement {
 
   public BreakStmt(int count) : this(_count: count) { }
   public BreakStmt(string targetLabel) : this(_targetLabel: targetLabel) { }
+
+  public override IEnumerable<Node> Children => Enumerable.Empty<Node>();
 }
 
 public partial class ContinueStmt : BreakStmt {

@@ -6,4 +6,6 @@ public partial class AssertStmt : Statement {
   public AssertStmt(Expression assertion) {
     Assertion = assertion;
   }
+
+  public override IEnumerable<Node> Children => new[] { Assertion };
 }

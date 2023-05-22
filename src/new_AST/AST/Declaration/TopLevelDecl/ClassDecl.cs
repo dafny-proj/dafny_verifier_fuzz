@@ -19,6 +19,8 @@ public partial class ClassDecl : TopLevelDecl {
   public void AddMember(MemberDecl member) => Members.Add(member);
   public void AddMembers(IEnumerable<MemberDecl> members)
     => Members.AddRange(members);
+
+  public override IEnumerable<Node> Children => Members;
 }
 
 public partial class DefaultClassDecl : ClassDecl {

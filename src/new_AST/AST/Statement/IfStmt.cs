@@ -12,4 +12,12 @@ public partial class IfStmt : Statement {
     Thn = thn;
     Els = els;
   }
+
+  public override IEnumerable<Node> Children {
+    get {
+      if (Guard != null) { yield return Guard; }
+      yield return Thn;
+      if (Els != null) { yield return Els; }
+    }
+  }
 }

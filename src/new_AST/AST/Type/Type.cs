@@ -13,10 +13,12 @@ public abstract partial class Type : Node {
   public static readonly RealType Real = RealType.Instance;
   public static readonly NatType Nat = NatType.Instance;
   public static readonly StringType String = StringType.Instance;
+
+  public override IEnumerable<Node> Children => TypeArgs;
 }
 
 public partial class TypeProxy : Type {
-  public override string BaseName 
+  public override string BaseName
     => throw new InvalidASTOperationException(
       $"Type proxies should not be printed.");
 }

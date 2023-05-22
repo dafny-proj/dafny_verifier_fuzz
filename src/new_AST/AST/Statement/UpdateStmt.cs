@@ -11,34 +11,38 @@ public abstract partial class UpdateStmt : Statement {
   public abstract IReadOnlyList<AssignmentRhs> Rhss { get; }
 
   public bool HasLhs() => Lhss.Count > 0;
+
+  public override IEnumerable<Node> Children => Lhss.Concat<Node>(Rhss);
 }
 
 public partial class AssignStmt : UpdateStmt {
-  private List<AssignmentPair> _assignments = new();
+  public readonly List<AssignmentPair> Assignments = new();
 
   public override IReadOnlyList<Expression> Lhss
-    => _assignments.Select(a => a.Key).ToList().AsReadOnly();
+    => Assignments.Select(a => a.Key).ToList().AsReadOnly();
   public override IReadOnlyList<AssignmentRhs> Rhss
-    => _assignments.Select(a => a.Value).ToList().AsReadOnly();
+    => Assignments.Select(a => a.Value).ToList().AsReadOnly();
 
   public AssignStmt(IEnumerable<AssignmentPair>? assignments) {
     if (assignments != null) {
-      _assignments.AddRange(assignments);
+      Assignments.AddRange(assignments);
     }
   }
+
+  public override IEnumerable<Node> Children => Assignments;
 }
 
 public partial class CallStmt : UpdateStmt {
   private List<Expression> _lhss = new();
-  private MethodCallRhs _rhs { get; }
+  public MethodCallRhs Call { get; }
 
   public override IReadOnlyList<Expression> Lhss
     => _lhss.AsReadOnly();
   public override IReadOnlyList<AssignmentRhs> Rhss
-    => (new[] { _rhs }).AsReadOnly();
+    => (new[] { Call }).AsReadOnly();
 
   public CallStmt(MethodCallRhs call, IEnumerable<Expression>? lhss = null) {
-    _rhs = call;
+    Call = call;
     if (lhss != null) {
       _lhss.AddRange(lhss);
     }

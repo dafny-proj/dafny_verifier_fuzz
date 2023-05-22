@@ -7,4 +7,6 @@ public partial class PrintStmt : Statement {
     Expressions.AddRange(expressions);
   }
 
+  public override IEnumerable<Node> Children => Expressions;
+
 }

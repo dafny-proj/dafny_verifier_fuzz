@@ -11,4 +11,13 @@ public partial class VarDeclStmt : Statement {
     Vars.AddRange(vars);
     Initialiser = initialiser;
   }
+
+  public override IEnumerable<Node> Children {
+    get {
+      foreach (var v in Vars) { yield return v; }
+      if (HasInitialiser()) {
+        foreach (var r in Initialiser!.Rhss) { yield return r; }
+      }
+    }
+  }
 }

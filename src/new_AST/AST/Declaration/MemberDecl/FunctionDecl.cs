@@ -41,4 +41,16 @@ public partial class FunctionDecl : MemberDecl {
   public static FunctionDecl Skeleton(TopLevelDecl enclosingDecl,
   string name, Type returnType)
     => new FunctionDecl(enclosingDecl, name, returnType);
+
+  public override IEnumerable<Node> Children {
+    get {
+      foreach (var i in Ins) { yield return i; }
+      if (Result != null) { yield return Result; }
+      if (HasPrecondition()) { yield return Precondition!; }
+      if (HasPostcondition()) { yield return Postcondition!; }
+      if (HasReadsSpec()) { yield return Reads!; }
+      if (HasDecreasesSpec()) { yield return Decreases!; }
+      if (Body != null) { yield return Body; }
+    }
+  }
 }

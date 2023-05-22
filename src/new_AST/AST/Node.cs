@@ -1,13 +1,7 @@
 namespace AST_new;
 
 public abstract class Node {
-  public virtual IEnumerable<Node> Children {
-    get => throw new UnsupportedNodeChildrenException(this);
-  }
-
-  public virtual Node Clone() {
-    throw new UnsupportedNodeCloningException(this);
-  }
+  public abstract IEnumerable<Node> Children { get; }
 
   public virtual Node ReplaceChild(Node oldChild, Node newChild) {
     throw new UnsupportedNodeChildReplacementException(this);
@@ -53,7 +47,7 @@ public partial class BinaryExpr : Expression { }
 public partial class UnaryExpr : Expression { }
 public partial class MemberSelectExpr : Expression { }
 public abstract partial class CollectionSelectExpr : Expression { }
-public abstract partial class CollectionDisplayExpr<T> : Expression { }
+public abstract partial class CollectionDisplayExpr<T> : Expression where T : Node { }
 public partial class CollectionUpdateExpr : Expression { }
 public partial class DatatypeValueExpr : Expression { }
 public partial class ThisExpr : Expression { }
@@ -87,4 +81,4 @@ public partial class TypeProxy : Type { }
 
 public abstract partial class Variable : Node { }
 public partial class Specification : Node { }
-public partial class KeyValuePair<K, V> : Node { }
+public partial class KeyValuePair<K, V> : Node where K : Node where V : Node { }

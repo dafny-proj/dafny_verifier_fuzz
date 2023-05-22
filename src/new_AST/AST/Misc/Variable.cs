@@ -18,6 +18,9 @@ public abstract partial class Variable : Node {
     Type = type;
     ExplicitType = explicitType;
   }
+
+  public override IEnumerable<Node> Children
+    => HasExplicitType() ? new[] { ExplicitType! } : Enumerable.Empty<Node>();
 }
 
 public partial class LocalVar : Variable {
@@ -39,4 +42,7 @@ public partial class Formal : Variable {
   : base(name, type, explicitType: type) {
     DefaultValue = defaultValue;
   }
+
+  public override IEnumerable<Node> Children
+    => HasDefaultValue() ? base.Children.Append(DefaultValue!) : base.Children;
 }

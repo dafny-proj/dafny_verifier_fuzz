@@ -15,4 +15,6 @@ public partial class DatatypeValueExpr : Expression {
       ConstructorArguments.AddRange(constructorArguments);
     }
   }
+
+  public override IEnumerable<Node> Children => ConstructorArguments;
 }

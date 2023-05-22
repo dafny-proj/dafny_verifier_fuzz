@@ -5,4 +5,6 @@ public partial class TypeParameterDecl : TopLevelDecl {
   public TypeParameterDecl(string name) {
     Name = name;
   }
+
+  public override IEnumerable<Node> Children => Enumerable.Empty<Node>();
 }

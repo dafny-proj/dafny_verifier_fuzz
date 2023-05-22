@@ -17,4 +17,7 @@ public partial class SubsetTypeDecl : TopLevelDecl {
       TypeParams.AddRange(typeParams);
     }
   }
+
+  public override IEnumerable<Node> Children
+    => TypeParams.Append<Node>(BaseIdent).Append<Node>(Constraint);
 }

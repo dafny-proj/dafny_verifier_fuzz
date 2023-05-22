@@ -13,4 +13,7 @@ public partial class TypeSynonymDecl : TopLevelDecl {
       TypeParams.AddRange(typeParams);
     }
   }
+
+  public override IEnumerable<Node> Children
+    => TypeParams.Append<Node>(BaseType);
 }

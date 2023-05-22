@@ -5,7 +5,10 @@ public partial class ReturnStmt : Statement {
 
   public bool HasReturns() => Returns != null;
 
-  public ReturnStmt(UpdateStmt returns) {
+  public ReturnStmt(UpdateStmt? returns = null) {
     Returns = returns;
   }
+
+  public override IEnumerable<Node> Children
+    => Returns?.Rhss ?? Enumerable.Empty<Node>();
 }

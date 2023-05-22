@@ -15,4 +15,6 @@ public partial class CollectionUpdateExpr : Expression {
     Value = value;
   }
 
+  public override IEnumerable<Node> Children
+    => new[] { Collection, Index, Value };
 }

@@ -22,6 +22,8 @@ public partial class ExprRhs : AssignmentRhs {
   public ExprRhs(Expression e) {
     E = e;
   }
+
+  public override IEnumerable<Node> Children => new[] { E };
 }
 
 public partial class MethodCallRhs : AssignmentRhs {
@@ -36,6 +38,9 @@ public partial class MethodCallRhs : AssignmentRhs {
       Arguments.AddRange(arguments);
     }
   }
+
+  public override IEnumerable<Node> Children
+    => new[] { Callee }.Concat<Node>(Arguments);
 }
 
 public partial class NewArrayRhs : AssignmentRhs {
@@ -46,6 +51,9 @@ public partial class NewArrayRhs : AssignmentRhs {
     ElementType = elementType;
     Dimensions.AddRange(dimensions);
   }
+
+  public override IEnumerable<Node> Children
+    => new[] { ElementType }.Concat<Node>(Dimensions);
 }
 
 public partial class NewArrayWithElementInitialiserRhs : NewArrayRhs {
@@ -57,6 +65,9 @@ public partial class NewArrayWithElementInitialiserRhs : NewArrayRhs {
   : base(elementType, dimensions) {
     ElementInitialiser = elementInitialiser;
   }
+
+  public override IEnumerable<Node> Children
+    => base.Children.Append(ElementInitialiser);
 }
 
 // Only for 1 dimensional arrays.
@@ -69,6 +80,9 @@ public partial class NewArrayWithListInitialiserRhs : NewArrayRhs {
   : base(elementType, new[] { dimension }) {
     ListInitialiser.AddRange(listInitialiser);
   }
+
+  public override IEnumerable<Node> Children
+    => base.Children.Concat(ListInitialiser);
 }
 
 public partial class NewObjectRhs : AssignmentRhs {
@@ -77,6 +91,8 @@ public partial class NewObjectRhs : AssignmentRhs {
   public NewObjectRhs(Type objectType) {
     ObjectType = objectType;
   }
+
+  public override IEnumerable<Node> Children => new[] { ObjectType };
 }
 
 public partial class NewObjectWithConstructorRhs : NewObjectRhs {
@@ -91,4 +107,7 @@ public partial class NewObjectWithConstructorRhs : NewObjectRhs {
       ConstructorArguments.AddRange(constructorArguments);
     }
   }
+
+  public override IEnumerable<Node> Children
+    => base.Children.Concat<Node>(ConstructorArguments);
 }

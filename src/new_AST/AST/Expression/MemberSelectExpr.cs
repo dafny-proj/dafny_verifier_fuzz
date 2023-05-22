@@ -9,4 +9,6 @@ public partial class MemberSelectExpr : Expression {
     Receiver = receiver;
     Member = member;
   }
+
+  public override IEnumerable<Node> Children => new[] { Receiver };
 }

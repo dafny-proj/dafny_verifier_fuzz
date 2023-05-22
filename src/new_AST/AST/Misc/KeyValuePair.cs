@@ -1,10 +1,11 @@
 namespace AST_new;
 
-public partial class KeyValuePair<K, V> : Node { }
+public partial class KeyValuePair<K, V> : Node where K : Node where V : Node { }
 public partial class ExpressionPair : KeyValuePair<Expression, Expression> { }
 public partial class AssignmentPair : KeyValuePair<Expression, AssignmentRhs> { }
 
-public partial class KeyValuePair<K, V> : Node {
+public partial class KeyValuePair<K, V> : Node
+where K : Node where V : Node {
   public K Key { get; }
   public V Value { get; }
 
@@ -12,6 +13,8 @@ public partial class KeyValuePair<K, V> : Node {
     Key = key;
     Value = value;
   }
+
+  public override IEnumerable<Node> Children => new Node[] { Key, Value };
 }
 
 public partial class ExpressionPair : KeyValuePair<Expression, Expression> {

@@ -6,4 +6,6 @@ public partial class Program : Node {
   public Program(ModuleDecl programModule) {
     ProgramModule = programModule;
   }
+
+  public override IEnumerable<Node> Children => new[] { ProgramModule };
 }

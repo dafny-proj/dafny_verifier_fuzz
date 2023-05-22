@@ -8,4 +8,6 @@ public partial class IdentifierExpr : Expression {
   public IdentifierExpr(Variable var) {
     Var = var;
   }
+
+  public override IEnumerable<Node> Children => Enumerable.Empty<Node>();
 }

@@ -49,7 +49,8 @@ public partial class DafnyASTTranslator {
   }
 
   private ReturnStmt TranslateReturnStmt(Dafny.ReturnStmt ds) {
-    var s = new ReturnStmt(TranslateUpdateStmt(ds.HiddenUpdate));
+    var s = new ReturnStmt(
+      ds.HiddenUpdate == null ? null : TranslateUpdateStmt(ds.HiddenUpdate));
     SetStatementLabel(ds, s);
     return s;
   }

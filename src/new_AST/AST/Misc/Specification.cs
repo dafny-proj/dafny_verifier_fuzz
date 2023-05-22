@@ -35,4 +35,5 @@ public partial class Specification {
   public static bool HasUserDefinedSpec(Specification? s)
     => s == null ? false : s.HasUserDefinedSpec();
 
+  public override IEnumerable<Node> Children => GetUserDefinedSpec();
 }

@@ -10,6 +10,8 @@ public abstract partial class CollectionSelectExpr : Expression {
   protected CollectionSelectExpr(Expression collection) {
     Collection = collection;
   }
+
+  public override IEnumerable<Node> Children => new[] { Collection };
 }
 
 // Only for sequences, multisets, maps, arrays. 
@@ -20,6 +22,8 @@ public partial class CollectionElementExpr : CollectionSelectExpr {
   : base(collection) {
     Index = index;
   }
+
+  public override IEnumerable<Node> Children => base.Children.Append(Index);
 }
 
 // Only for sequences, arrays.
@@ -32,5 +36,13 @@ public partial class CollectionSliceExpr : CollectionSelectExpr {
   : base(collection) {
     Index0 = index0;
     Index1 = index1;
+  }
+
+  public override IEnumerable<Node> Children {
+    get {
+      foreach (var c in base.Children) { yield return c; }
+      if (Index0 != null) { yield return Index0; }
+      if (Index1 != null) { yield return Index1; }
+    }
   }
 }

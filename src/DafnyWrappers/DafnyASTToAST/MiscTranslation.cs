@@ -4,13 +4,14 @@ namespace AST_new.Translation;
 
 public partial class DafnyASTTranslator {
   private Variable CreateVariable(Dafny.IVariable dv) {
+    var name = dv.Name;
+    var type = TranslateType(dv.Type);
     return dv switch {
-      Dafny.LocalVariable lv => new LocalVar(
-        name: lv.Name, type: TranslateType(lv.Type),
-        explicitType: lv.IsTypeExplicit ? TranslateType(lv.OptionalType) : null),
-      Dafny.BoundVar bv => new BoundVar(bv.Name, TranslateType(bv.Type)),
-      Dafny.Formal f => new Formal(
-        f.Name, TranslateType(f.Type),
+      Dafny.LocalVariable lv => new LocalVar(name, type, explicitType:
+        lv.IsTypeExplicit ? TranslateType(lv.OptionalType) : null),
+      Dafny.BoundVar bv => new BoundVar(name, type, explicitType:
+        bv.IsTypeExplicit ? type : null),
+      Dafny.Formal f => new Formal(name, type, defaultValue:
         f.DefaultValue == null ? null : TranslateExpression(f.DefaultValue)),
       _ => throw new UnsupportedTranslationException(dv),
     };

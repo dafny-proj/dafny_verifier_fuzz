@@ -24,6 +24,8 @@ public partial class UnaryExpr : Expression {
     Op = op;
     E = e;
   }
+
+  public override IEnumerable<Node> Children => new[] { E };
 }
 
 public partial class UnaryExpr : Expression {

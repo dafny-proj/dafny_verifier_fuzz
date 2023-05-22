@@ -13,4 +13,6 @@ public partial class ModuleDecl : TopLevelDecl {
   public void AddDecl(TopLevelDecl decl) => Decls.Add(decl);
   public void AddDecls(IEnumerable<TopLevelDecl> decls)
     => Decls.AddRange(decls);
+
+  public override IEnumerable<Node> Children => Decls;
 }

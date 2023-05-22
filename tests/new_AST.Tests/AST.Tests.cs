@@ -6,17 +6,19 @@ namespace AST_new.Tests;
 
 using DafnyASTTranslator = Translation.DafnyASTTranslator;
 using ASTPrinter = Printer.ASTPrinter;
+using ASTCloner = Cloner.ASTCloner;
 
 [TestClass]
 public class ASTTests {
-  private void CanParseAndPrint(string sourceStr) {
+  private void CanParseClonePrint(string sourceStr) {
     // Filter out '\r' from the string literals which messes up string 
     // comparison. It's weird that '\r' only started appearing in this file.
     sourceStr = Regex.Replace(sourceStr, "\r", "");
     var programDafny = DafnyW.ParseDafnyProgramFromString(sourceStr);
     DafnyW.ResolveDafnyProgram(programDafny);
     var program = DafnyASTTranslator.TranslateDafnyProgram(programDafny);
-    var outputStr = ASTPrinter.NodeToString(program);
+    var clone = ASTCloner.Clone<Program>(program);
+    var outputStr = ASTPrinter.NodeToString(clone);
     Assert.AreEqual(sourceStr, outputStr.TrimEnd(), /*ignore_case=*/false);
   }
 
@@ -27,7 +29,7 @@ public class ASTTests {
       print "Hello World!";
     }
     """;
-    CanParseAndPrint(sourceStr);
+    CanParseClonePrint(sourceStr);
   }
 
   [TestMethod]
@@ -57,7 +59,7 @@ public class ASTTests {
       c1.SetF1(0);
     }
     """;
-    CanParseAndPrint(sourceStr);
+    CanParseClonePrint(sourceStr);
   }
 
   [TestMethod]
@@ -78,7 +80,7 @@ public class ASTTests {
       }
     }
     """;
-    CanParseAndPrint(sourceStr);
+    CanParseClonePrint(sourceStr);
   }
 
   [TestMethod]
@@ -101,7 +103,7 @@ public class ASTTests {
     // // Unsupported lambdas and arrow types.
     // var a2 := new int[3](i => i);
     // """;
-    CanParseAndPrint(sourceStr);
+    CanParseClonePrint(sourceStr);
   }
 
   [TestMethod]
@@ -116,7 +118,7 @@ public class ASTTests {
       var x5 := s[i];
     }
     """;
-    CanParseAndPrint(sourceStr);
+    CanParseClonePrint(sourceStr);
   }
 
   [TestMethod]
@@ -126,7 +128,7 @@ public class ASTTests {
       var s := {1, 2, 3};
     }
     """;
-    CanParseAndPrint(sourceStr);
+    CanParseClonePrint(sourceStr);
   }
 
   [TestMethod]
@@ -139,7 +141,7 @@ public class ASTTests {
       assert s[1] == 1 && s[2] == 2 && s[3] == 3;
     }
     """;
-    CanParseAndPrint(sourceStr);
+    CanParseClonePrint(sourceStr);
   }
 
   [TestMethod]
@@ -152,7 +154,7 @@ public class ASTTests {
       assert m[1] == 1 && m[2] == 2 && m[3] == 3;
     }
     """;
-    CanParseAndPrint(mapSelect);
+    CanParseClonePrint(mapSelect);
   }
 
   [TestMethod]
@@ -162,7 +164,7 @@ public class ASTTests {
       var i := 0;
     }
     """;
-    CanParseAndPrint(sourceStr);
+    CanParseClonePrint(sourceStr);
   }
 
   [TestMethod]
@@ -172,7 +174,7 @@ public class ASTTests {
       y := x;
     }
     """;
-    CanParseAndPrint(sourceStr);
+    CanParseClonePrint(sourceStr);
   }
 
   [TestMethod]
@@ -181,8 +183,12 @@ public class ASTTests {
     method Identity(x: int) returns (y: int) {
       return x;
     }
+
+    method DoNothing() {
+      return;
+    }
     """;
-    CanParseAndPrint(sourceStr);
+    CanParseClonePrint(sourceStr);
   }
 
   [TestMethod]
@@ -198,7 +204,7 @@ public class ASTTests {
       }
     }
     """;
-    CanParseAndPrint(sourceStr);
+    CanParseClonePrint(sourceStr);
   }
 
   [TestMethod]
@@ -213,7 +219,7 @@ public class ASTTests {
       }
     }
     """;
-    CanParseAndPrint(sourceStr);
+    CanParseClonePrint(sourceStr);
   }
 
   [TestMethod]
@@ -227,7 +233,7 @@ public class ASTTests {
       }
     }
     """;
-    CanParseAndPrint(sourceStr);
+    CanParseClonePrint(sourceStr);
   }
 
 }

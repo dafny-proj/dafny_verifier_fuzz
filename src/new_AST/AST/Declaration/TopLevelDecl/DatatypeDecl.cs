@@ -60,6 +60,12 @@ public partial class DatatypeDecl : TopLevelDecl {
     }
   }
 
+  public void AddConstructors(IEnumerable<DatatypeConstructorDecl> constructors) {
+    foreach (var c in constructors) {
+      AddConstructor(c);
+    }
+  }
+
   public void AddMember(MemberDecl member) {
     Contract.Requires(member.EnclosingDecl == this
       && member is not (DatatypeDestructorDecl or DatatypeDiscriminatorDecl));
@@ -69,5 +75,14 @@ public partial class DatatypeDecl : TopLevelDecl {
       Members.Add(member);
     }
   }
+
+  public void AddMembers(IEnumerable<MemberDecl> members) {
+    foreach (var m in members) {
+      AddMember(m);
+    }
+  }
+
+  public override IEnumerable<Node> Children
+    => TypeParams.Concat<Node>(Constructors).Concat<Node>(Members);
 
 }

@@ -9,4 +9,6 @@ public partial class FieldDecl : MemberDecl {
     Name = name;
     Type = type;
   }
+
+  public override IEnumerable<Node> Children => new[] { Type };
 }

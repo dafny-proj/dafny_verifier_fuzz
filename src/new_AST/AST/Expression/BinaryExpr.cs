@@ -12,6 +12,8 @@ public partial class BinaryExpr : Expression {
     E1 = e1;
     Op = op;
   }
+
+  public override IEnumerable<Node> Children => new[] { E0, E1 };
 }
 
 public partial class BinaryExpr : Expression {

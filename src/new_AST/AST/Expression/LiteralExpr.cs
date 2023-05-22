@@ -2,9 +2,14 @@ using System.Numerics;
 
 namespace AST_new;
 
+public abstract partial class LiteralExpr : Expression { }
 public partial class BoolLiteralExpr : LiteralExpr { }
 public partial class IntLiteralExpr : LiteralExpr { }
 public partial class StringLiteralExpr : LiteralExpr { }
+
+public abstract partial class LiteralExpr : Expression {
+  public override IEnumerable<Node> Children => Enumerable.Empty<Node>();
+}
 
 public partial class BoolLiteralExpr : LiteralExpr {
   public bool Value { get; }

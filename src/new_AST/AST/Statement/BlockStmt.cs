@@ -8,4 +8,6 @@ public partial class BlockStmt : Statement {
   public BlockStmt(IEnumerable<Statement> body) {
     Body.AddRange(body);
   }
+
+  public override IEnumerable<Node> Children => Body;
 }
