@@ -4,7 +4,7 @@ public partial class BreakStmt : Statement { }
 public partial class ContinueStmt : BreakStmt { }
 
 public partial class BreakStmt : Statement {
-  public int Count { get; }
+  public int Count { get; set; }
   public string? TargetLabel { get; }
 
   public bool HasTargetLabel() => TargetLabel != null;

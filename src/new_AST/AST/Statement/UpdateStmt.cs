@@ -23,11 +23,18 @@ public partial class AssignStmt : UpdateStmt {
   public override IReadOnlyList<AssignmentRhs> Rhss
     => Assignments.Select(a => a.Value).ToList().AsReadOnly();
 
-  public AssignStmt(IEnumerable<AssignmentPair>? assignments) {
-    if (assignments != null) {
-      Assignments.AddRange(assignments);
-    }
+  public AssignStmt() { }
+  public AssignStmt(IEnumerable<AssignmentPair> assignments) {
+    AddAssignments(assignments);
   }
+  public AssignStmt(AssignmentPair assignment) {
+    AddAssignment(assignment);
+  }
+
+  public void AddAssignment(AssignmentPair assignment)
+    => Assignments.Add(assignment);
+  public void AddAssignments(IEnumerable<AssignmentPair> assignments)
+    => Assignments.AddRange(assignments);
 
   public override IEnumerable<Node> Children => Assignments;
 }

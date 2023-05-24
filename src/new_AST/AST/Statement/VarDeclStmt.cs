@@ -2,7 +2,7 @@ namespace AST_new;
 
 public partial class VarDeclStmt : Statement {
   public readonly List<LocalVar> Vars = new();
-  public UpdateStmt? Initialiser { get; }
+  public UpdateStmt? Initialiser { get; set; }
 
   public bool HasInitialiser() => Initialiser != null;
 
@@ -11,6 +11,8 @@ public partial class VarDeclStmt : Statement {
     Vars.AddRange(vars);
     Initialiser = initialiser;
   }
+  public VarDeclStmt(LocalVar var, UpdateStmt? initialiser = null)
+  : this(new[] { var }, initialiser) { }
 
   public override IEnumerable<Node> Children {
     get {
