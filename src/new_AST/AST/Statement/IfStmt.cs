@@ -1,9 +1,9 @@
 namespace AST_new;
 
 public partial class IfStmt : Statement {
-  public Expression? Guard { get; }
-  public BlockStmt Thn { get; }
-  public Statement? Els { get; }
+  public Expression? Guard { get; set; }
+  public BlockStmt Thn { get; set; }
+  public Statement? Els { get; set; }
 
   public bool HasElse() => Els != null;
 

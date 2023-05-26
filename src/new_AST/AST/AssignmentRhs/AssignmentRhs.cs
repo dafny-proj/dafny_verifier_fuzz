@@ -17,7 +17,7 @@ public partial class NewObjectRhs : AssignmentRhs { }
 public partial class NewObjectWithConstructorRhs : NewObjectRhs { }
 
 public partial class ExprRhs : AssignmentRhs {
-  public Expression E { get; }
+  public Expression E { get; set; }
 
   public ExprRhs(Expression e) {
     E = e;
@@ -27,7 +27,7 @@ public partial class ExprRhs : AssignmentRhs {
 }
 
 public partial class MethodCallRhs : AssignmentRhs {
-  public MemberSelectExpr Callee { get; }
+  public MemberSelectExpr Callee { get; set; }
   public readonly List<Expression> Arguments = new();
 
   public MethodCallRhs(MemberSelectExpr callee,
@@ -58,7 +58,7 @@ public partial class NewArrayRhs : AssignmentRhs {
 
 public partial class NewArrayWithElementInitialiserRhs : NewArrayRhs {
   // An expression that returns a function of type `index: nat -> element: T`.
-  public Expression ElementInitialiser { get; }
+  public Expression ElementInitialiser { get; set; }
 
   public NewArrayWithElementInitialiserRhs(Type elementType,
   IEnumerable<Expression> dimensions, Expression elementInitialiser)

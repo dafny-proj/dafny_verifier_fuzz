@@ -1,13 +1,13 @@
 namespace Fuzzer_new;
 
-public partial class MergeVarsToMapRewriter {
+public partial class MergeVarsToMapMutationRewriter {
   private class VarRefRewriteTask : Task {
     private IdentifierExpr vref;
     private Node vrefParent;
-    private MergeVarsToMapRewriter vm;
+    private MergeVarsToMapMutationRewriter vm;
 
     public VarRefRewriteTask(IdentifierExpr use, Node useParent,
-    MergeVarsToMapRewriter vm) {
+    MergeVarsToMapMutationRewriter vm) {
       this.vref = use;
       this.vrefParent = useParent;
       this.vm = vm;
@@ -22,10 +22,10 @@ public partial class MergeVarsToMapRewriter {
   private class VarDefRewriteTask : Task {
     private AssignStmt vdef;
     private BlockStmt vdefParent;
-    private MergeVarsToMapRewriter vm;
+    private MergeVarsToMapMutationRewriter vm;
 
     public VarDefRewriteTask(AssignStmt vdef, BlockStmt vdefParent,
-    MergeVarsToMapRewriter vm) {
+    MergeVarsToMapMutationRewriter vm) {
       this.vdef = vdef;
       this.vdefParent = vdefParent;
       this.vm = vm;
@@ -41,10 +41,10 @@ public partial class MergeVarsToMapRewriter {
   private class VarDeclRewriteTask : Task {
     private VarDeclStmt vdec;
     private BlockStmt vdecParent;
-    private MergeVarsToMapRewriter vm;
+    private MergeVarsToMapMutationRewriter vm;
 
     public VarDeclRewriteTask(VarDeclStmt vdec, BlockStmt vdecParent,
-    MergeVarsToMapRewriter vm) {
+    MergeVarsToMapMutationRewriter vm) {
       this.vdec = vdec;
       this.vdecParent = vdecParent;
       this.vm = vm;

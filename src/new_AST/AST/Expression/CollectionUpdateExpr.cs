@@ -2,9 +2,9 @@ namespace AST_new;
 
 // Only for sequences, maps, multisets.
 public partial class CollectionUpdateExpr : Expression {
-  public Expression Collection { get; }
-  public Expression Index { get; }
-  public Expression Value { get; }
+  public Expression Collection { get; set; }
+  public Expression Index { get; set; }
+  public Expression Value { get; set; }
 
   public override Type Type => Collection.Type;
 

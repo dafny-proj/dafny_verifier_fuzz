@@ -1,34 +1,27 @@
 namespace Fuzzer_new;
 
-// Requires loops to have bodies.
-// Requires loop bodies to not have labeled statements.
-/// <summary>
-/// `while cond { body }`
-/// Unpeels to
-/// ```
-/// if cond { body }
-/// while cond { body }
-/// ```
-/// </summary>
-public partial class WhileLoopUnpeelingRewriter {
-  private WhileLoopStmt loop;
-  private BlockStmt loopParent;
+public partial class WhileLoopUnpeelMutationRewriter {
+  private WhileLoopStmt whileLoop;
+  private BlockStmt enclosingScope;
   private LocalVar? breakVariable;
   private string? breakLabel;
   private IGenerator gen;
 
-  public WhileLoopUnpeelingRewriter(WhileLoopStmt loop, BlockStmt loopParent,
-  IGenerator generator) {
-    this.loop = loop;
-    this.loopParent = loopParent;
-    gen = generator;
+  public WhileLoopUnpeelMutationRewriter(WhileLoopUnpeelMutation m, IGenerator g)
+  : this(m.whileLoop, m.enclosingScope, g) { }
+
+  public WhileLoopUnpeelMutationRewriter(
+  WhileLoopStmt whileLoop, BlockStmt enclosingScope, IGenerator generator) {
+    this.whileLoop = whileLoop;
+    this.enclosingScope = enclosingScope;
+    this.gen = generator;
   }
 
-  private void Rewrite() {
+  public void Rewrite() {
     var unpeeledLoop = new List<Statement>();
     // Extract an iteration of the loop into an if statement.
-    var guard = loop.Guard;
-    var body = loop.Body!;
+    var guard = whileLoop.Guard;
+    var body = whileLoop.Body!;
     var extractedIteration = new IfStmt(
       guard: guard == null ? null : Cloner.Clone<Expression>(guard),
       thn: Cloner.Clone<BlockStmt>(body));
@@ -40,7 +33,7 @@ public partial class WhileLoopUnpeelingRewriter {
       unpeeledLoop.AddRange(GenAssertFromInvariants());
       unpeeledLoop.Add(extractedIteration);
       unpeeledLoop.AddRange(GenAssertFromInvariants());
-      unpeeledLoop.Add(loop);
+      unpeeledLoop.Add(whileLoop);
     } else {
       // Create break variable declaration.
       var initBreakToFalse = new AssignStmt(new AssignmentPair(
@@ -56,12 +49,12 @@ public partial class WhileLoopUnpeelingRewriter {
       // Wrap assertions and remaining loop in a check for the break.
       var notBreak = new UnaryExpr(UnaryExpr.Opcode.Not, GenBreakVariableIdent());
       var remLoop = new IfStmt(guard: notBreak,
-        thn: new BlockStmt(GenAssertFromInvariants().Append<Statement>(loop)));
+        thn: new BlockStmt(GenAssertFromInvariants().Append<Statement>(whileLoop)));
       unpeeledLoop.Add(remLoop);
     }
 
     // Rewrite the loop in the parent.
-    loopParent.Replace(loop, unpeeledLoop);
+    enclosingScope.Replace(whileLoop, unpeeledLoop);
   }
 
   private IdentifierExpr GenBreakVariableIdent() {
@@ -79,14 +72,14 @@ public partial class WhileLoopUnpeelingRewriter {
   }
 
   private IEnumerable<AssertStmt> GenAssertFromInvariants() {
-    return loop.Invariants?.GetUserDefinedSpec()
+    return whileLoop.Invariants?.GetUserDefinedSpec()
       .Select(e => new AssertStmt(Cloner.Clone<Expression>(e)))
       ?? Enumerable.Empty<AssertStmt>();
   }
 
   private class BreakReconditioner {
     private List<Task> reconditionTasks = new();
-    private WhileLoopUnpeelingRewriter _wr;
+    private WhileLoopUnpeelMutationRewriter _wr;
 
     private int loopNestingDepth;
     private void EnterLoop() => loopNestingDepth++;
@@ -107,7 +100,7 @@ public partial class WhileLoopUnpeelingRewriter {
       childToParent.Add(c, p);
     }
 
-    public BreakReconditioner(WhileLoopUnpeelingRewriter wr) {
+    public BreakReconditioner(WhileLoopUnpeelMutationRewriter wr) {
       _wr = wr;
     }
 
@@ -179,9 +172,9 @@ public partial class WhileLoopUnpeelingRewriter {
   private class BreakThisLoopReconditionTask : Task {
     private BreakStmt _s;
     private BlockStmt _parent;
-    private WhileLoopUnpeelingRewriter _wr;
+    private WhileLoopUnpeelMutationRewriter _wr;
     public BreakThisLoopReconditionTask(BreakStmt s, BlockStmt parent,
-    WhileLoopUnpeelingRewriter wr) {
+    WhileLoopUnpeelMutationRewriter wr) {
       _s = s;
       _parent = parent;
       _wr = wr;

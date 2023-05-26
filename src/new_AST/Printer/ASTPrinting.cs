@@ -65,7 +65,10 @@ public partial class ASTPrinter {
     PrintList<Formal>(fs, PrintFormal, start: "(", end: ")");
   }
   private void PrintMembers(IEnumerable<MemberDecl> ds) {
-    PrintList<MemberDecl>(ds, PrintMemberDecl, sep: "\n");
+    var fields = ds.Where(m => m is FieldDecl);
+    var remaining = ds.Where(m => m is not FieldDecl);
+    PrintList<MemberDecl>(fields, PrintMemberDecl, sep: "");
+    PrintList<MemberDecl>(remaining, PrintMemberDecl, sep: "\n");
   }
   private void PrintTypes(IEnumerable<Type> ts) {
     PrintList<Type>(ts, PrintType, start: "<", end: ">");

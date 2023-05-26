@@ -8,7 +8,9 @@ public partial class DafnyASTTranslator {
       s.Labels = new();
       var l = ds.Labels;
       while (l != null) {
-        s.Labels.Add(l.Data.Name);
+        if (l.Data.Name != null) {
+          s.Labels.Add(l.Data.Name);
+        }
         l = l.Next;
       }
     }

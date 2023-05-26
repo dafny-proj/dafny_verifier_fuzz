@@ -5,7 +5,7 @@ public partial class CollectionElementExpr : CollectionSelectExpr { }
 public partial class CollectionSliceExpr : CollectionSelectExpr { }
 
 public abstract partial class CollectionSelectExpr : Expression {
-  public Expression Collection { get; }
+  public Expression Collection { get; set; }
 
   protected CollectionSelectExpr(Expression collection) {
     Collection = collection;
@@ -16,7 +16,7 @@ public abstract partial class CollectionSelectExpr : Expression {
 
 // Only for sequences, multisets, maps, arrays. 
 public partial class CollectionElementExpr : CollectionSelectExpr {
-  public Expression Index { get; }
+  public Expression Index { get; set; }
 
   public CollectionElementExpr(Expression collection, Expression index)
   : base(collection) {
@@ -28,8 +28,8 @@ public partial class CollectionElementExpr : CollectionSelectExpr {
 
 // Only for sequences, arrays.
 public partial class CollectionSliceExpr : CollectionSelectExpr {
-  public Expression? Index0 { get; }
-  public Expression? Index1 { get; }
+  public Expression? Index0 { get; set; }
+  public Expression? Index1 { get; set; }
 
   public CollectionSliceExpr(Expression collection,
   Expression? index0 = null, Expression? index1 = null)

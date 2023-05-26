@@ -36,7 +36,7 @@ public abstract partial class LoopStmt : Statement {
 }
 
 public partial class WhileLoopStmt : LoopStmt {
-  public Expression? Guard { get; }
+  public Expression? Guard { get; set; }
 
   public WhileLoopStmt(Expression? guard = null, BlockStmt? body = null,
   Specification? inv = null, Specification? mod = null, Specification? dec = null)
@@ -51,8 +51,8 @@ public partial class WhileLoopStmt : LoopStmt {
 public partial class ForLoopStmt : LoopStmt {
   public BoundVar LoopIndex { get; }
   public bool GoesUp { get; }
-  public Expression LoopStart { get; }
-  public Expression? LoopEnd { get; }
+  public Expression LoopStart { get; set; }
+  public Expression? LoopEnd { get; set; }
 
   public ForLoopStmt(BoundVar loopIndex, bool goesUp, Expression loopStart,
   Expression? loopEnd = null, BlockStmt? body = null, Specification? inv = null,

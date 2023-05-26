@@ -2,6 +2,12 @@ namespace AST_new.Printer;
 
 public partial class ASTPrinter {
   private void PrintStatement(Statement s) {
+    if (s.Labels != null) {
+      foreach (var label in s.Labels) {
+        WriteLine($"label {label}:");
+        WriteIndent();
+      }
+    }
     switch (s) {
       case BlockStmt bs:
         PrintBlockStmt(bs);

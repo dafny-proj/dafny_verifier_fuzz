@@ -10,7 +10,9 @@ public partial class ModuleDecl : TopLevelDecl {
   }
 
   public static ModuleDecl Skeleton() => new ModuleDecl();
-  public void AddDecl(TopLevelDecl decl) => Decls.Add(decl);
+  public void AppendDecl(TopLevelDecl decl) => Decls.Add(decl);
+  public void InsertDecl(TopLevelDecl decl, int i) => Decls.Insert(i, decl);
+  public void PrependDecl(TopLevelDecl decl) => Decls.Insert(0, decl);
   public void AddDecls(IEnumerable<TopLevelDecl> decls)
     => Decls.AddRange(decls);
 

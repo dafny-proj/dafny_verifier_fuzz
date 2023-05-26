@@ -1,7 +1,7 @@
 namespace AST_new;
 
 public partial class ReturnStmt : Statement {
-  public UpdateStmt? Returns { get; }
+  public UpdateStmt? Returns { get; set; }
 
   public bool HasReturns() => Returns != null;
 

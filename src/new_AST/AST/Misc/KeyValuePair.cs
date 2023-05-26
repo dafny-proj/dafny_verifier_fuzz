@@ -6,8 +6,8 @@ public partial class AssignmentPair : KeyValuePair<Expression, AssignmentRhs> { 
 
 public partial class KeyValuePair<K, V> : Node
 where K : Node where V : Node {
-  public K Key { get; }
-  public V Value { get; }
+  public K Key { get; set; }
+  public V Value { get; set; }
 
   public KeyValuePair(K key, V value) {
     Key = key;

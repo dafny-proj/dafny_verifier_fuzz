@@ -40,18 +40,18 @@ public partial class AssignStmt : UpdateStmt {
 }
 
 public partial class CallStmt : UpdateStmt {
-  private List<Expression> _lhss = new();
-  public MethodCallRhs Call { get; }
+  public List<Expression> CallLhss = new();
+  public MethodCallRhs Call { get; set; }
 
   public override IReadOnlyList<Expression> Lhss
-    => _lhss.AsReadOnly();
+    => CallLhss.AsReadOnly();
   public override IReadOnlyList<AssignmentRhs> Rhss
     => (new[] { Call }).AsReadOnly();
 
   public CallStmt(MethodCallRhs call, IEnumerable<Expression>? lhss = null) {
     Call = call;
     if (lhss != null) {
-      _lhss.AddRange(lhss);
+      CallLhss.AddRange(lhss);
     }
   }
 }

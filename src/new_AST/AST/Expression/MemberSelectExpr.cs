@@ -1,7 +1,7 @@
 namespace AST_new;
 
 public partial class MemberSelectExpr : Expression {
-  public Expression Receiver { get; }
+  public Expression Receiver { get; set; }
   public MemberDecl Member { get; }
   public string MemberName => Member.Name;
 

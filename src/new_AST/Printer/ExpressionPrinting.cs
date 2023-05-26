@@ -45,6 +45,15 @@ public partial class ASTPrinter {
       case ThisExpr te:
         PrintThisExpr(te);
         break;
+      case WildcardExpr we:
+        PrintWildcardExpr(we);
+        break;
+      case FunctionCallExpr fe:
+        PrintFunctionCallExpr(fe);
+        break;
+      case StaticReceiverExpr se:
+        PrintStaticReceiverExpr(se);
+        break;
       default:
         throw new UnsupportedNodePrintingException(e);
     }
@@ -97,7 +106,7 @@ public partial class ASTPrinter {
   }
 
   private void PrintMemberSelectExpr(MemberSelectExpr e) {
-    if (e.Receiver is not ImplicitThisExpr) {
+    if (e.Receiver is not (ImplicitThisExpr or ImplicitStaticReceiverExpr)) {
       PrintExpression(e.Receiver);
       Write(".");
     }
@@ -162,8 +171,24 @@ public partial class ASTPrinter {
     }
   }
 
-  private void PrintThisExpr(ThisExpr te) {
-    if (te is ImplicitThisExpr) return;
+  private void PrintThisExpr(ThisExpr e) {
+    if (e is ImplicitThisExpr) return;
     Write("this");
+  }
+
+  private void PrintWildcardExpr(WildcardExpr e) {
+    Write("*");
+  }
+
+  private void PrintFunctionCallExpr(FunctionCallExpr e) {
+    PrintExpression(e.Callee);
+    Write("(");
+    PrintExpressions(e.Arguments);
+    Write(")");
+  }
+
+  private void PrintStaticReceiverExpr(StaticReceiverExpr e) {
+    if (e is ImplicitStaticReceiverExpr) { return; }
+    Write(e.Decl.Name);
   }
 }

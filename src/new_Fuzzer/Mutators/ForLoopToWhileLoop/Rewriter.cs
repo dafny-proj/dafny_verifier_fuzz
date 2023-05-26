@@ -1,55 +1,49 @@
 namespace Fuzzer_new;
 
-// Requires loops to have bodies.
-/// <summary>
-/// `for i := s to e { body }`
-/// Rewrites to
-/// ```
-/// var i := s;
-/// while (i != e) { body; i := i + 1; }
-/// ```
-/// </summary>
-public partial class ForLoopToWhileLoopRewriter {
-  private ForLoopStmt _forLoop;
-  private BlockStmt _forLoopParent;
+public partial class ForLoopToWhileLoopMutationRewriter {
+  private ForLoopStmt forLoop;
+  private BlockStmt enclosingScope;
 
-  public ForLoopToWhileLoopRewriter(
-  ForLoopStmt forLoop, BlockStmt forLoopParent) {
-    _forLoop = forLoop;
-    _forLoopParent = forLoopParent;
+  public ForLoopToWhileLoopMutationRewriter(ForLoopToWhileLoopMutation m)
+  : this(m.forLoop, m.enclosingScope) { }
+
+  public ForLoopToWhileLoopMutationRewriter(
+  ForLoopStmt forLoop, BlockStmt enclosingScope) {
+    this.forLoop = forLoop;
+    this.enclosingScope = enclosingScope;
   }
 
-  private void Rewrite() {
-    var indexBV = _forLoop.LoopIndex;
+  public void Rewrite() {
+    var indexBV = forLoop.LoopIndex;
     var indexLV = new LocalVar(indexBV.Name, indexBV.Type, indexBV.ExplicitType);
     // Create variable declaration for index.
     // `var index := start`
     var indexInit = new AssignStmt(new AssignmentPair(
-      new IdentifierExpr(indexLV), new ExprRhs(_forLoop.LoopStart)));
+      new IdentifierExpr(indexLV), new ExprRhs(forLoop.LoopStart)));
     var indexDecl = new VarDeclStmt(var: indexLV, initialiser: indexInit);
 
     // Create guard for while loop.
     Expression guard;
-    if (_forLoop.LoopEnd == null) {
+    if (forLoop.LoopEnd == null) {
       // non-deterministic loop: `while true`
       guard = new BoolLiteralExpr(true);
     } else {
       // `while index != end`
       guard = new BinaryExpr(
-        BinaryExpr.Opcode.Neq, new IdentifierExpr(indexLV), _forLoop.LoopEnd);
+        BinaryExpr.Opcode.Neq, new IdentifierExpr(indexLV), forLoop.LoopEnd);
     }
 
     // Create index update statement.
     // `index := index +/- 1`
     var nextIndex = new BinaryExpr(
-      _forLoop.GoesUp ? BinaryExpr.Opcode.Add : BinaryExpr.Opcode.Sub,
+      forLoop.GoesUp ? BinaryExpr.Opcode.Add : BinaryExpr.Opcode.Sub,
       new IdentifierExpr(indexLV), new IntLiteralExpr(1));
     var indexUpdate = new AssignStmt(new AssignmentPair(
       new IdentifierExpr(indexLV), new ExprRhs(nextIndex)));
 
     // Compose body of while loop as original body and index update statement.
-    var body = _forLoop.Body!;
-    if (_forLoop.GoesUp) {
+    var body = forLoop.Body!;
+    if (forLoop.GoesUp) {
       body.Append(indexUpdate);
     } else {
       body.Prepend(indexUpdate);
@@ -57,10 +51,10 @@ public partial class ForLoopToWhileLoopRewriter {
 
     // Create while loop.
     var whileLoop = new WhileLoopStmt(guard: guard, body: body,
-      inv: _forLoop.Invariants, mod: _forLoop.Modifies, dec: _forLoop.Decreases);
+      inv: forLoop.Invariants, mod: forLoop.Modifies, dec: forLoop.Decreases);
 
     // Replace for loop with index declaration and while loop.
-    _forLoopParent.Replace(_forLoop, new Statement[] { indexDecl, whileLoop });
+    enclosingScope.Replace(forLoop, new Statement[] { indexDecl, whileLoop });
   }
 
 }

@@ -1,7 +1,7 @@
 namespace AST_new;
 
 public partial class UnaryExpr : Expression {
-  public Expression E { get; }
+  public Expression E { get; set; }
   public UnaryExpr.Opcode Op { get; }
   public override Type Type {
     get {

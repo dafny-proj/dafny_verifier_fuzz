@@ -93,5 +93,11 @@ public static partial class DafnyWrappers {
       PrintDafnyAST(child, $"{prefix}.{childCount++}");
     }
   }
+
+  public static AST_new.Program ParseProgramFromString(string program) {
+    var programDafny = ParseDafnyProgramFromString(program);
+    ResolveDafnyProgram(programDafny);
+    return AST_new.Translation.DafnyASTTranslator.TranslateDafnyProgram(programDafny);
+  }
   
 }

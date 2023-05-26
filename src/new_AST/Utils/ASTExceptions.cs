@@ -23,12 +23,20 @@ public class ParentNotFoundException : InvalidASTOperationException {
   : this($"Could not find parent for `{child}`.") { }
 }
 
+public class ChildReplaceIncompatibleTypeException : InvalidASTOperationException {
+  public ChildReplaceIncompatibleTypeException(string message)
+  : base(message) { }
+
+  public ChildReplaceIncompatibleTypeException(Node parent, Node child, Node newChild)
+  : this($"Cannot replace `{child}` with `{newChild}` in `{parent}`.") { }
+}
+
 public class DuplicateParentException : InvalidASTOperationException {
   public DuplicateParentException(string message)
   : base(message) { }
 
   public DuplicateParentException(Node child, Node parent1, Node parent2)
-  : this($"Nodes should only have a single parent. Found multiple parents " + 
+  : this($"Nodes should only have a single parent. Found multiple parents " +
          $"{{`{parent1}`, `{parent2}`}} for `{child}`.") { }
 }
 

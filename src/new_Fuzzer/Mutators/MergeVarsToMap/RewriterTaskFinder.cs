@@ -1,6 +1,6 @@
 namespace Fuzzer_new;
 
-public partial class MergeVarsToClassRewriter {
+public partial class MergeVarsToMapMutationRewriter {
   private Dictionary<Node, Node> childToParent = new();
   private Node GetParent(Node c) {
     if (!childToParent.ContainsKey(c)) {
@@ -16,7 +16,6 @@ public partial class MergeVarsToClassRewriter {
   }
 
   private void VisitNode(Node n) {
-    VisitChildren(n);
     switch (n) {
       case IdentifierExpr e:
         VisitIdentifierExpr(e);
@@ -24,7 +23,11 @@ public partial class MergeVarsToClassRewriter {
       case VarDeclStmt s:
         VisitVarDeclStmt(s);
         return;
+      case AssignStmt s:
+        VisitAssignStmt(s);
+        return;
       default:
+        VisitChildren(n);
         return;
     }
   }
@@ -36,16 +39,27 @@ public partial class MergeVarsToClassRewriter {
   }
 
   private void VisitVarDeclStmt(VarDeclStmt s) {
+    VisitChildren(s);
     if (s.Vars.Any(v => ContainsVar(v))) {
       Contract.Assert(GetParent(s) is BlockStmt);
       rewriteTasks.Add(new VarDeclRewriteTask(s, (BlockStmt)GetParent(s), this));
     }
   }
 
-  private void VisitChildren(Node n) {
-    foreach (var c in n.Children) {
+  private void VisitAssignStmt(AssignStmt s) {
+    // Don't visit the Lhs.
+    VisitChildren(s, s.Rhss);
+    if (s.Lhss.Any(v => TryGetAffectedVar(v) != null)) {
+      Contract.Assert(GetParent(s) is BlockStmt);
+      rewriteTasks.Add(new VarDefRewriteTask(s, (BlockStmt)GetParent(s), this));
+    }
+  }
+
+  private void VisitChildren(Node parent, IEnumerable<Node>? children = null) {
+    var cs = children ?? parent.Children;
+    foreach (var c in cs) {
       if (OfInterest(c)) {
-        SetParent(n, c);
+        SetParent(c, parent);
         VisitNode(c);
       }
     }

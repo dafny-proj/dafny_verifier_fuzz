@@ -1,8 +1,8 @@
 namespace AST_new;
 
 public partial class BinaryExpr : Expression {
-  public Expression E0 { get; }
-  public Expression E1 { get; }
+  public Expression E0 { get; set; }
+  public Expression E1 { get; set; }
   public BinaryExpr.Opcode Op { get; }
   public override Type Type
     => OpcodesReturningBool.Contains(Op) ? Type.Bool : E0.Type;

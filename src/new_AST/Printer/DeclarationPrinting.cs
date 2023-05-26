@@ -57,9 +57,8 @@ public partial class ASTPrinter {
     if (named) {
       DecIndent();
       WriteIndent();
-      Write("}");
+      WriteLine("}");
     }
-    WriteLine();
   }
 
   private void PrintMethodHeader(MethodDecl d) {
@@ -197,6 +196,7 @@ public partial class ASTPrinter {
     Write($"var {d.Name}");
     Write(": ");
     PrintType(d.Type);
+    WriteLine();
   }
 
 }
