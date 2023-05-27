@@ -94,10 +94,10 @@ public static partial class DafnyWrappers {
     }
   }
 
-  public static AST_new.Program ParseProgramFromString(string program) {
+  public static AST.Program ParseProgramFromString(string program) {
     var programDafny = ParseDafnyProgramFromString(program);
     ResolveDafnyProgram(programDafny);
-    return AST_new.Translation.DafnyASTTranslator.TranslateDafnyProgram(programDafny);
+    return AST.Translation.DafnyASTTranslator.TranslateDafnyProgram(programDafny);
   }
   
 }

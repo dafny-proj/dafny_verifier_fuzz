@@ -1,6 +1,6 @@
 using Dafny = Microsoft.Dafny;
 
-namespace AST_new.Translation;
+namespace AST.Translation;
 
 public class UnsupportedTranslationException : Exception {
   public UnsupportedTranslationException(string message) : base(message) { }

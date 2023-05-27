@@ -1,6 +1,6 @@
 using Dafny = Microsoft.Dafny;
 
-namespace AST_new.Translation;
+namespace AST.Translation;
 
 public partial class DafnyASTTranslator {
   private Variable CreateVariable(Dafny.IVariable dv) {

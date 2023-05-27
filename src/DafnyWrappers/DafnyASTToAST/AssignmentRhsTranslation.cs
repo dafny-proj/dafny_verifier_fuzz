@@ -1,7 +1,7 @@
 using System.Diagnostics.Contracts;
 using Dafny = Microsoft.Dafny;
 
-namespace AST_new.Translation;
+namespace AST.Translation;
 
 public partial class DafnyASTTranslator {
   private AssignmentRhs TranslateAssignmentRhs(Dafny.AssignmentRhs ar) {

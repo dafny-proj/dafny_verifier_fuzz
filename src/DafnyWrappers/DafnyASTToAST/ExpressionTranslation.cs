@@ -2,7 +2,7 @@ using System.Numerics;
 using System.Diagnostics.Contracts;
 using Dafny = Microsoft.Dafny;
 
-namespace AST_new.Translation;
+namespace AST.Translation;
 
 public partial class DafnyASTTranslator {
   private Expression TranslateExpression(Dafny.Node n) {

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\new_AST\new_AST.csproj" />
+    <ProjectReference Include="..\AST\AST.csproj" />
   </ItemGroup>
 
   <ItemGroup>
