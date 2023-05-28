@@ -12,7 +12,7 @@ public class ASTTests {
     DafnyW.ResolveDafnyProgram(programDafny);
     var program = ASTTranslator.TranslateDafnyProgram(programDafny);
     var clone = ASTCloner.Clone<Program>(program);
-    var outputStr = ASTPrinter.NodeToString(clone);
+    var outputStr = ASTPrinter.PrintNodeToString(clone);
     Assert.AreEqual(sourceStr, outputStr.TrimEnd(), /*ignore_case=*/false);
   }
 

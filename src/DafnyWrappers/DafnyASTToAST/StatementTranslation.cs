@@ -2,7 +2,7 @@ using Dafny = Microsoft.Dafny;
 
 namespace AST.Translation;
 
-public partial class DafnyASTTranslator {
+public partial class ASTTranslator {
   private void SetStatementLabel(Dafny.Statement ds, Statement s) {
     if (ds.Labels != null && s.Labels == null) {
       s.Labels = new();
@@ -139,9 +139,10 @@ public partial class DafnyASTTranslator {
   }
 
   private UpdateStmt TranslateCallStmt(Dafny.CallStmt ds) {
-    var s = new CallStmt(new MethodCallRhs(
+    var s = new CallStmt(call: new MethodCallRhs(
       callee: TranslateMemberSelectExpr(ds.MethodSelect),
-      arguments: ds.Args.Select(TranslateExpression)));
+      arguments: ds.Args.Select(TranslateExpression)),
+      lhss: ds.Lhs.Select(TranslateExpression));
     SetStatementLabel(ds, s);
     return s;
   }

@@ -7,13 +7,17 @@ public interface IGenerator {
 }
 
 public class BasicGenerator : IGenerator {
-  private string id;
+  private string suffix;
   private int count = 0;
-  public BasicGenerator(string id) {
-    this.id = id;
+  public BasicGenerator(string suffix = "") {
+    this.suffix = suffix;
+  }
+  public void Reset(string suffix = "") {
+    this.count = 0;
+    this.suffix = suffix;
   }
 
-  private string GenName(string prefix) => $"{prefix}{count++}_{id}";
+  private string GenName(string prefix) => $"{prefix}{count++}_{suffix}";
   public string GenClassName() => GenName("C");
   public string GenLabelName() => GenName("l");
   public string GenVarName() => GenName("v");

@@ -23,7 +23,7 @@ public class MergeVarsToClassTest {
         Math.Min(mutation.Vars.Count, maxVarsMerged)).ToList();
     }
     mutator.ApplyMutation(mutation);
-    var mutant = ASTPrinter.NodeToString(program).TrimEnd();
+    var mutant = ASTPrinter.PrintNodeToString(program).TrimEnd();
     Assert.AreEqual(expectedOutput, mutant);
   }
 
@@ -137,6 +137,26 @@ public class MergeVarsToClassTest {
     TestMergeVarsToClass(source, target,
       expectedNumMutationsFound: 3,
       mutationToTrigger: 1);
+  }
+
+  [TestMethod]
+  public void Test5() {
+    var source = """
+    method M() returns (x: int) {
+      var y := M();
+    }
+    """;
+    var target = """
+    class C0_mock {
+      var y: int
+    }
+
+    method M() returns (x: int) {
+      var v1_mock: C0_mock := new C0_mock;
+      v1_mock.y := M();
+    }
+    """;
+    TestMergeVarsToClass(source, target);
   }
 
 }

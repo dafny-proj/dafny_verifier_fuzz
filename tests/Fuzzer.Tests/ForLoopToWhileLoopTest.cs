@@ -11,7 +11,7 @@ public class ForLoopToWhileLoopTest {
 
     var mutation = potentialMutations[0];
     mutator.ApplyMutation(mutation);
-    var mutant = ASTPrinter.NodeToString(program).TrimEnd();
+    var mutant = ASTPrinter.PrintNodeToString(program).TrimEnd();
     Assert.AreEqual(whileLoop, mutant);
   }
 

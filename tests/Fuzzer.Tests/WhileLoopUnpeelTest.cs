@@ -16,7 +16,7 @@ public class WhileLoopUnpeelTest {
 
     var mutation = potentialMutations[mutationToTrigger];
     mutator.ApplyMutation(mutation);
-    var mutant = ASTPrinter.NodeToString(program).TrimEnd();
+    var mutant = ASTPrinter.PrintNodeToString(program).TrimEnd();
     Assert.AreEqual(expectedOutput, mutant);
   }
 

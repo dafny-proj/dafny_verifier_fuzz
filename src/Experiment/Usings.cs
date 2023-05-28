@@ -1,5 +1,5 @@
 global using AST;
-global using Type = AST.Type;
+global using DafnyWrappers;
 global using Cloner = AST.Cloner.ASTCloner;
 global using Printer = AST.Printer.ASTPrinter;
-global using System.Diagnostics.Contracts;
+global using DafnyW = DafnyWrappers.DafnyWrappers;

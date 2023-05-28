@@ -4,7 +4,7 @@ using Dafny = Microsoft.Dafny;
 
 namespace AST.Translation;
 
-public partial class DafnyASTTranslator {
+public partial class ASTTranslator {
   private Expression TranslateExpression(Dafny.Node n) {
     // For now, ignore differences between attributed/frame expressions 
     // and expressions.

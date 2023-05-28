@@ -10,7 +10,7 @@ public class UnsupportedTranslationException : Exception {
 }
 
 // Requires Dafny program to be resolved.
-public partial class DafnyASTTranslator {
+public partial class ASTTranslator {
   private Dictionary<Dafny.Declaration, Declaration> SkeletonDecls = new();
   private Dictionary<Dafny.Declaration, Declaration> TranslatedDecls = new();
 
@@ -53,7 +53,7 @@ public partial class DafnyASTTranslator {
   }
 
   public static Program TranslateDafnyProgram(Dafny.Program p) {
-    return new DafnyASTTranslator().TranslateProgram(p);
+    return new ASTTranslator().TranslateProgram(p);
   }
 
   private Program TranslateProgram(Dafny.Program p) {

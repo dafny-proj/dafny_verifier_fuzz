@@ -3,7 +3,7 @@ using Dafny = Microsoft.Dafny;
 
 namespace AST.Translation;
 
-public partial class DafnyASTTranslator {
+public partial class ASTTranslator {
   private AssignmentRhs TranslateAssignmentRhs(Dafny.AssignmentRhs ar) {
     return ar switch {
       Dafny.ExprRhs er => TranslateExprRhs(er),

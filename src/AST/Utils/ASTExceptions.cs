@@ -1,6 +1,10 @@
 namespace AST;
 
-public class InvalidASTOperationException : Exception {
+public class ASTException : Exception {
+  public ASTException(string message) : base(message) { }
+}
+
+public class InvalidASTOperationException : ASTException {
   public InvalidASTOperationException(string message) : base(message) { }
 
   public InvalidASTOperationException(object trigger, string operation, string message = "\r")
@@ -40,7 +44,7 @@ public class DuplicateParentException : InvalidASTOperationException {
          $"{{`{parent1}`, `{parent2}`}} for `{child}`.") { }
 }
 
-public class UnsupportedASTOperationException : Exception {
+public class UnsupportedASTOperationException : ASTException {
   public UnsupportedASTOperationException(string message) : base(message) { }
 
   public UnsupportedASTOperationException(object trigger, string operation)

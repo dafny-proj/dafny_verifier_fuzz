@@ -2,7 +2,7 @@ using Dafny = Microsoft.Dafny;
 
 namespace AST.Translation;
 
-public partial class DafnyASTTranslator {
+public partial class ASTTranslator {
   private Type TranslateType(Dafny.Type t) {
     return t switch {
       Dafny.BoolType => Type.Bool,

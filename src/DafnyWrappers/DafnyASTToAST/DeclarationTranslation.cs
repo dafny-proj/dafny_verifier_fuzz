@@ -2,7 +2,7 @@ using Dafny = Microsoft.Dafny;
 
 namespace AST.Translation;
 
-public partial class DafnyASTTranslator {
+public partial class ASTTranslator {
   private Declaration TranslateDeclRef(Dafny.Declaration dd) {
     if (TranslatedDecls.ContainsKey(dd)) {
       return TranslatedDecls[dd];

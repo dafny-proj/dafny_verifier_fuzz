@@ -2,7 +2,7 @@ using Dafny = Microsoft.Dafny;
 
 namespace AST.Translation;
 
-public partial class DafnyASTTranslator {
+public partial class ASTTranslator {
   private Variable CreateVariable(Dafny.IVariable dv) {
     var name = dv.Name;
     var type = TranslateType(dv.Type);

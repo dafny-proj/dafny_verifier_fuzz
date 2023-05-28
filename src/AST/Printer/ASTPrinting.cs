@@ -14,10 +14,14 @@ public partial class ASTPrinter {
     _wr = wr;
   }
 
-  public static string NodeToString(Node n) {
-    var wr = new StringWriter();
+  public static void PrintNode(Node n, TextWriter wr) {
     var pr = new ASTPrinter(wr);
     pr.PrintNode(n);
+  }
+
+  public static string PrintNodeToString(Node n) {
+    var wr = new StringWriter();
+    PrintNode(n, wr);
     return wr.ToString();
   }
 

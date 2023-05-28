@@ -2,40 +2,88 @@
 using System.Diagnostics;
 
 namespace DafnyWrappers;
+
+public class DafnyException : Exception {
+  public int ErrorCount = 0;
+  public List<string> ErrorMessages = new();
+  public DafnyException(Dafny.BatchErrorReporter reporter) {
+    ErrorCount = reporter.Count(Dafny.ErrorLevel.Error);
+    foreach (var err in reporter.AllMessages[Dafny.ErrorLevel.Error]) {
+      ErrorMessages.Add(
+        Dafny.ErrorReporter.ErrorToString(err.Level, err.Token, err.Message));
+    }
+  }
+  public DafnyException(int errorCount) {
+    ErrorCount = errorCount;
+  }
+}
+
+public class DafnyParseException : DafnyException {
+  public DafnyParseException(Dafny.BatchErrorReporter reporter)
+  : base(reporter) { }
+  public DafnyParseException(int errorCount) : base(errorCount) { }
+}
+
+public class DafnyResolveException : DafnyException {
+  public DafnyResolveException(Dafny.BatchErrorReporter reporter)
+  : base(reporter) { }
+  public DafnyResolveException(int errorCount) : base(errorCount) { }
+}
+
 public static partial class DafnyWrappers {
-  public static Dafny.DafnyOptions DefaultDafnyParseOptions() {
-    return Dafny.DafnyOptions.Create();
+  public static AST.Program ParseProgramFromFile(string filepath) {
+    return ParseProgramFromString(File.ReadAllText(filepath));
   }
 
-  // FIXME: For now, assume no errors while parsing and that we only parse a single file
-  public static Dafny.Program
-  ParseDafnyProgramFromFile(string sourceFile) {
-    var sourceStr = File.ReadAllText(sourceFile);
-    return ParseDafnyProgramFromString(sourceStr, sourceFile);
+  public static AST.Program ParseProgramFromString(string program) {
+    var programDafny = ParseDafnyProgramFromString(program);
+    ResolveDafnyProgram(programDafny);
+    return AST.Translation.ASTTranslator.TranslateDafnyProgram(programDafny);
   }
 
-  // FIXME: For now, assume no errors while parsing and that we only parse a single file
+  public static Dafny.Program ParseDafnyProgramFromFile(string filepath) {
+    var program = File.ReadAllText(filepath);
+    return ParseDafnyProgramFromString(program, filepath);
+  }
+
   public static Dafny.Program
-  ParseDafnyProgramFromString(string sourceStr, string sourceFile = "") {
-    var options = DefaultDafnyParseOptions();
-    var defModule = new Dafny.LiteralModuleDecl(
+  ParseDafnyProgramFromString(string program, string filePath = "program.dfy") {
+    var filename = Path.GetFileName(filePath);
+    var options = Dafny.DafnyOptions.Create();
+    var module = new Dafny.LiteralModuleDecl(
       new Dafny.DefaultModuleDefinition(), /*parent=*/null);
     var builtIns = new Dafny.BuiltIns(options);
-    var reporter = new Dafny.ConsoleErrorReporter(options);
-    var success = Dafny.Parser.Parse(sourceStr, sourceFile, sourceFile, defModule, builtIns, reporter);
-    return new Dafny.Program("program", defModule, builtIns, reporter);
+    var reporter = new Dafny.BatchErrorReporter(options);
+    var numParseErrors = Dafny.Parser.Parse(
+      program, filePath, filename, module, builtIns, reporter);
+    if (numParseErrors > 0) {
+      throw new DafnyParseException(reporter);
+    }
+    return new Dafny.Program(filename, module, builtIns, reporter);
   }
 
-  public static void
-  ResolveDafnyProgram(Dafny.Program programDafny) {
+  public static void ResolveDafnyProgram(Dafny.Program programDafny) {
     var resolver = new Dafny.Resolver(programDafny);
     resolver.ResolveProgram(programDafny);
+    var reporter = programDafny.Reporter;
+    var numResolveErrors = reporter.ErrorCountUntilResolver;
+    if (numResolveErrors > 0) {
+      var exception = reporter is Dafny.BatchErrorReporter r ?
+        new DafnyResolveException(r) :
+        new DafnyResolveException(numResolveErrors);
+      throw exception;
+    }
   }
+}
 
-  public static string DafnyProgramToString(Dafny.Program programDafny) {
+// Internal tools for development.
+public static partial class DafnyWrappers {
+  public static string DafnyProgramToString(
+  Dafny.Program programDafny, bool postResolution = false) {
     var writer = new StringWriter();
-    var printer = new Dafny.Printer(writer, programDafny.Options, programDafny.Options.PrintMode);
-    printer.PrintProgram(programDafny, /*afterResolver=*/false);
+    var printer = new Dafny.Printer(writer,
+      programDafny.Options, programDafny.Options.PrintMode);
+    printer.PrintProgram(programDafny, postResolution);
     return writer.ToString();
   }
 
@@ -46,7 +94,8 @@ public static partial class DafnyWrappers {
     "--use-basename-for-filename",
     "--verification-time-limit=300" };
 
-  public static (int, string, string) RunDafnyVerify(string filepath, string dafnyPath = DefaultDafnyPath) {
+  public static (int, string, string)
+  RunDafnyVerify(string filepath, string dafnyPath = DefaultDafnyPath) {
     // Verification API is not easily callable, use Dafny CLI instead
     var process = new Process();
     process.StartInfo.FileName = dafnyPath;
@@ -85,7 +134,8 @@ public static partial class DafnyWrappers {
     }
   }
 
-  public static void PrintDafnyAST(Dafny.Node node, string prefix="0", bool preResolve = false) {
+  public static void PrintDafnyAST(
+  Dafny.Node node, string prefix = "0", bool preResolve = false) {
     Console.WriteLine($"{prefix}: {node.GetType()}");
     int childCount = 1;
     var children = preResolve ? node.PreResolveChildren : node.Children;
@@ -94,10 +144,4 @@ public static partial class DafnyWrappers {
     }
   }
 
-  public static AST.Program ParseProgramFromString(string program) {
-    var programDafny = ParseDafnyProgramFromString(program);
-    ResolveDafnyProgram(programDafny);
-    return AST.Translation.DafnyASTTranslator.TranslateDafnyProgram(programDafny);
-  }
-  
 }

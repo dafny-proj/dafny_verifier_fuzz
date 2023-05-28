@@ -23,7 +23,7 @@ public class MergeVarsToMapTest {
         Math.Min(mutation.Vars.Count, maxVarsMerged)).ToList();
     }
     mutator.ApplyMutation(mutation);
-    var mutant = ASTPrinter.NodeToString(program).TrimEnd();
+    var mutant = ASTPrinter.PrintNodeToString(program).TrimEnd();
     Assert.AreEqual(expectedOutput, mutant);
   }
 
