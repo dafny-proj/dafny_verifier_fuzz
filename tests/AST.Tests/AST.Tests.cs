@@ -230,4 +230,14 @@ public class ASTTests {
     CanParseClonePrint(sourceStr);
   }
 
+  [TestMethod]
+  public void ITEExpr() {
+    var sourceStr = """
+    function IsNegative(x: int): bool {
+      if x < 0 then true else false
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
 }

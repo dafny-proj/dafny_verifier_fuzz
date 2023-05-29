@@ -54,6 +54,9 @@ public partial class ASTPrinter {
       case StaticReceiverExpr se:
         PrintStaticReceiverExpr(se);
         break;
+      case ITEExpr ie:
+        PrintITEExpr(ie);
+        break;
       default:
         throw new UnsupportedNodePrintingException(e);
     }
@@ -191,4 +194,14 @@ public partial class ASTPrinter {
     if (e is ImplicitStaticReceiverExpr) { return; }
     Write(e.Decl.Name);
   }
+
+  private void PrintITEExpr(ITEExpr e) {
+    Write("if ");
+    PrintExpression(e.Guard);
+    Write(" then ");
+    PrintExpression(e.Thn);
+    Write(" else ");
+    PrintExpression(e.Els);
+  }
+
 }

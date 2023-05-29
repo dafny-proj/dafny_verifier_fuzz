@@ -42,6 +42,9 @@ public static partial class ASTChildReplacementMethods {
       case FunctionCallExpr e:
         e.ReplaceChild(child, newChild);
         break;
+      case ITEExpr e:
+        e.ReplaceChild(child, newChild);
+        break;
       default:
         throw new UnsupportedNodeChildReplacementException(n);
     }
@@ -148,6 +151,19 @@ public static partial class ASTChildReplacementMethods {
       n.Callee = CheckAndCastNewChild<MemberSelectExpr>(n, child, newChild);
     } else {
       ReplaceInList<Expression>(n.Arguments, child, newChild, n);
+    }
+  }
+
+  public static void ReplaceChild(this ITEExpr n, Node child, Node newChild) {
+    var newE = CheckAndCastNewChild<Expression>(n, child, newChild);
+    if (n.Guard == child) {
+      n.Guard = newE;
+    } else if (n.Thn == child) {
+      n.Thn = newE;
+    } else if (n.Thn == child) {
+      n.Els = newE;
+    } else {
+      throw new ChildNotFoundException(n, child);
     }
   }
 

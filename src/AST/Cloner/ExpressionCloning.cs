@@ -22,6 +22,7 @@ public partial class ASTCloner {
       WildcardExpr we => CloneWildcardExpr(we),
       FunctionCallExpr fe => CloneFunctionCallExpr(fe),
       StaticReceiverExpr se => CloneStaticReceiverExpr(se),
+      ITEExpr ite => CloneITEExpr(ite),
       _ => throw new UnsupportedNodeCloningException(e),
     };
   }
@@ -121,6 +122,11 @@ public partial class ASTCloner {
       return new ImplicitStaticReceiverExpr(d);
     }
     return new StaticReceiverExpr(d);
+  }
+
+  private ITEExpr CloneITEExpr(ITEExpr e) {
+    return new ITEExpr(CloneExpression(e.Guard), 
+      CloneExpression(e.Thn), CloneExpression(e.Els));
   }
 
 }
