@@ -44,8 +44,9 @@ public partial class ASTTranslator {
   }
 
   private Expression TranslateLiteralExpr(Dafny.LiteralExpr le) {
-
-    if (le.Value == null) {
+    if (le is Dafny.StaticReceiverExpr sre) {
+      return TranslateStaticReceiverExpr(sre);
+    } else if (le.Value == null) {
       return new NullLiteralExpr(TranslateType(le.Type));
     } else if (le.Value is bool b) {
       return new BoolLiteralExpr(b);
@@ -57,8 +58,6 @@ public partial class ASTTranslator {
       return new RealLiteralExpr(f.ToDecimalString());
     } else if (le is Dafny.StringLiteralExpr se) {
       return new StringLiteralExpr((string)se.Value);
-    } else if (le is Dafny.StaticReceiverExpr sre) {
-      return TranslateStaticReceiverExpr(sre);
     } else {
       throw new UnsupportedTranslationException(le);
     }
