@@ -292,4 +292,39 @@ public class ASTTests {
     """;
     CanParseClonePrint(sourceStr);
   }
+
+  [TestMethod]
+  public void ForallStmt() {
+    // TODO: Replace range with chaining expression when implemented.
+    // TODO: Replace upper bound with a.Length when implemented.
+    var forallAssign = """
+    method ForallStmtAssign() {
+      var a := new int[5];
+      forall i: int | 0 <= i && i < 5 {
+        a[i] := i;
+      }
+    }
+    """;
+    var forallCall = """
+    lemma P(i: int)
+
+    method ForallStmtCall() {
+      forall i: int | 0 <= i < 5 {
+        P(i);
+      }
+    }
+    """;
+    var forallProof = """
+    method ForallStmtProof() {
+      forall i: int | 0 <= i && i < 5
+        ensures i < 5
+      {
+      }
+    }
+    """;
+    CanParseClonePrint(forallAssign);
+    // TODO: Lemmas.
+    // CanParseClonePrint(forallCall);
+    CanParseClonePrint(forallProof);
+  }
 }

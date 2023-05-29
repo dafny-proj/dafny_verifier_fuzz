@@ -51,4 +51,16 @@ public partial class ASTTranslator {
       TranslateExpression(ep.A), TranslateExpression(ep.B));
   }
 
+  private QuantifierDomain TranslateQuantifierDomain(
+  IEnumerable<Dafny.BoundVar> vars, Dafny.Expression? range) {
+    var vs = vars.Select(TranslateBoundVar);
+    // Quantified vars may be explicitly typed, but this information is lost 
+    // during desugaring of the quantifier domain. Assume explicit to be safe.
+    foreach (var v in vs) {
+      v.ExplicitType = v.Type;
+    }
+    return new QuantifierDomain(vars: vs,
+      range: range == null ? null : TranslateExpression(range));
+  }
+
 }

@@ -39,6 +39,9 @@ public partial class ASTPrinter {
       case AssertStmt ats:
         PrintAssertStmt(ats);
         break;
+      case ForallStmt fs:
+        PrintForallStmt(fs);
+        break;
       default:
         throw new UnsupportedNodePrintingException(s);
     }
@@ -166,6 +169,26 @@ public partial class ASTPrinter {
     Write("assert ");
     PrintExpression(s.Assertion);
     Write(";");
+  }
+
+  private void PrintForallStmt(ForallStmt s) {
+    Write("forall ");
+    PrintQuantifierDomain(s.QuantifierDomain);
+    var printSpec = Specification.HasUserDefinedSpec(s.Ensures);
+    if (printSpec) {
+      WriteLine();
+      IncIndent();
+      PrintSpecification(s.Ensures);
+      DecIndent();
+    }
+    if (s.Body != null) {
+      if (printSpec) {
+        WriteIndent();
+      } else {
+        Write(" ");
+      }
+      PrintStatement(s.Body);
+    }
   }
 
 }

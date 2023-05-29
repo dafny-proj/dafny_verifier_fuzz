@@ -165,14 +165,7 @@ public partial class ASTTranslator {
   }
 
   private QuantifierExpr TranslateQuantifierExpr(Dafny.QuantifierExpr qe) {
-    var vars = qe.BoundVars.Select(TranslateBoundVar);
-    // Quantified vars are always explicitly typed, but this information is lost 
-    // during desugaring of the quantifier domain.
-    foreach (var v in vars) {
-      v.ExplicitType = v.Type;
-    }
-    var qd = new QuantifierDomain(vars: vars,
-      range: qe.Range == null ? null : TranslateExpression(qe.Range));
+    var qd = TranslateQuantifierDomain(qe.BoundVars, qe.Range);
     var term = TranslateExpression(qe.Term);
     if (qe is Dafny.ForallExpr) {
       return new ForallExpr(qd, term);
