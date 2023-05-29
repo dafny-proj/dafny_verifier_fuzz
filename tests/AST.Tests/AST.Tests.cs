@@ -309,7 +309,7 @@ public class ASTTests {
     lemma P(i: int)
 
     method ForallStmtCall() {
-      forall i: int | 0 <= i < 5 {
+      forall i: int | 0 <= i && i < 5 {
         P(i);
       }
     }
@@ -323,8 +323,7 @@ public class ASTTests {
     }
     """;
     CanParseClonePrint(forallAssign);
-    // TODO: Lemmas.
-    // CanParseClonePrint(forallCall);
+    CanParseClonePrint(forallCall);
     CanParseClonePrint(forallProof);
   }
 }

@@ -62,13 +62,9 @@ public partial class ASTPrinter {
   }
 
   private void PrintMethodHeader(MethodDecl d) {
-    if (d is ConstructorDecl c) {
-      Write("constructor");
-      if (!c.IsAnonymous()) {
-        Write($" {c.Name}");
-      }
-    } else {
-      Write($"method {d.Name}");
+    Write(d.MethodKind);
+    if (d is not ConstructorDecl c || !c.IsAnonymous()) {
+      Write(" " + d.Name);
     }
     PrintTypeParameters(d.TypeParams);
   }

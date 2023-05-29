@@ -217,6 +217,7 @@ public partial class ASTCloner {
     var enclosingDecl = (TopLevelDecl)CloneDeclRef(d.EnclosingDecl);
     var s = d switch {
       ConstructorDecl => ConstructorDecl.Skeleton(enclosingDecl, d.Name),
+      LemmaDecl => LemmaDecl.Skeleton(enclosingDecl, d.Name),
       _ => MethodDecl.Skeleton(enclosingDecl, d.Name),
     };
     MarkDeclCloneSkeleton(d, s);

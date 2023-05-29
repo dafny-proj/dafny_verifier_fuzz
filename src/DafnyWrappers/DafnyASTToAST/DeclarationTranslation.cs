@@ -135,6 +135,7 @@ public partial class ASTTranslator {
         = (TopLevelDecl)TranslateDeclRef(d.EnclosingClass);
     var s = d switch {
       Dafny.Constructor => ConstructorDecl.Skeleton(enclosingDecl, d.Name),
+      Dafny.Lemma => LemmaDecl.Skeleton(enclosingDecl, d.Name),
       _ => MethodDecl.Skeleton(enclosingDecl, d.Name),
     };
     MarkDeclSkeleton(d, s);

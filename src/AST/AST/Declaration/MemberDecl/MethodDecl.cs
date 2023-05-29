@@ -2,8 +2,10 @@ namespace AST;
 
 public partial class MethodDecl : MemberDecl { }
 public partial class ConstructorDecl : MethodDecl { }
+public partial class LemmaDecl : MethodDecl { }
 
 public partial class MethodDecl : MemberDecl {
+  public virtual string MethodKind => "method";
   public override string Name { get; protected set; }
   public readonly List<TypeParameterDecl> TypeParams = new();
   public BlockStmt? Body { get; set; }
@@ -64,6 +66,7 @@ public partial class MethodDecl : MemberDecl {
 }
 
 public partial class ConstructorDecl : MethodDecl {
+  public override string MethodKind => "constructor";
   public bool IsAnonymous() => Name == "_ctor";
 
   public ConstructorDecl(TopLevelDecl enclosingDecl, string name,
@@ -75,4 +78,18 @@ public partial class ConstructorDecl : MethodDecl {
 
   new public static ConstructorDecl Skeleton(TopLevelDecl enclosingDecl, string name)
     => new ConstructorDecl(enclosingDecl, name);
+}
+
+public partial class LemmaDecl : MethodDecl {
+  public override string MethodKind => "lemma";
+
+  public LemmaDecl(TopLevelDecl enclosingDecl, string name,
+  IEnumerable<TypeParameterDecl>? typeParams = null, BlockStmt? body = null,
+  IEnumerable<Formal>? ins = null, IEnumerable<Formal>? outs = null,
+  Specification? pre = null, Specification? post = null,
+  Specification? mod = null, Specification? dec = null)
+  : base(enclosingDecl, name, typeParams, body, ins, outs, pre, post, mod, dec) { }
+
+  public new static LemmaDecl Skeleton(TopLevelDecl enclosingDecl, string name)
+    => new LemmaDecl(enclosingDecl, name);
 }
