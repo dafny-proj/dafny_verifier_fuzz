@@ -45,6 +45,9 @@ public static partial class ASTChildReplacementMethods {
       case ITEExpr e:
         e.ReplaceChild(child, newChild);
         break;
+      case LetExpr e:
+        e.ReplaceChild(child, newChild);
+        break;
       default:
         throw new UnsupportedNodeChildReplacementException(n);
     }
@@ -164,6 +167,15 @@ public static partial class ASTChildReplacementMethods {
       n.Els = newE;
     } else {
       throw new ChildNotFoundException(n, child);
+    }
+  }
+
+  public static void ReplaceChild(this LetExpr n, Node child, Node newChild) {
+    if (n.Body == child) {
+      n.Body = CheckAndCastNewChild<Expression>(n, child, newChild);
+    } else {
+      // Other children are unlikely to be mutated here, skip for now.
+      throw new UnsupportedNodeChildReplacementException(n);
     }
   }
 

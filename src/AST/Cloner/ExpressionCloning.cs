@@ -23,6 +23,7 @@ public partial class ASTCloner {
       FunctionCallExpr fe => CloneFunctionCallExpr(fe),
       StaticReceiverExpr se => CloneStaticReceiverExpr(se),
       ITEExpr ite => CloneITEExpr(ite),
+      LetExpr le => CloneLetExpr(le),
       _ => throw new UnsupportedNodeCloningException(e),
     };
   }
@@ -125,8 +126,15 @@ public partial class ASTCloner {
   }
 
   private ITEExpr CloneITEExpr(ITEExpr e) {
-    return new ITEExpr(CloneExpression(e.Guard), 
+    return new ITEExpr(CloneExpression(e.Guard),
       CloneExpression(e.Thn), CloneExpression(e.Els));
+  }
+
+  private LetExpr CloneLetExpr(LetExpr e) {
+    return new LetExpr(e.Vars.Select(v =>
+      new KeyValuePair<BoundVar, Expression>(
+        CloneBoundVar(v.Key), CloneExpression(v.Value))),
+      CloneExpression(e.Body));
   }
 
 }

@@ -240,4 +240,14 @@ public class ASTTests {
     CanParseClonePrint(sourceStr);
   }
 
+  [TestMethod]
+  public void LetExpr() {
+    var sourceStr = """
+    function Triple(x: int): int {
+      var single, double := x, x + x; var triple := single + double; triple
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }  
+
 }

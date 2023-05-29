@@ -57,6 +57,9 @@ public partial class ASTPrinter {
       case ITEExpr ie:
         PrintITEExpr(ie);
         break;
+      case LetExpr le:
+        PrintLetExpr(le);
+        break;
       default:
         throw new UnsupportedNodePrintingException(e);
     }
@@ -202,6 +205,17 @@ public partial class ASTPrinter {
     PrintExpression(e.Thn);
     Write(" else ");
     PrintExpression(e.Els);
+  }
+
+  private void PrintLetExpr(LetExpr le) {
+    var lhss = le.Vars.Select(v => v.Key);
+    var rhss = le.Vars.Select(v => v.Value);
+    Write("var ");
+    PrintList<BoundVar>(lhss, PrintBoundVar);
+    Write(" := ");
+    PrintExpressions(rhss);
+    Write("; ");
+    PrintExpression(le.Body);
   }
 
 }
