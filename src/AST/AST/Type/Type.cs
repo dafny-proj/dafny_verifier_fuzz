@@ -22,3 +22,10 @@ public partial class TypeProxy : Type {
     => throw new InvalidASTOperationException(
       $"Type proxies should not be printed.");
 }
+
+public partial class NullableType : UserDefinedType {
+  public override string BaseName => TypeDecl.Name + "?";
+
+  public NullableType(ClassDecl classDecl, IEnumerable<Type>? typeArgs = null)
+  : base(classDecl, typeArgs) { }
+}

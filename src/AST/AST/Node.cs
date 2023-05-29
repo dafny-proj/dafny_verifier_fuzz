@@ -80,6 +80,7 @@ public partial class SetType : CollectionType { }
 public partial class MultiSetType : CollectionType { }
 public partial class UserDefinedType : Type { }
 public partial class TypeProxy : Type { }
+public partial class NullableType : UserDefinedType { }
 
 public abstract partial class Variable : Node { }
 public partial class Specification : Node { }

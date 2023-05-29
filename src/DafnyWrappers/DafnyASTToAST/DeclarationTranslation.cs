@@ -119,9 +119,6 @@ public partial class ASTTranslator {
   }
 
   private TopLevelDecl TranslateSubsetTypeDecl(Dafny.SubsetTypeDecl dstd) {
-    if (dstd is Dafny.NonNullTypeDecl ntd) {
-      return (ClassDecl)TranslateDeclRef(ntd.Class);
-    }
     if (HasTranslatedDecl(dstd)) {
       return (SubsetTypeDecl)GetTranslatedDecl(dstd);
     }

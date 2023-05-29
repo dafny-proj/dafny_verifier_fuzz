@@ -24,17 +24,22 @@ public partial class ASTTranslator {
   }
 
   private Type TranslateUserDefinedType(Dafny.UserDefinedType udt) {
+    var typeArgs = udt.TypeArgs.Select(TranslateType);
     if (udt.IsStringType) {
       return Type.String;
     } else if (udt.Name == "nat") {
       return Type.Nat;
     } else if (udt.IsArrayType) {
       var arrDecl = (ArrayClassDecl)TranslateDeclRef(udt.AsArrayType);
-      return new ArrayType(arrDecl, TranslateType(udt.TypeArgs[0]));
+      return new ArrayType(arrDecl, typeArgs.First());
+    } else if (udt.ResolvedClass is Dafny.ClassDecl cd) {
+      var t = new NullableType((ClassDecl)TranslateDeclRef(cd), typeArgs);
+      return new NullableType((ClassDecl)TranslateDeclRef(cd), typeArgs);
+    } else if (udt.ResolvedClass is Dafny.NonNullTypeDecl nd) {
+      return new UserDefinedType((ClassDecl)TranslateDeclRef(nd.Class), typeArgs);
     } else {
       return new UserDefinedType(
-        (TopLevelDecl)TranslateDeclRef(udt.ResolvedClass),
-        udt.TypeArgs.Select(TranslateType));
+        (TopLevelDecl)TranslateDeclRef(udt.ResolvedClass), typeArgs);
     }
   }
 

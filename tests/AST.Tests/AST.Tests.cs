@@ -259,20 +259,24 @@ public class ASTTests {
     }
     """;
     CanParseClonePrint(sourceStr);
-  }  
+  }
 
   [TestMethod]
   public void LiteralExpr() {
     var sourceStr = """
+    class C {
+    }
+
     method Literals() {
       var t, f := true, false;
       var c: char := '\n';
       var i: int := 12345;
       var r: real := 0.5;
       var s: string := "hello";
+      var c0: C?, c1: C := null, new C;
     }
     """;
     CanParseClonePrint(sourceStr);
-  }  
+  }
 
 }
