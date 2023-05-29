@@ -279,4 +279,17 @@ public class ASTTests {
     CanParseClonePrint(sourceStr);
   }
 
+  [TestMethod]
+  public void QuantifierExpr() {
+    var sourceStr = """
+    function Forall(): bool {
+      forall x: nat | x <= 5 :: x * x <= 25
+    }
+
+    function Exists(): bool {
+      exists x: nat, y: nat | x <= 5 && y <= 5 :: x * y == 25
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
 }

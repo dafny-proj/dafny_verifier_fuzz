@@ -60,6 +60,9 @@ public partial class ASTPrinter {
       case LetExpr le:
         PrintLetExpr(le);
         break;
+      case QuantifierExpr qe:
+        PrintQuantifierExpr(qe);
+        break;
       default:
         throw new UnsupportedNodePrintingException(e);
     }
@@ -216,11 +219,18 @@ public partial class ASTPrinter {
     var lhss = le.Vars.Select(v => v.Key);
     var rhss = le.Vars.Select(v => v.Value);
     Write("var ");
-    PrintList<BoundVar>(lhss, PrintBoundVar);
+    PrintBoundVars(lhss);
     Write(" := ");
     PrintExpressions(rhss);
     Write("; ");
     PrintExpression(le.Body);
+  }
+
+  private void PrintQuantifierExpr(QuantifierExpr qe) {
+    Write(qe.Quantifier + " ");
+    PrintQuantifierDomain(qe.QuantifierDomain);
+    Write(" :: ");
+    PrintExpression(qe.Term);
   }
 
 }

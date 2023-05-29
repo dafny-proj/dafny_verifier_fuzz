@@ -54,6 +54,7 @@ public partial class FunctionCallExpr : Expression { }
 public partial class StaticReceiverExpr : Expression { }
 public partial class ITEExpr : Expression { }
 public partial class LetExpr : Expression { }
+public abstract partial class QuantifierExpr : Expression { }
 
 public abstract partial class AssignmentRhs : Node { }
 public partial class ExprRhs : AssignmentRhs { }
@@ -85,3 +86,4 @@ public partial class NullableType : UserDefinedType { }
 public abstract partial class Variable : Node { }
 public partial class Specification : Node { }
 public partial class KeyValuePair<K, V> : Node where K : Node where V : Node { }
+public partial class QuantifierDomain : Node { }

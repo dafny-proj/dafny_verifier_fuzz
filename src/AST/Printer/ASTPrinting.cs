@@ -56,6 +56,9 @@ public partial class ASTPrinter {
   private void PrintLocalVars(IEnumerable<LocalVar> lvs) {
     PrintList<LocalVar>(lvs, PrintLocalVar);
   }
+  private void PrintBoundVars(IEnumerable<BoundVar> bvs) {
+    PrintList<BoundVar>(bvs, PrintBoundVar);
+  }
   private void PrintAssignmentRhss(IEnumerable<AssignmentRhs> ars) {
     PrintList<AssignmentRhs>(ars, PrintAssignmentRhs);
   }

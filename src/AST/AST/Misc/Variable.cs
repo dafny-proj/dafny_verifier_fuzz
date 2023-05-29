@@ -9,7 +9,7 @@ public partial class Formal : Variable { }
 public abstract partial class Variable : Node {
   public virtual string Name { get; protected set; }
   public virtual Type Type { get; protected set; }
-  public virtual Type? ExplicitType { get; protected set; }
+  public virtual Type? ExplicitType { get; set; }
 
   public bool HasExplicitType() => ExplicitType != null;
 

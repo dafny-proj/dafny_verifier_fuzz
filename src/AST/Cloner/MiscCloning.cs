@@ -45,4 +45,9 @@ public partial class ASTCloner {
     return new AssignmentPair(
       CloneExpression(ap.Key), CloneAssignmentRhs(ap.Value));
   }
+
+  private QuantifierDomain CloneQuantifierDomain(QuantifierDomain qd) {
+    return new QuantifierDomain(qd.Vars.Select(CloneBoundVar),
+      qd.Range == null ? null : CloneExpression(qd.Range));
+  }
 }

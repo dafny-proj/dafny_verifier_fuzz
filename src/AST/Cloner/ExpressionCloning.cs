@@ -24,6 +24,7 @@ public partial class ASTCloner {
       StaticReceiverExpr se => CloneStaticReceiverExpr(se),
       ITEExpr ite => CloneITEExpr(ite),
       LetExpr le => CloneLetExpr(le),
+      QuantifierExpr qe => CloneQuantifierExpr(qe),
       _ => throw new UnsupportedNodeCloningException(e),
     };
   }
@@ -138,6 +139,18 @@ public partial class ASTCloner {
       new KeyValuePair<BoundVar, Expression>(
         CloneBoundVar(v.Key), CloneExpression(v.Value))),
       CloneExpression(e.Body));
+  }
+
+  private QuantifierExpr CloneQuantifierExpr(QuantifierExpr e) {
+    var qd = CloneQuantifierDomain(e.QuantifierDomain);
+    var term = CloneExpression(e.Term);
+    if (e is ForallExpr) {
+      return new ForallExpr(qd, term);
+    } else if (e is ExistsExpr) {
+      return new ExistsExpr(qd, term);
+    } else {
+      throw new UnsupportedNodeCloningException(e);
+    }
   }
 
 }

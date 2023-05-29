@@ -61,4 +61,12 @@ public partial class ASTPrinter {
     PrintExpression(ep.Value);
   }
 
+  private void PrintQuantifierDomain(QuantifierDomain qd) {
+    PrintBoundVars(qd.Vars);
+    if (qd.Range != null) {
+      Write(" | ");
+      PrintExpression(qd.Range);
+    }
+  }
+
 }
