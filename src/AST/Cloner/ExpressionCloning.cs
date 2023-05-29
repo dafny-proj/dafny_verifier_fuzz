@@ -31,8 +31,11 @@ public partial class ASTCloner {
   private LiteralExpr CloneLiteralExpr(LiteralExpr e) {
     return e switch {
       BoolLiteralExpr be => new BoolLiteralExpr(be.Value),
+      CharLiteralExpr ce => new CharLiteralExpr(ce.Value),
       IntLiteralExpr ie => new IntLiteralExpr(ie.Value),
+      RealLiteralExpr re => new RealLiteralExpr(re.Value),
       StringLiteralExpr se => new StringLiteralExpr(se.Value),
+      NullLiteralExpr ne => new NullLiteralExpr(CloneType(ne.Type)),
       _ => throw new UnsupportedNodeCloningException(e),
     };
   }

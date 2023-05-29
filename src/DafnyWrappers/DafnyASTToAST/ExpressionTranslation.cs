@@ -44,10 +44,17 @@ public partial class ASTTranslator {
   }
 
   private Expression TranslateLiteralExpr(Dafny.LiteralExpr le) {
-    if (le.Value is bool b) {
+
+    if (le.Value == null) {
+      return new NullLiteralExpr(TranslateType(le.Type));
+    } else if (le.Value is bool b) {
       return new BoolLiteralExpr(b);
+    } else if (le is Dafny.CharLiteralExpr ce) {
+      return new CharLiteralExpr((string)ce.Value);
     } else if (le.Value is BigInteger i) {
       return new IntLiteralExpr(i);
+    } else if (le.Value is Microsoft.BaseTypes.BigDec f) {
+      return new RealLiteralExpr(f.ToDecimalString());
     } else if (le is Dafny.StringLiteralExpr se) {
       return new StringLiteralExpr((string)se.Value);
     } else if (le is Dafny.StaticReceiverExpr sre) {

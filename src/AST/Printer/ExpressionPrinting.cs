@@ -68,8 +68,11 @@ public partial class ASTPrinter {
   private void PrintLiteralExpr(LiteralExpr e) {
     Write(e switch {
       BoolLiteralExpr b => b.Value ? "true" : "false",
+      CharLiteralExpr c => $"'{c.Value}'",
       IntLiteralExpr i => i.Value.ToString(),
+      RealLiteralExpr r => r.Value,
       StringLiteralExpr s => $"\"{s.Value}\"",
+      NullLiteralExpr => "null",
       _ => throw new UnsupportedNodePrintingException(e),
     });
   }
