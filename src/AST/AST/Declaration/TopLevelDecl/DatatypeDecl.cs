@@ -2,6 +2,9 @@ using System.Diagnostics.Contracts;
 
 namespace AST;
 
+public partial class DatatypeDecl : TopLevelDecl { }
+public partial class TupleTypeDecl : DatatypeDecl { }
+
 public partial class DatatypeDecl : TopLevelDecl {
   public override string Name { get; protected set; }
   public readonly List<TypeParameterDecl> TypeParams = new();
@@ -85,4 +88,17 @@ public partial class DatatypeDecl : TopLevelDecl {
   public override IEnumerable<Node> Children
     => TypeParams.Concat<Node>(Constructors).Concat<Node>(Members);
 
+}
+
+public partial class TupleTypeDecl : DatatypeDecl {
+  public TupleTypeDecl(string name,
+  IEnumerable<TypeParameterDecl>? typeParams = null)
+  : base(name, typeParams) { }
+
+  public new static TupleTypeDecl Skeleton(string name,
+  IEnumerable<TypeParameterDecl>? typeParams = null)
+    => new TupleTypeDecl(name, typeParams);
+  
+  // TODO: Auto-generate a tuple type and its accessors. 
+  // public TupleTypeDecl(int dims)
 }

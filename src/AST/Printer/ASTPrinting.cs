@@ -83,6 +83,11 @@ public partial class ASTPrinter {
   }
 
   private void PrintType(Type t) {
+    if (t is UserDefinedType udt && udt.TypeDecl is TupleTypeDecl) {
+      // Special case for tuple types.
+      PrintList<Type>(t.GetTypeArgs(), PrintType, start: "(", end: ")");
+      return;
+    }
     Write(t.BaseName);
     if (t.HasTypeArgs()) {
       PrintTypes(t.GetTypeArgs());

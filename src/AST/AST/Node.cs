@@ -14,6 +14,7 @@ public partial class TypeParameterDecl : TopLevelDecl { }
 public partial class TypeSynonymDecl : TopLevelDecl { }
 public partial class SubsetTypeDecl : TopLevelDecl { }
 public partial class DatatypeDecl : TopLevelDecl { }
+public partial class TupleTypeDecl : DatatypeDecl { }
 public abstract partial class MemberDecl : Declaration { }
 public partial class MethodDecl : MemberDecl { }
 public partial class FunctionDecl : MemberDecl { }

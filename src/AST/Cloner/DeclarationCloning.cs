@@ -130,8 +130,14 @@ public partial class ASTCloner {
   }
 
   private DatatypeDecl CreateDatatypeDeclSkeleton(DatatypeDecl d) {
-    var s = DatatypeDecl.Skeleton(name: d.Name,
-      typeParams: d.TypeParams.Select(CloneTypeParameterDecl));
+    DatatypeDecl s;
+    if (d is TupleTypeDecl) {
+      s = TupleTypeDecl.Skeleton(name: d.Name,
+        typeParams: d.TypeParams.Select(CloneTypeParameterDecl));
+    } else {
+      s = DatatypeDecl.Skeleton(name: d.Name,
+        typeParams: d.TypeParams.Select(CloneTypeParameterDecl));
+    }
     MarkDeclCloneSkeleton(d, s);
     return s;
   }

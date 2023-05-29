@@ -169,7 +169,9 @@ public partial class ASTPrinter {
   }
 
   private void PrintDatatypeValueExpr(DatatypeValueExpr e) {
-    Write($"{e.DatatypeName}.{e.ConstructorName}");
+    if (e.Constructor.EnclosingDecl is not TupleTypeDecl) {
+      Write($"{e.DatatypeName}.{e.ConstructorName}");
+    }
     if (e.HasArguments()) {
       Write("(");
       PrintExpressions(e.ConstructorArguments);

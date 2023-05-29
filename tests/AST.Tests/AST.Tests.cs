@@ -248,6 +248,17 @@ public class ASTTests {
     }
     """;
     CanParseClonePrint(sourceStr);
+  }
+
+  [TestMethod]
+  public void Tuple() {
+    var sourceStr = """
+    method Tuple() {
+      var x: (int, bool) := (1, true);
+      print x.0;
+    }
+    """;
+    CanParseClonePrint(sourceStr);
   }  
 
 }

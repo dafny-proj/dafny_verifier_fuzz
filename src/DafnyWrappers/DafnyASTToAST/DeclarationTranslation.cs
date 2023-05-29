@@ -197,8 +197,14 @@ public partial class ASTTranslator {
   }
 
   private DatatypeDecl CreateDatatypeDeclSkeleton(Dafny.DatatypeDecl d) {
-    var s = DatatypeDecl.Skeleton(d.Name,
-      typeParams: d.TypeArgs.Select(TranslateTypeParameter));
+    DatatypeDecl s;
+    if (d is Dafny.TupleTypeDecl) {
+      s = TupleTypeDecl.Skeleton(d.Name,
+       typeParams: d.TypeArgs.Select(TranslateTypeParameter));
+    } else {
+      s = DatatypeDecl.Skeleton(d.Name,
+       typeParams: d.TypeArgs.Select(TranslateTypeParameter));
+    }
     MarkDeclSkeleton(d, s);
     return s;
   }
