@@ -15,6 +15,9 @@ public static partial class ASTChildReplacementMethods {
       case AssignmentPair a:
         a.ReplaceChild(child, newChild);
         break;
+      case ExpressionPair a:
+        a.ReplaceChild(child, newChild);
+        break;
       case MatchExprCase a:
         a.ReplaceChild(child, newChild);
         break;
