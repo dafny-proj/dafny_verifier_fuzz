@@ -361,4 +361,14 @@ public class ASTTests {
     CanParseClonePrint(sourceStr);
   }
 
+   [TestMethod]
+  public void MultiSetFormingExpr() {
+    var sourceStr = """
+    method M(s: set<int>) {
+      var ms := multiset(s);
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
 }

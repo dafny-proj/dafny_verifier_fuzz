@@ -66,6 +66,9 @@ public partial class ASTPrinter {
       case MatchExpr me:
         PrintMatchExpr(me);
         break;
+      case MultiSetFormingExpr me:
+        PrintMultiSetFormingExpr(me);
+        break;
       default:
         throw new UnsupportedNodePrintingException(e);
     }
@@ -248,6 +251,12 @@ public partial class ASTPrinter {
     DecIndent();
     WriteIndent();
     Write("}");
+  }
+
+  private void PrintMultiSetFormingExpr(MultiSetFormingExpr me) {
+    Write("multiset(");
+    PrintExpression(me.E);
+    Write(")");
   }
 
 }

@@ -57,6 +57,7 @@ public partial class ITEExpr : Expression { }
 public partial class LetExpr : Expression { }
 public abstract partial class QuantifierExpr : Expression { }
 public partial class MatchExpr : Expression { }
+public partial class MultiSetFormingExpr : Expression { }
 
 public abstract partial class AssignmentRhs : Node { }
 public partial class ExprRhs : AssignmentRhs { }
