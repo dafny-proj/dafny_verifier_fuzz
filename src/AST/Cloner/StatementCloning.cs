@@ -20,6 +20,7 @@ public partial class ASTCloner {
       BreakStmt bs => CloneBreakStmt(bs),
       AssertStmt ass => CloneAssertStmt(ass),
       ForallStmt fs => CloneForallStmt(fs),
+      MatchStmt ms => CloneMatchStmt(ms),
       _ => throw new UnsupportedNodeCloningException(s),
     };
   }
@@ -126,6 +127,11 @@ public partial class ASTCloner {
     return new ForallStmt(CloneQuantifierDomain(s.QuantifierDomain),
       CloneSpecification(s.Ensures),
       s.Body == null ? null : CloneStatement(s.Body));
+  }
+
+  private MatchStmt CloneMatchStmt(MatchStmt s) {
+    return new MatchStmt(
+      CloneExpression(s.Selector), s.Cases.Select(CloneMatchStmtCase));
   }
 
 }

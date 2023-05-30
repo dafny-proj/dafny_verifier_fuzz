@@ -63,4 +63,23 @@ public partial class ASTTranslator {
       range: range == null ? null : TranslateExpression(range));
   }
 
+  private Matcher TranslateMatcher(Dafny.ExtendedPattern p) {
+    if (p is Dafny.LitPattern lp) {
+      return new ExpressionMatcher(TranslateExpression(lp.OrigLit));
+    } else if (p is Dafny.DisjunctivePattern dp) {
+      return new DisjunctiveMatcher(dp.Alternatives.Select(TranslateMatcher));
+    } else if (p is Dafny.IdPattern ip) {
+      if (ip.Id.StartsWith("_")) {
+        return new WildcardMatcher();
+      } else if (ip.BoundVar != null) {
+        return new BindingMatcher(TranslateVariable(ip.BoundVar));
+      } else if (ip.Arguments != null && ip.Ctor != null) {
+        return new DestructuringMatcher(
+          (DatatypeConstructorDecl)TranslateDeclRef(ip.Ctor),
+          ip.Arguments.Select(TranslateMatcher));
+      }
+    }
+    throw new UnsupportedTranslationException(p);
+  }
+
 }

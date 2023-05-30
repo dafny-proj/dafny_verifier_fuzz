@@ -27,6 +27,9 @@ public static partial class ASTChildReplacementMethods {
       case AssertStmt s:
         s.ReplaceChild(child, newChild);
         break;
+      case MatchStmt s:
+        s.ReplaceChild(child, newChild);
+        break;
       default:
         throw new UnsupportedNodeChildReplacementException(n);
     }
@@ -91,4 +94,14 @@ public static partial class ASTChildReplacementMethods {
       throw new ChildNotFoundException(n, child);
     }
   }
+
+  public static void ReplaceChild(this MatchStmt n, Node child, Node newChild) {
+    if (n.Selector == child) {
+      n.Selector = CheckAndCastNewChild<Expression>(n, child, newChild);
+    } else {
+      // Other children are unlikely to be mutated here, skip for now.
+      throw new UnsupportedNodeChildReplacementException(n);
+    }
+  }
+
 }

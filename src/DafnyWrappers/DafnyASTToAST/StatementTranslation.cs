@@ -33,6 +33,7 @@ public partial class ASTTranslator {
       Dafny.BreakStmt bs => TranslateBreakStmt(bs),
       Dafny.AssertStmt ats => TranslateAssertStmt(ats),
       Dafny.ForallStmt fs => TranslateForallStmt(fs),
+      Dafny.NestedMatchStmt ms => TranslateMatchStmt(ms),
       _ => throw new UnsupportedTranslationException(ds),
     };
     SetStatementLabel(ds, s);
@@ -116,6 +117,25 @@ public partial class ASTTranslator {
     var s = new ForallStmt(quantifierDomain: qd,
       ensures: TranslateSpecification(Specification.Type.Postcondition, ds.Ens),
       body: ds.Body == null ? null : TranslateStatement(ds.Body));
+    SetStatementLabel(ds, s);
+    return s;
+  }
+
+  private MatchStmt TranslateMatchStmt(Dafny.NestedMatchStmt ds) {
+    var selector = TranslateExpression(ds.Source);
+    var cases = new List<MatchStmtCase>();
+    foreach (var c in ds.Cases) {
+      BlockStmt body;
+      var stmts = c.Body.Select(TranslateStatement);
+      if (stmts.Count() == 1 && stmts.ElementAt(0) is BlockStmt b) {
+        body = b;
+      } else {
+        body = new BlockStmt(stmts);
+      }
+      var matcher = TranslateMatcher(c.Pat);
+      cases.Add(new MatchStmtCase(matcher, body));
+    }
+    var s = new MatchStmt(selector, cases);
     SetStatementLabel(ds, s);
     return s;
   }

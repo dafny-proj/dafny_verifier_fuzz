@@ -25,6 +25,7 @@ public partial class ASTCloner {
       ITEExpr ite => CloneITEExpr(ite),
       LetExpr le => CloneLetExpr(le),
       QuantifierExpr qe => CloneQuantifierExpr(qe),
+      MatchExpr me => CloneMatchExpr(me),
       _ => throw new UnsupportedNodeCloningException(e),
     };
   }
@@ -151,6 +152,11 @@ public partial class ASTCloner {
     } else {
       throw new UnsupportedNodeCloningException(e);
     }
+  }
+
+  private MatchExpr CloneMatchExpr(MatchExpr e) {
+    return new MatchExpr(
+      CloneExpression(e.Selector), e.Cases.Select(CloneMatchExprCase));
   }
 
 }

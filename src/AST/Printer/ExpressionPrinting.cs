@@ -63,6 +63,9 @@ public partial class ASTPrinter {
       case QuantifierExpr qe:
         PrintQuantifierExpr(qe);
         break;
+      case MatchExpr me:
+        PrintMatchExpr(me);
+        break;
       default:
         throw new UnsupportedNodePrintingException(e);
     }
@@ -175,10 +178,9 @@ public partial class ASTPrinter {
   }
 
   private void PrintDatatypeValueExpr(DatatypeValueExpr e) {
-    if (e.Constructor.EnclosingDecl is not TupleTypeDecl) {
-      Write($"{e.DatatypeName}.{e.ConstructorName}");
-    }
-    if (e.HasArguments()) {
+    var isTuple = e.Constructor.EnclosingDecl is TupleTypeDecl;
+    if (!isTuple) { Write($"{e.DatatypeName}.{e.ConstructorName}"); }
+    if (e.HasArguments() || isTuple) {
       Write("(");
       PrintExpressions(e.ConstructorArguments);
       Write(")");
@@ -231,6 +233,21 @@ public partial class ASTPrinter {
     PrintQuantifierDomain(qe.QuantifierDomain);
     Write(" :: ");
     PrintExpression(qe.Term);
+  }
+
+  private void PrintMatchExpr(MatchExpr me) {
+    Write("match ");
+    PrintExpression(me.Selector);
+    WriteLine(" {");
+    IncIndent();
+    foreach (var c in me.Cases) {
+      WriteIndent();
+      PrintMatchExprCase(c);
+      WriteLine();
+    }
+    DecIndent();
+    WriteIndent();
+    Write("}");
   }
 
 }

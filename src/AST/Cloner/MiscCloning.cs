@@ -50,4 +50,31 @@ public partial class ASTCloner {
     return new QuantifierDomain(qd.Vars.Select(CloneBoundVar),
       qd.Range == null ? null : CloneExpression(qd.Range));
   }
+
+  private MatchExprCase CloneMatchExprCase(MatchExprCase mc) {
+    return new MatchExprCase(CloneMatcher(mc.Key), CloneExpression(mc.Value));
+  }
+
+  private MatchStmtCase CloneMatchStmtCase(MatchStmtCase mc) {
+    return new MatchStmtCase(CloneMatcher(mc.Key), CloneBlockStmt(mc.Value));
+  }
+
+  private Matcher CloneMatcher(Matcher m) {
+    if (m is WildcardMatcher) {
+      return new WildcardMatcher();
+    } else if (m is ExpressionMatcher em) {
+      return new ExpressionMatcher(CloneExpression(em.E));
+    } else if (m is BindingMatcher bm) {
+      return new BindingMatcher(CloneVariable(bm.Var));
+    } else if (m is DestructuringMatcher dsm) {
+      return new DestructuringMatcher(
+        constructor: (DatatypeConstructorDecl)CloneDeclRef(dsm.Constructor),
+        argumentMatchers: dsm.ArgumentMatchers.Select(CloneMatcher));
+    } else if (m is DisjunctiveMatcher djm) {
+      return new DisjunctiveMatcher(djm.Matchers.Select(CloneMatcher));
+    } else {
+      throw new UnsupportedNodeCloningException(m);
+    }
+  }
+
 }

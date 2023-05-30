@@ -35,6 +35,7 @@ public partial class ForLoopStmt : LoopStmt { }
 public partial class BreakStmt : Statement { }
 public partial class ContinueStmt : BreakStmt { }
 public partial class AssertStmt : Statement { }
+public partial class MatchStmt : Statement { }
 
 public abstract partial class Expression : Node { }
 public abstract partial class LiteralExpr : Expression { }
@@ -55,6 +56,7 @@ public partial class StaticReceiverExpr : Expression { }
 public partial class ITEExpr : Expression { }
 public partial class LetExpr : Expression { }
 public abstract partial class QuantifierExpr : Expression { }
+public partial class MatchExpr : Expression { }
 
 public abstract partial class AssignmentRhs : Node { }
 public partial class ExprRhs : AssignmentRhs { }
@@ -87,3 +89,4 @@ public abstract partial class Variable : Node { }
 public partial class Specification : Node { }
 public partial class KeyValuePair<K, V> : Node where K : Node where V : Node { }
 public partial class QuantifierDomain : Node { }
+public abstract partial class Matcher : Node { }

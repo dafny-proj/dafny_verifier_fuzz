@@ -42,6 +42,9 @@ public partial class ASTPrinter {
       case ForallStmt fs:
         PrintForallStmt(fs);
         break;
+      case MatchStmt ms:
+        PrintMatchStmt(ms);
+        break;
       default:
         throw new UnsupportedNodePrintingException(s);
     }
@@ -189,6 +192,21 @@ public partial class ASTPrinter {
       }
       PrintStatement(s.Body);
     }
+  }
+
+  private void PrintMatchStmt(MatchStmt ms) {
+    Write("match ");
+    PrintExpression(ms.Selector);
+    WriteLine(" {");
+    IncIndent();
+    foreach (var c in ms.Cases) {
+      WriteIndent();
+      PrintMatchStmtCase(c);
+      WriteLine();
+    }
+    DecIndent();
+    WriteIndent();
+    Write("}");
   }
 
 }

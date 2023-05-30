@@ -255,6 +255,7 @@ public class ASTTests {
     var sourceStr = """
     method Tuple() {
       var x: (int, bool) := (1, true);
+      var y := ();
       print x.0;
     }
     """;
@@ -326,4 +327,38 @@ public class ASTTests {
     CanParseClonePrint(forallCall);
     CanParseClonePrint(forallProof);
   }
+
+  [TestMethod]
+  public void MatchExpr() {
+    var sourceStr = """
+    datatype Literal = Null | Bool(b: bool) | Int(i: int) | String(s: string)
+
+    function ToInt(l: Literal): int {
+      match l {
+        case Null | Bool(false) => 0
+        case Int(i) => i
+        case _ => 1
+      }
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
+  [TestMethod]
+  public void MatchStmt() {
+    var sourceStr = """
+    datatype OptionalInt = None | Some(i: int)
+
+    method TryPrint(i: OptionalInt) {
+      match i {
+        case Some(j) => {
+          print j;
+        }
+        case _ => 
+      }
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
 }

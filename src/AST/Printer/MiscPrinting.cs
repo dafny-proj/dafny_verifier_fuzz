@@ -69,4 +69,41 @@ public partial class ASTPrinter {
     }
   }
 
+  private void PrintMatchExprCase(MatchExprCase mc) {
+    Write("case ");
+    PrintMatcher(mc.Key);
+    Write(" => ");
+    PrintExpression(mc.Value);
+  }
+
+  private void PrintMatchStmtCase(MatchStmtCase mc) {
+    Write("case ");
+    PrintMatcher(mc.Key);
+    Write(" => ");
+    if (mc.Value.Body.Count > 0) {
+      PrintBlockStmt(mc.Value);
+    }
+  }
+
+  private void PrintMatcher(Matcher m) {
+    if (m is WildcardMatcher) {
+      Write("_");
+    } else if (m is ExpressionMatcher em) {
+      PrintExpression(em.E);
+    } else if (m is BindingMatcher bm) {
+      PrintVariable(bm.Var);
+    } else if (m is DestructuringMatcher dsm) {
+      var isTuple = dsm.Constructor.EnclosingDecl is TupleTypeDecl;
+      if (!isTuple) { Write(dsm.Constructor.Name); }
+      if (dsm.ArgumentMatchers.Count > 0 || isTuple) {
+        PrintList<Matcher>(dsm.ArgumentMatchers, PrintMatcher,
+          start: "(", sep: ", ", end: ")");
+      }
+    } else if (m is DisjunctiveMatcher djm) {
+      PrintList<Matcher>(djm.Matchers, PrintMatcher, sep: " | ");
+    } else {
+      throw new UnsupportedNodePrintingException(m);
+    }
+  }
+
 }

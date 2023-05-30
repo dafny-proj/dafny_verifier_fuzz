@@ -15,6 +15,12 @@ public static partial class ASTChildReplacementMethods {
       case AssignmentPair a:
         a.ReplaceChild(child, newChild);
         break;
+      case MatchExprCase a:
+        a.ReplaceChild(child, newChild);
+        break;
+      case Matcher a:
+        a.ReplaceChild(child, newChild);
+        break;
       default:
         throw new UnsupportedNodeChildReplacementException(n);
     }
