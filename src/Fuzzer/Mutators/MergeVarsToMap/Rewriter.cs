@@ -15,7 +15,7 @@ public partial class MergeVarsToMapMutationRewriter {
     this.vars = m.Vars;
     var valueType = GetCommonType(this.vars);
     if (valueType == null) {
-      throw new ArgumentException(
+      throw new ASTException(
         $"Only variables of the same type can be merged into a map.");
     }
     this.mapType = new MapType(Type.String, valueType);

@@ -32,11 +32,11 @@ public class DafnyResolveException : DafnyException {
 
 public static partial class DafnyWrappers {
   public static AST.Program ParseProgramFromFile(string filepath) {
-    return ParseProgramFromString(File.ReadAllText(filepath));
+    return ParseProgramFromString(File.ReadAllText(filepath), filepath);
   }
 
-  public static AST.Program ParseProgramFromString(string program) {
-    var programDafny = ParseDafnyProgramFromString(program);
+  public static AST.Program ParseProgramFromString(string program, string filepath="program.dfy") {
+    var programDafny = ParseDafnyProgramFromString(program, filepath);
     ResolveDafnyProgram(programDafny);
     return AST.Translation.ASTTranslator.TranslateDafnyProgram(programDafny);
   }

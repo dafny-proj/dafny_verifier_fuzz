@@ -25,6 +25,10 @@ public class Randomizer : IRandomizer {
   public IEnumerable<T> Shuffle<T>(IEnumerable<T> ts) {
     return ts.OrderBy(_ => rand.Next());
   }
+  public IEnumerable<T> ShuffledSubset<T>(IEnumerable<T> ts) {
+    var numToRemove = RandInt(minValue: 0, maxValue: ts.Count());
+    return Shuffle<T>(ts).Take(ts.Count() - numToRemove);
+  }
   public T RandElement<T>(IEnumerable<T> ts) {
     Contract.Requires(ts.Count() > 0);
     return ts.ElementAt(rand.Next(maxValue: ts.Count()));

@@ -21,7 +21,7 @@ public partial class ASTTranslator {
   private bool HasSkeletonDecl(Dafny.Declaration dd)
     => SkeletonDecls.ContainsKey(dd);
   private Declaration GetSkeletonDecl(Dafny.Declaration dd)
-    => TranslatedDecls[dd];
+    => SkeletonDecls[dd];
   private void MarkDeclSkeleton(Dafny.Declaration dd, Declaration d) {
     SkeletonDecls.Add(dd, d);
   }

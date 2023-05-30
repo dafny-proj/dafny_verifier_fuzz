@@ -27,6 +27,10 @@ public class FuzzerMain {
       description: "The maximum number of mutations applied to generate a mutant.",
       getDefaultValue: () => 1);
 
+    seedOption.IsRequired = true;
+    outputDirOption.IsRequired = true;
+    numMutantsOption.IsRequired = true;
+
     var rootCommand = new RootCommand("Mutant generator for Dafny programs.");
     rootCommand.Name = "gen-mutant";
     rootCommand.AddOption(seedOption);

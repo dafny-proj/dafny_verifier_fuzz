@@ -55,7 +55,7 @@ public class MergeVarsToClassMutator : BasicMutator<MergeVarsToClassMutation> {
     // Select a scope at random.
     var m = Rand.RandElement<MergeVarsToClassMutation>(ms);
     // Select variables at random.
-    var vs = m.Vars.Where(_ => Rand.RandBool());
+    var vs = Rand.ShuffledSubset<LocalVar>(m.Vars);
     return new MergeVarsToClassMutation(
       vars: vs,
       enclosingScope: m.EnclosingScope,
