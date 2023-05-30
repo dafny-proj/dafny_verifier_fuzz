@@ -11,6 +11,15 @@ public static partial class ASTChildReplacementMethods {
     }
   }
 
+  public static void ReplaceChild(this ExpressionPair n, Node child, Node newChild) {
+    if (n.Key == child) {
+      n.Key = CheckAndCastNewChild<Expression>(n, child, newChild);
+    } else if (n.Value == child) {
+      n.Value = CheckAndCastNewChild<Expression>(n, child, newChild);
+    } else {
+      throw new ChildNotFoundException(n, child);
+    }
+  }
 
   public static void ReplaceChild(this MatchExprCase n, Node child, Node newChild) {
     if (n.Value == child) {

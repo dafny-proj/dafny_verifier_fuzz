@@ -166,7 +166,7 @@ public static partial class ASTChildReplacementMethods {
       n.Guard = newE;
     } else if (n.Thn == child) {
       n.Thn = newE;
-    } else if (n.Thn == child) {
+    } else if (n.Els == child) {
       n.Els = newE;
     } else {
       throw new ChildNotFoundException(n, child);
