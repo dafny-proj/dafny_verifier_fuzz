@@ -59,6 +59,11 @@ public partial class ASTCloner {
     return new MatchStmtCase(CloneMatcher(mc.Key), CloneBlockStmt(mc.Value));
   }
 
+  private DatatypeUpdatePair CloneDatatypeUpdatePair(DatatypeUpdatePair dup) {
+    return new DatatypeUpdatePair(
+      (DatatypeDestructorDecl)CloneDeclRef(dup.Key), CloneExpression(dup.Value));
+  }
+
   private Matcher CloneMatcher(Matcher m) {
     if (m is WildcardMatcher) {
       return new WildcardMatcher();

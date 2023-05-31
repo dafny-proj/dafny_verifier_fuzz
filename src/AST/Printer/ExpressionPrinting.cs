@@ -72,6 +72,9 @@ public partial class ASTPrinter {
       case LambdaExpr le:
         PrintLambdaExpr(le);
         break;
+      case DatatypeUpdateExpr de:
+        PrintDatatypeUpdateExpr(de);
+        break;
       default:
         throw new UnsupportedNodePrintingException(e);
     }
@@ -223,30 +226,30 @@ public partial class ASTPrinter {
     PrintExpression(e.Els);
   }
 
-  private void PrintLetExpr(LetExpr le) {
-    var lhss = le.Vars.Select(v => v.Key);
-    var rhss = le.Vars.Select(v => v.Value);
+  private void PrintLetExpr(LetExpr e) {
+    var lhss = e.Vars.Select(v => v.Key);
+    var rhss = e.Vars.Select(v => v.Value);
     Write("var ");
     PrintBoundVars(lhss);
     Write(" := ");
     PrintExpressions(rhss);
     Write("; ");
-    PrintExpression(le.Body);
+    PrintExpression(e.Body);
   }
 
-  private void PrintQuantifierExpr(QuantifierExpr qe) {
-    Write(qe.Quantifier + " ");
-    PrintQuantifierDomain(qe.QuantifierDomain);
+  private void PrintQuantifierExpr(QuantifierExpr e) {
+    Write(e.Quantifier + " ");
+    PrintQuantifierDomain(e.QuantifierDomain);
     Write(" :: ");
-    PrintExpression(qe.Term);
+    PrintExpression(e.Term);
   }
 
-  private void PrintMatchExpr(MatchExpr me) {
+  private void PrintMatchExpr(MatchExpr e) {
     Write("match ");
-    PrintExpression(me.Selector);
+    PrintExpression(e.Selector);
     WriteLine(" {");
     IncIndent();
-    foreach (var c in me.Cases) {
+    foreach (var c in e.Cases) {
       WriteIndent();
       PrintMatchExprCase(c);
       WriteLine();
@@ -256,18 +259,24 @@ public partial class ASTPrinter {
     Write("}");
   }
 
-  private void PrintMultiSetFormingExpr(MultiSetFormingExpr me) {
+  private void PrintMultiSetFormingExpr(MultiSetFormingExpr e) {
     Write("multiset(");
-    PrintExpression(me.E);
+    PrintExpression(e.E);
     Write(")");
   }
 
-  private void PrintLambdaExpr(LambdaExpr le) {
-    PrintList<BoundVar>(le.Params, PrintBoundVar, start: "(", end: ")");
-    PrintSpecification(le.Precondition, oneLine: true);
-    PrintSpecification(le.ReadFrame, oneLine: true);
+  private void PrintLambdaExpr(LambdaExpr e) {
+    PrintList<BoundVar>(e.Params, PrintBoundVar, start: "(", end: ")");
+    PrintSpecification(e.Precondition, oneLine: true);
+    PrintSpecification(e.ReadFrame, oneLine: true);
     Write(" => ");
-    PrintExpression(le.Result);
+    PrintExpression(e.Result);
+  }
+
+  private void PrintDatatypeUpdateExpr(DatatypeUpdateExpr e) {
+    PrintExpression(e.DatatypeValue);
+    PrintList<DatatypeUpdatePair>(e.Updates, PrintDatatypeUpdatePair,
+      start: ".(", end: ")");
   }
 
 }

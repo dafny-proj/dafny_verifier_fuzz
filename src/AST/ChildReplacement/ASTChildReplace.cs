@@ -21,6 +21,9 @@ public static partial class ASTChildReplacementMethods {
       case MatchExprCase a:
         a.ReplaceChild(child, newChild);
         break;
+      case DatatypeUpdatePair a:
+        a.ReplaceChild(child, newChild);
+        break;
       case Matcher a:
         a.ReplaceChild(child, newChild);
         break;

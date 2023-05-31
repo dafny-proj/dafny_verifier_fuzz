@@ -97,6 +97,11 @@ public partial class ASTPrinter {
     }
   }
 
+  private void PrintDatatypeUpdatePair(DatatypeUpdatePair dup) {
+    Write($"{dup.Key.Name} := ");
+    PrintExpression(dup.Value);
+  }
+
   private void PrintMatcher(Matcher m) {
     if (m is WildcardMatcher) {
       Write("_");

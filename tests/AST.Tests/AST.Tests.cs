@@ -418,4 +418,16 @@ public class ASTTests {
     CanParseClonePrint(sourceStr);
   }
 
+  [TestMethod]
+  public void DatatypeValueUpdate() {
+    var sourceStr = """
+    datatype Coordinate = Dim3(x: int, y: int, z: int)
+
+    function ProjectDim1(c: Coordinate): Coordinate {
+      c.(y := 0, z := 0)
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
 }

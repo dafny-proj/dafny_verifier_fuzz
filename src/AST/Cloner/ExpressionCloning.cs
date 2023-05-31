@@ -28,6 +28,7 @@ public partial class ASTCloner {
       MatchExpr me => CloneMatchExpr(me),
       MultiSetFormingExpr me => CloneMultiSetFormingExpr(me),
       LambdaExpr le => CloneLambdaExpr(le),
+      DatatypeUpdateExpr de => CloneDatatypeUpdateExpr(de),
       _ => throw new UnsupportedNodeCloningException(e),
     };
   }
@@ -171,6 +172,11 @@ public partial class ASTCloner {
       result: CloneExpression(e.Result),
       pre: CloneSpecification(e.Precondition),
       reads: CloneSpecification(e.ReadFrame));
+  }
+
+  private DatatypeUpdateExpr CloneDatatypeUpdateExpr(DatatypeUpdateExpr e) {
+    return new DatatypeUpdateExpr(CloneExpression(e.DatatypeValue),
+      e.Updates.Select(CloneDatatypeUpdatePair));
   }
 
 }

@@ -59,6 +59,7 @@ public abstract partial class QuantifierExpr : Expression { }
 public partial class MatchExpr : Expression { }
 public partial class MultiSetFormingExpr : Expression { }
 public partial class LambdaExpr : Expression { }
+public partial class DatatypeUpdateExpr : Expression { }
 
 public abstract partial class AssignmentRhs : Node { }
 public partial class ExprRhs : AssignmentRhs { }

@@ -5,6 +5,8 @@ public partial class ExpressionPair : KeyValuePair<Expression, Expression> { }
 public partial class AssignmentPair : KeyValuePair<Expression, AssignmentRhs> { }
 public partial class MatchExprCase : KeyValuePair<Matcher, Expression> { }
 public partial class MatchStmtCase : KeyValuePair<Matcher, BlockStmt> { }
+public partial class DatatypeUpdatePair :
+KeyValuePair<DatatypeDestructorDecl, Expression> { }
 
 public partial class KeyValuePair<K, V> : Node
 where K : Node where V : Node {
@@ -36,4 +38,10 @@ public partial class MatchExprCase : KeyValuePair<Matcher, Expression> {
 public partial class MatchStmtCase : KeyValuePair<Matcher, BlockStmt> {
   public MatchStmtCase(Matcher match, BlockStmt body)
   : base(match, body) { }
+}
+
+public partial class DatatypeUpdatePair :
+KeyValuePair<DatatypeDestructorDecl, Expression> {
+  public DatatypeUpdatePair(DatatypeDestructorDecl key, Expression value)
+  : base(key, value) { }
 }
