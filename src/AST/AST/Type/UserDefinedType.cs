@@ -1,5 +1,8 @@
 namespace AST;
 
+public partial class UserDefinedType : Type { }
+public partial class ArrowType : UserDefinedType { }
+
 public partial class UserDefinedType : Type {
   public override string BaseName => TypeDecl.Name;
 
@@ -30,5 +33,23 @@ public partial class UserDefinedType : Type {
       h += t.GetHashCode();
     }
     return h;
+  }
+}
+
+public partial class ArrowType : UserDefinedType {
+  public FuncT Arrow { get; }
+  public string ArrowStr => arrowStr[Arrow];
+  public int Arity => TypeArgs.Count - 1;
+  public List<Type> ArgTypes => TypeArgs.Take(Arity).ToList();
+  public Type ResultType => TypeArgs.Last();
+
+  public enum FuncT { All, Partial, Total }
+  private Dictionary<FuncT, string> arrowStr = new() {
+    {FuncT.All, "~>"}, {FuncT.Partial, "-->"}, {FuncT.Total, "->"}};
+
+  public ArrowType(FuncT arrow, TopLevelDecl typeDecl,
+  IEnumerable<Type>? typeArgs = null)
+  : base(typeDecl, typeArgs) {
+    Arrow = arrow;
   }
 }

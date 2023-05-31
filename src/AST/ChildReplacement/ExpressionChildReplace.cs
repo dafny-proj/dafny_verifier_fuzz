@@ -54,6 +54,9 @@ public static partial class ASTChildReplacementMethods {
       case MultiSetFormingExpr e:
         e.ReplaceChild(child, newChild);
         break;
+      case LambdaExpr e:
+        e.ReplaceChild(child, newChild);
+        break;
       default:
         throw new UnsupportedNodeChildReplacementException(n);
     }
@@ -199,6 +202,15 @@ public static partial class ASTChildReplacementMethods {
       n.E = CheckAndCastNewChild<Expression>(n, child, newChild);
     } else {
       throw new ChildNotFoundException(n, child);
+    }
+  }
+
+  public static void ReplaceChild(this LambdaExpr n, Node child, Node newChild) {
+    if (n.Result == child) {
+      n.Result = CheckAndCastNewChild<Expression>(n, child, newChild);
+    } else {
+      // Other children are unlikely to be mutated here, skip for now.
+      throw new UnsupportedNodeChildReplacementException(n);
     }
   }
 

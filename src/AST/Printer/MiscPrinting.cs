@@ -26,7 +26,7 @@ public partial class ASTPrinter {
     }
   }
 
-  private void PrintSpecification(Specification? s) {
+  private void PrintSpecification(Specification? s, bool oneLine = false) {
     if (!Specification.HasUserDefinedSpec(s)) return;
     var st = s!.SpecificationType;
     var sts = Specification.SpecificationTypeAsString(st);
@@ -36,19 +36,31 @@ public partial class ASTPrinter {
       case Specification.Type.Postcondition:
       case Specification.Type.Invariant:
         foreach (var e in userDefinedExprs) {
-          WriteIndent();
+          if (oneLine) {
+            Write(" ");
+          } else {
+            WriteIndent();
+          }
           Write($"{sts} ");
           PrintExpression(e);
-          WriteLine();
+          if (!oneLine) {
+            WriteLine();
+          }
         }
         break;
       case Specification.Type.ModifiesFrame:
       case Specification.Type.ReadFrame:
       case Specification.Type.Decreases:
-        WriteIndent();
+        if (oneLine) {
+          Write(" ");
+        } else {
+          WriteIndent();
+        }
         Write($"{sts} ");
         PrintExpressions(userDefinedExprs);
-        WriteLine();
+        if (!oneLine) {
+          WriteLine();
+        }
         break;
       default:
         throw new UnsupportedNodePrintingException(s);

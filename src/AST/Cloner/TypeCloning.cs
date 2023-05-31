@@ -13,6 +13,9 @@ public partial class ASTCloner {
       NullableType nt => new NullableType(
         classDecl: (ClassDecl)CloneDeclRef(nt.TypeDecl),
         typeArgs: nt.GetTypeArgs().Select(CloneType)),
+      ArrowType at => new ArrowType(arrow: at.Arrow,
+        typeDecl: (TopLevelDecl)CloneDeclRef(at.TypeDecl),
+        typeArgs: at.GetTypeArgs().Select(CloneType)),
       UserDefinedType ut => new UserDefinedType(
         typeDecl: (TopLevelDecl)CloneDeclRef(ut.TypeDecl),
         typeArgs: ut.GetTypeArgs().Select(CloneType)),

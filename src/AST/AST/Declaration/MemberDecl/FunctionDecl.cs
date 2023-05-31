@@ -1,5 +1,6 @@
 namespace AST;
 
+// TODO: Type parameters for generic functions.
 public partial class FunctionDecl : MemberDecl {
   public override string Name { get; protected set; }
   public Expression? Body { get; set; }

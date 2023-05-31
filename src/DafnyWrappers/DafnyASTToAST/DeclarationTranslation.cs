@@ -82,6 +82,7 @@ public partial class ASTTranslator {
       Dafny.DefaultClassDecl => DefaultClassDecl.Skeleton(),
       // TODO: Add to a built-ins list?
       Dafny.ArrayClassDecl a => ArrayClassDecl.Skeleton(a.Dims),
+      Dafny.ArrowTypeDecl a => ArrayClassDecl.Skeleton(a.Arity),
       _ => ClassDecl.Skeleton(d.Name),
     };
     MarkDeclSkeleton(d, s);

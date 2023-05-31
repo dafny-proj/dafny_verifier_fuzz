@@ -58,6 +58,7 @@ public partial class LetExpr : Expression { }
 public abstract partial class QuantifierExpr : Expression { }
 public partial class MatchExpr : Expression { }
 public partial class MultiSetFormingExpr : Expression { }
+public partial class LambdaExpr : Expression { }
 
 public abstract partial class AssignmentRhs : Node { }
 public partial class ExprRhs : AssignmentRhs { }
@@ -85,6 +86,7 @@ public partial class MultiSetType : CollectionType { }
 public partial class UserDefinedType : Type { }
 public partial class TypeProxy : Type { }
 public partial class NullableType : UserDefinedType { }
+public partial class ArrowType : UserDefinedType { }
 
 public abstract partial class Variable : Node { }
 public partial class Specification : Node { }

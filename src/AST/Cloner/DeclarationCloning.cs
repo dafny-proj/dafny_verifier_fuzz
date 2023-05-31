@@ -81,6 +81,7 @@ public partial class ASTCloner {
     var s = d switch {
       DefaultClassDecl => DefaultClassDecl.Skeleton(),
       ArrayClassDecl a => ArrayClassDecl.Skeleton(a.Dimensions),
+      ArrowTypeDecl a => ArrowTypeDecl.Skeleton(a.Arity),
       _ => ClassDecl.Skeleton(d.Name),
     };
     MarkDeclCloneSkeleton(d, s);

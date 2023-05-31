@@ -297,11 +297,10 @@ public class ASTTests {
   [TestMethod]
   public void ForallStmt() {
     // TODO: Replace range with chaining expression when implemented.
-    // TODO: Replace upper bound with a.Length when implemented.
     var forallAssign = """
     method ForallStmtAssign() {
       var a := new int[5];
-      forall i: int | 0 <= i && i < 5 {
+      forall i: int | 0 <= i && i < a.Length {
         a[i] := i;
       }
     }
@@ -366,6 +365,54 @@ public class ASTTests {
     var sourceStr = """
     method M(s: set<int>) {
       var ms := multiset(s);
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
+  [TestMethod]
+  public void ArrayLength() {
+    var sourceStr = """
+    method ArrayLength(a: array<int>) {
+      print a.Length;
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
+  [TestMethod]
+  public void ArrowType() {
+    // Syntax such as `int -> int` is accepted but for simplicity, we always 
+    // choose to print the arguments in parentheses.
+    var sourceStr = """
+    function F0(f: () -> bool): bool {
+      f()
+    }
+
+    function F1(f: (int) -> bool): bool {
+      f(1)
+    }
+
+    function F2(f: (int, int) -> bool): bool {
+      f(1, 1)
+    }
+
+    function F3(f: ((int, int)) -> bool): bool {
+      f((1, 1))
+    }
+    
+    function F4(f: ((int) -> bool) -> bool): bool
+
+    function F5(f: (int) -> (bool) -> bool): bool
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
+  [TestMethod]
+  public void LambdaExpr() {
+    var sourceStr = """
+    function Equals(): (int, int) -> bool {
+      (x, y) => x == y
     }
     """;
     CanParseClonePrint(sourceStr);

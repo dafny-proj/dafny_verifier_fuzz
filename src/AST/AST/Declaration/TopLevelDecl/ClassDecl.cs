@@ -3,7 +3,9 @@ namespace AST;
 public partial class ClassDecl : TopLevelDecl { }
 public partial class DefaultClassDecl : ClassDecl { }
 public partial class ArrayClassDecl : ClassDecl { }
+public partial class ArrowTypeDecl : ClassDecl { }
 
+// TODO: Type parameters for classes.
 public partial class ClassDecl : TopLevelDecl {
   public override string Name { get; protected set; }
   public readonly List<MemberDecl> Members = new();
@@ -40,8 +42,21 @@ public partial class ArrayClassDecl : ClassDecl {
 
   public ArrayClassDecl(int dimensions) : base(ArrayName(dimensions)) {
     Dimensions = dimensions;
-    // TODO: Add built-in methods.
+    // TODO: Automatically populate built-in methods. For now, they are 
+    // translated and added if present in Dafny programs.
   }
 
   public static ArrayClassDecl Skeleton(int dims) => new ArrayClassDecl(dims);
+}
+
+// TODO: This class inherits from ClassDecl which reflects the implementation in 
+// Dafny. Consider removing the inheritance, they don't really correspond.
+// Built-in arrow type class. (f: A ~> B). 
+// This class gives rise to two subset types (f: A --> B) and (f: A -> B).
+public partial class ArrowTypeDecl : ClassDecl {
+  // Number of arguments to the function. Excludes the single produced result.
+  public int Arity { get; }
+  public ArrowTypeDecl(int arity) : base("_DF_builtin_arrow") { }
+
+  public static ArrowTypeDecl Skeleton(int arity) => new ArrowTypeDecl(arity);
 }

@@ -27,6 +27,7 @@ public partial class ASTCloner {
       QuantifierExpr qe => CloneQuantifierExpr(qe),
       MatchExpr me => CloneMatchExpr(me),
       MultiSetFormingExpr me => CloneMultiSetFormingExpr(me),
+      LambdaExpr le => CloneLambdaExpr(le),
       _ => throw new UnsupportedNodeCloningException(e),
     };
   }
@@ -120,7 +121,7 @@ public partial class ASTCloner {
 
   private FunctionCallExpr CloneFunctionCallExpr(FunctionCallExpr e) {
     return new FunctionCallExpr(
-      CloneMemberSelectExpr(e.Callee), e.Arguments.Select(CloneExpression));
+      CloneExpression(e.Callee), e.Arguments.Select(CloneExpression));
   }
 
   private StaticReceiverExpr CloneStaticReceiverExpr(StaticReceiverExpr e) {
@@ -162,6 +163,14 @@ public partial class ASTCloner {
 
   private MultiSetFormingExpr CloneMultiSetFormingExpr(MultiSetFormingExpr e) {
     return new MultiSetFormingExpr(CloneExpression(e.E));
+  }
+
+  private LambdaExpr CloneLambdaExpr(LambdaExpr e) {
+    return new LambdaExpr(
+      params_: e.Params.Select(CloneBoundVar),
+      result: CloneExpression(e.Result),
+      pre: CloneSpecification(e.Precondition),
+      reads: CloneSpecification(e.ReadFrame));
   }
 
 }

@@ -32,6 +32,16 @@ public partial class ASTTranslator {
     } else if (udt.IsArrayType) {
       var arrDecl = (ArrayClassDecl)TranslateDeclRef(udt.AsArrayType);
       return new ArrayType(arrDecl, typeArgs.First());
+    } else if (udt.IsArrowType) {
+      var arrow = ArrowType.FuncT.All;
+      if (Dafny.ArrowType.IsPartialArrowTypeName(udt.Name)) {
+        arrow = ArrowType.FuncT.Partial;
+      } else if (Dafny.ArrowType.IsTotalArrowTypeName(udt.Name)) {
+        arrow = ArrowType.FuncT.Total;
+      }
+      return new ArrowType(arrow,
+        (TopLevelDecl)TranslateDeclRef(udt.ResolvedClass),
+        udt.TypeArgs.Select(TranslateType));
     } else if (udt.ResolvedClass is Dafny.ClassDecl cd) {
       var t = new NullableType((ClassDecl)TranslateDeclRef(cd), typeArgs);
       return new NullableType((ClassDecl)TranslateDeclRef(cd), typeArgs);

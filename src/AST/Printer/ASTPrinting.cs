@@ -86,15 +86,24 @@ public partial class ASTPrinter {
   }
 
   private void PrintType(Type t) {
-    if (t is UserDefinedType udt && udt.TypeDecl is TupleTypeDecl) {
-      // Special case for tuple types.
-      PrintList<Type>(t.GetTypeArgs(), PrintType, start: "(", end: ")");
-      return;
+    if (t is UserDefinedType udt) {
+      if (udt.TypeDecl is TupleTypeDecl) { PrintTupleType(t); return; }
+      if (udt is ArrowType at) { PrintArrowType(at); return; }
     }
     Write(t.BaseName);
     if (t.HasTypeArgs()) {
       PrintTypes(t.GetTypeArgs());
     }
+  }
+
+  private void PrintArrowType(ArrowType t) {
+    PrintList<Type>(t.ArgTypes, PrintType, start: "(", end: ")");
+    Write($" {t.ArrowStr} ");
+    PrintType(t.ResultType);
+  }
+
+  private void PrintTupleType(Type t) {
+    PrintList<Type>(t.GetTypeArgs(), PrintType, start: "(", end: ")");
   }
 
 }

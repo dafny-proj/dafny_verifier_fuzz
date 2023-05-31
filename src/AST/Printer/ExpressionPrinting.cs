@@ -69,6 +69,9 @@ public partial class ASTPrinter {
       case MultiSetFormingExpr me:
         PrintMultiSetFormingExpr(me);
         break;
+      case LambdaExpr le:
+        PrintLambdaExpr(le);
+        break;
       default:
         throw new UnsupportedNodePrintingException(e);
     }
@@ -257,6 +260,14 @@ public partial class ASTPrinter {
     Write("multiset(");
     PrintExpression(me.E);
     Write(")");
+  }
+
+  private void PrintLambdaExpr(LambdaExpr le) {
+    PrintList<BoundVar>(le.Params, PrintBoundVar, start: "(", end: ")");
+    PrintSpecification(le.Precondition, oneLine: true);
+    PrintSpecification(le.ReadFrame, oneLine: true);
+    Write(" => ");
+    PrintExpression(le.Result);
   }
 
 }
