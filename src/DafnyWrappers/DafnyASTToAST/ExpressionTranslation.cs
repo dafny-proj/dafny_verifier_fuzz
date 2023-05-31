@@ -26,8 +26,12 @@ public partial class ASTTranslator {
       Dafny.SeqSelectExpr sse => TranslateCollectionSelectExpr(sse),
       Dafny.DisplayExpression de => TranslateDisplayExpr(de),
       Dafny.MapDisplayExpr mde => TranslateMapDisplayExpr(mde),
+      Dafny.SetComprehension sce => TranslateComprehensionExpr(sce),
+      Dafny.MapComprehension mce => TranslateComprehensionExpr(mce),
       Dafny.SeqUpdateExpr sue => TranslateCollectionUpdateExpr(sue),
       Dafny.DatatypeValue dv => TranslateDatatypeValue(dv),
+      Dafny.MultiSetFormingExpr me => TranslateMultiSetConstructionExpr(me),
+      Dafny.SeqConstructionExpr se => TranslateSeqConstructionExpr(se),
       Dafny.ThisExpr te => TranslateThisExpr(te),
       Dafny.WildcardExpr we => TranslateWildcardExpr(we),
       Dafny.FunctionCallExpr fe => TranslateFunctionCallExpr(fe),
@@ -35,7 +39,6 @@ public partial class ASTTranslator {
       Dafny.LetExpr le => TranslateLetExpr(le),
       Dafny.QuantifierExpr qe => TranslateQuantifierExpr(qe),
       Dafny.NestedMatchExpr me => TranslateMatchExpr(me),
-      Dafny.MultiSetFormingExpr me => TranslateMultiSetFormingExpr(me),
       Dafny.ApplyExpr ae => TranslateFunctionCallExpr(ae),
       Dafny.LambdaExpr le => TranslateLambdaExpr(le),
       Dafny.ConcreteSyntaxExpression cse => cse switch {
@@ -111,12 +114,35 @@ public partial class ASTTranslator {
     return new MapDisplayExpr(mde.Elements.Select(TranslateExpressionPair));
   }
 
+  private SetComprehensionExpr TranslateComprehensionExpr(Dafny.SetComprehension sce) {
+    return new SetComprehensionExpr(
+      TranslateQuantifierDomain(sce.BoundVars, sce.Range),
+      value: sce.TermIsImplicit ? null : TranslateExpression(sce.Term));
+  }
+
+  private MapComprehensionExpr TranslateComprehensionExpr(Dafny.MapComprehension mce) {
+    return new MapComprehensionExpr(
+      TranslateQuantifierDomain(mce.BoundVars, mce.Range),
+      key: mce.TermLeft == null ? null : TranslateExpression(mce.TermLeft),
+      value: TranslateExpression(mce.Term));
+  }
+
   private CollectionUpdateExpr
   TranslateCollectionUpdateExpr(Dafny.SeqUpdateExpr sue) {
     return new CollectionUpdateExpr(
       collection: TranslateExpression(sue.Seq),
       index: TranslateExpression(sue.Index),
       value: TranslateExpression(sue.Value));
+  }
+
+  private MultiSetConstructionExpr TranslateMultiSetConstructionExpr(Dafny.MultiSetFormingExpr me) {
+    return new MultiSetConstructionExpr(TranslateExpression(me.E));
+  }
+
+  private SeqConstructionExpr TranslateSeqConstructionExpr(Dafny.SeqConstructionExpr me) {
+    return new SeqConstructionExpr(
+      count: TranslateExpression(me.N),
+      initialiser: TranslateExpression(me.Initializer));
   }
 
   private DatatypeValueExpr TranslateDatatypeValue(Dafny.DatatypeValue dv) {
@@ -195,10 +221,6 @@ public partial class ASTTranslator {
       cases.Add(new MatchExprCase(matcher, body));
     }
     return new MatchExpr(selector, cases);
-  }
-
-  private MultiSetFormingExpr TranslateMultiSetFormingExpr(Dafny.MultiSetFormingExpr me) {
-    return new MultiSetFormingExpr(TranslateExpression(me.E));
   }
 
   private LambdaExpr TranslateLambdaExpr(Dafny.LambdaExpr le) {

@@ -36,6 +36,12 @@ public static partial class ASTChildReplacementMethods {
       case CollectionUpdateExpr e:
         e.ReplaceChild(child, newChild);
         break;
+      case MultiSetConstructionExpr e:
+        e.ReplaceChild(child, newChild);
+        break;
+      case SeqConstructionExpr e:
+        e.ReplaceChild(child, newChild);
+        break;
       case DatatypeValueExpr e:
         e.ReplaceChild(child, newChild);
         break;
@@ -51,13 +57,13 @@ public static partial class ASTChildReplacementMethods {
       case MatchExpr e:
         e.ReplaceChild(child, newChild);
         break;
-      case MultiSetFormingExpr e:
-        e.ReplaceChild(child, newChild);
-        break;
       case LambdaExpr e:
         e.ReplaceChild(child, newChild);
         break;
-      case DatatypeUpdateExpr e:
+      case SetComprehensionExpr e:
+        e.ReplaceChild(child, newChild);
+        break;
+      case MapComprehensionExpr e:
         e.ReplaceChild(child, newChild);
         break;
       default:
@@ -157,6 +163,24 @@ public static partial class ASTChildReplacementMethods {
     }
   }
 
+  public static void ReplaceChild(this MultiSetConstructionExpr n, Node child, Node newChild) {
+    if (n.E == child) {
+      n.E = CheckAndCastNewChild<Expression>(n, child, newChild);
+    } else {
+      throw new ChildNotFoundException(n, child);
+    }
+  }
+
+  public static void ReplaceChild(this SeqConstructionExpr n, Node child, Node newChild) {
+    if (n.Count == child) {
+      n.Count = CheckAndCastNewChild<Expression>(n, child, newChild);
+    } else if (n.Initialiser == child) {
+      n.Initialiser = CheckAndCastNewChild<Expression>(n, child, newChild);
+    } else {
+      throw new ChildNotFoundException(n, child);
+    }
+  }
+
   public static void ReplaceChild(this DatatypeValueExpr n, Node child, Node newChild) {
     ReplaceInList<Expression>(n.ConstructorArguments, child, newChild, n);
   }
@@ -200,14 +224,6 @@ public static partial class ASTChildReplacementMethods {
     }
   }
 
-  public static void ReplaceChild(this MultiSetFormingExpr n, Node child, Node newChild) {
-    if (n.E == child) {
-      n.E = CheckAndCastNewChild<Expression>(n, child, newChild);
-    } else {
-      throw new ChildNotFoundException(n, child);
-    }
-  }
-
   public static void ReplaceChild(this LambdaExpr n, Node child, Node newChild) {
     if (n.Result == child) {
       n.Result = CheckAndCastNewChild<Expression>(n, child, newChild);
@@ -220,6 +236,26 @@ public static partial class ASTChildReplacementMethods {
   public static void ReplaceChild(this DatatypeUpdateExpr n, Node child, Node newChild) {
     if (n.DatatypeValue == child) {
       n.DatatypeValue = CheckAndCastNewChild<Expression>(n, child, newChild);
+    } else {
+      // Other children are unlikely to be mutated here, skip for now.
+      throw new UnsupportedNodeChildReplacementException(n);
+    }
+  }
+
+  public static void ReplaceChild(this SetComprehensionExpr n, Node child, Node newChild) {
+    if (n.Value == child) {
+      n.Value = CheckAndCastNewChild<Expression>(n, child, newChild);
+    } else {
+      // Other children are unlikely to be mutated here, skip for now.
+      throw new UnsupportedNodeChildReplacementException(n);
+    }
+  }
+
+  public static void ReplaceChild(this MapComprehensionExpr n, Node child, Node newChild) {
+    if (n.Key == child) {
+      n.Key = CheckAndCastNewChild<Expression>(n, child, newChild);
+    } else if (n.Value == child) {
+      n.Value = CheckAndCastNewChild<Expression>(n, child, newChild);
     } else {
       // Other children are unlikely to be mutated here, skip for now.
       throw new UnsupportedNodeChildReplacementException(n);

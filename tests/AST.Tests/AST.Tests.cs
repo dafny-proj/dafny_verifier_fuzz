@@ -10,6 +10,7 @@ public class ASTTests {
     sourceStr = Regex.Replace(sourceStr, "\r", "");
     var programDafny = DafnyW.ParseDafnyProgramFromString(sourceStr);
     DafnyW.ResolveDafnyProgram(programDafny);
+    // Console.WriteLine(DafnyW.DafnyProgramToString(programDafny, postResolution: true));
     var program = ASTTranslator.TranslateDafnyProgram(programDafny);
     var clone = ASTCloner.Clone<Program>(program);
     var outputStr = ASTPrinter.PrintNodeToString(clone);
@@ -360,7 +361,7 @@ public class ASTTests {
     CanParseClonePrint(sourceStr);
   }
 
-   [TestMethod]
+  [TestMethod]
   public void MultiSetFormingExpr() {
     var sourceStr = """
     method M(s: set<int>) {
@@ -425,6 +426,40 @@ public class ASTTests {
 
     function ProjectDim1(c: Coordinate): Coordinate {
       c.(y := 0, z := 0)
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
+  [TestMethod]
+  public void SetComprehension() {
+    // TODO: Replace range with chaining expression when implemented.
+    var sourceStr = """
+    method M() {
+      var s1 := set x: nat, y: nat | x < y && y < 100 :: x * y;
+      var s2 := set x: nat | x in s1;
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
+  [TestMethod]
+  public void MapComprehension() {
+    // TODO: Replace range with chaining expression when implemented.
+    var sourceStr = """
+    method M() {
+      var m1 := map x: int | 0 <= x && x <= 10 :: x * x;
+      var m2 := map x: int | 0 <= x && x <= 10 :: x := x * x;
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
+  [TestMethod]
+  public void SeqConstruction() {
+    var sourceStr = """
+    method M() {
+      var s := seq(3, (i) => i);
     }
     """;
     CanParseClonePrint(sourceStr);

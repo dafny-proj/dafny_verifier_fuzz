@@ -36,8 +36,20 @@ public partial class ASTPrinter {
       case MapDisplayExpr mpde:
         PrintCollectionDisplayExpr(mpde);
         break;
+      case SetComprehensionExpr sce:
+        PrintComprehensionExpr(sce);
+        break;
+      case MapComprehensionExpr mce:
+        PrintComprehensionExpr(mce);
+        break;
       case CollectionUpdateExpr cue:
         PrintCollectionUpdateExpr(cue);
+        break;
+      case MultiSetConstructionExpr me:
+        PrintMultiSetConstructionExpr(me);
+        break;
+      case SeqConstructionExpr se:
+        PrintSeqConstructionExpr(se);
         break;
       case DatatypeValueExpr dve:
         PrintDatatypeValueExpr(dve);
@@ -65,9 +77,6 @@ public partial class ASTPrinter {
         break;
       case MatchExpr me:
         PrintMatchExpr(me);
-        break;
-      case MultiSetFormingExpr me:
-        PrintMultiSetFormingExpr(me);
         break;
       case LambdaExpr le:
         PrintLambdaExpr(le);
@@ -177,6 +186,26 @@ public partial class ASTPrinter {
     Write("]");
   }
 
+  private void PrintComprehensionExpr(SetComprehensionExpr e) {
+    Write("set ");
+    PrintQuantifierDomain(e.QuantifierDomain);
+    if (e.Value != null) {
+      Write(" :: ");
+      PrintExpression(e.Value);
+    }
+  }
+
+  private void PrintComprehensionExpr(MapComprehensionExpr e) {
+    Write("map ");
+    PrintQuantifierDomain(e.QuantifierDomain);
+    Write(" :: ");
+    if (e.Key != null) {
+      PrintExpression(e.Key);
+      Write(" := ");
+    }
+    PrintExpression(e.Value);
+  }
+
   private void PrintCollectionUpdateExpr(CollectionUpdateExpr e) {
     PrintExpression(e.Collection);
     Write("[");
@@ -184,6 +213,20 @@ public partial class ASTPrinter {
     Write(" := ");
     PrintExpression(e.Value);
     Write("]");
+  }
+
+  private void PrintMultiSetConstructionExpr(MultiSetConstructionExpr e) {
+    Write("multiset(");
+    PrintExpression(e.E);
+    Write(")");
+  }
+
+  private void PrintSeqConstructionExpr(SeqConstructionExpr e) {
+    Write("seq(");
+    PrintExpression(e.Count);
+    Write(", ");
+    PrintExpression(e.Initialiser);
+    Write(")");
   }
 
   private void PrintDatatypeValueExpr(DatatypeValueExpr e) {
@@ -257,12 +300,6 @@ public partial class ASTPrinter {
     DecIndent();
     WriteIndent();
     Write("}");
-  }
-
-  private void PrintMultiSetFormingExpr(MultiSetFormingExpr e) {
-    Write("multiset(");
-    PrintExpression(e.E);
-    Write(")");
   }
 
   private void PrintLambdaExpr(LambdaExpr e) {
