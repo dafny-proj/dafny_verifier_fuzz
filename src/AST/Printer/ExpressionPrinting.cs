@@ -84,6 +84,9 @@ public partial class ASTPrinter {
       case DatatypeUpdateExpr de:
         PrintDatatypeUpdateExpr(de);
         break;
+      case TypeUnaryExpr te:
+        PrintTypeUnaryExpr(te);
+        break;
       default:
         throw new UnsupportedNodePrintingException(e);
     }
@@ -314,6 +317,12 @@ public partial class ASTPrinter {
     PrintExpression(e.DatatypeValue);
     PrintList<DatatypeUpdatePair>(e.Updates, PrintDatatypeUpdatePair,
       start: ".(", end: ")");
+  }
+
+  private void PrintTypeUnaryExpr(TypeUnaryExpr e) {
+    PrintExpression(e.E);
+    Write($" {e.OpStr} ");
+    PrintType(e.T);
   }
 
 }

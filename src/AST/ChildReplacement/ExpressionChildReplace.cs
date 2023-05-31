@@ -66,6 +66,9 @@ public static partial class ASTChildReplacementMethods {
       case MapComprehensionExpr e:
         e.ReplaceChild(child, newChild);
         break;
+      case TypeUnaryExpr e:
+        e.ReplaceChild(child, newChild);
+        break;
       default:
         throw new UnsupportedNodeChildReplacementException(n);
     }
@@ -259,6 +262,14 @@ public static partial class ASTChildReplacementMethods {
     } else {
       // Other children are unlikely to be mutated here, skip for now.
       throw new UnsupportedNodeChildReplacementException(n);
+    }
+  }
+
+  public static void ReplaceChild(this TypeUnaryExpr n, Node child, Node newChild) {
+    if (n.E == child) {
+      n.E = CheckAndCastNewChild<Expression>(n, child, newChild);
+    } else {
+      throw new ChildNotFoundException(n, child);
     }
   }
 

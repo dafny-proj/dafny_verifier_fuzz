@@ -465,4 +465,16 @@ public class ASTTests {
     CanParseClonePrint(sourceStr);
   }
 
+  [TestMethod]
+  public void TypeUnaryExpr() {
+    var sourceStr = """
+    type Int = int
+
+    function F(a: Int): int {
+      if a is int then a as int else 0
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
 }
