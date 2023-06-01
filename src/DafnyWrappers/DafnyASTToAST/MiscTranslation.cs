@@ -69,9 +69,7 @@ public partial class ASTTranslator {
     } else if (p is Dafny.DisjunctivePattern dp) {
       return new DisjunctiveMatcher(dp.Alternatives.Select(TranslateMatcher));
     } else if (p is Dafny.IdPattern ip) {
-      if (ip.Id.StartsWith("_")) {
-        return new WildcardMatcher();
-      } else if (ip.BoundVar != null) {
+      if (ip.BoundVar != null) {
         return new BindingMatcher(TranslateVariable(ip.BoundVar));
       } else if (ip.Arguments != null && ip.Ctor != null) {
         return new DestructuringMatcher(

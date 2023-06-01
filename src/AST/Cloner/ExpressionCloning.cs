@@ -163,8 +163,7 @@ public partial class ASTCloner {
 
   private LetExpr CloneLetExpr(LetExpr e) {
     return new LetExpr(e.Vars.Select(v =>
-      new KeyValuePair<BoundVar, Expression>(
-        CloneBoundVar(v.Key), CloneExpression(v.Value))),
+      new VarExpressionPair(CloneBoundVar(v.Key), CloneExpression(v.Value))),
       CloneExpression(e.Body));
   }
 

@@ -177,11 +177,11 @@ public partial class ASTPrinter {
   private void PrintForallStmt(ForallStmt s) {
     Write("forall ");
     PrintQuantifierDomain(s.QuantifierDomain);
-    var printSpec = Specification.HasUserDefinedSpec(s.Ensures);
+    var printSpec = s.HasEnsures();
     if (printSpec) {
       WriteLine();
       IncIndent();
-      PrintSpecification(s.Ensures);
+      PrintSpecification(s.Ensures!);
       DecIndent();
     }
     if (s.Body != null) {

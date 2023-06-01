@@ -1,15 +1,10 @@
 namespace AST;
 
 public abstract partial class Matcher : Node { }
-public partial class WildcardMatcher : Matcher { }
 public partial class ExpressionMatcher : Matcher { }
 public partial class BindingMatcher : Matcher { }
 public partial class DestructuringMatcher : Matcher { }
 public partial class DisjunctiveMatcher : Matcher { }
-
-public partial class WildcardMatcher : Matcher {
-  public override IEnumerable<Node> Children => Enumerable.Empty<Node>();
-}
 
 public partial class ExpressionMatcher : Matcher {
   public Expression E { get; set; }

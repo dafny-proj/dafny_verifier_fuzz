@@ -193,10 +193,10 @@ public partial class ASTTranslator {
   }
 
   private LetExpr TranslateLetExpr(Dafny.LetExpr le) {
-    var vars = new List<KeyValuePair<BoundVar, Expression>>();
+    var vars = new List<VarExpressionPair>();
     foreach (var (l, r) in le.BoundVars.Zip(le.RHSs)) {
-      vars.Add(new KeyValuePair<BoundVar, Expression>(
-        TranslateBoundVar(l), TranslateExpression(r)));
+      vars.Add(
+        new VarExpressionPair(TranslateBoundVar(l), TranslateExpression(r)));
     }
     return new LetExpr(vars, TranslateExpression(le.Body));
   }

@@ -65,9 +65,7 @@ public partial class ASTCloner {
   }
 
   private Matcher CloneMatcher(Matcher m) {
-    if (m is WildcardMatcher) {
-      return new WildcardMatcher();
-    } else if (m is ExpressionMatcher em) {
+    if (m is ExpressionMatcher em) {
       return new ExpressionMatcher(CloneExpression(em.E));
     } else if (m is BindingMatcher bm) {
       return new BindingMatcher(CloneVariable(bm.Var));

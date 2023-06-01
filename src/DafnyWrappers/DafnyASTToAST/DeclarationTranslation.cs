@@ -83,7 +83,7 @@ public partial class ASTTranslator {
       // TODO: Add to a built-ins list?
       Dafny.ArrayClassDecl a => ArrayClassDecl.Skeleton(a.Dims),
       Dafny.ArrowTypeDecl a => ArrayClassDecl.Skeleton(a.Arity),
-      _ => ClassDecl.Skeleton(d.Name),
+      _ => ClassDecl.Skeleton(d.Name, d.TypeArgs.Select(TranslateTypeParameter)),
     };
     MarkDeclSkeleton(d, s);
     return s;
@@ -180,6 +180,7 @@ public partial class ASTTranslator {
     }
     var f = HasSkeletonDecl(df) ?
       (FunctionDecl)GetSkeletonDecl(df) : CreateFunctionDeclSkeleton(df);
+    f.TypeParams.AddRange(df.TypeArgs.Select(TranslateTypeParameter));
     f.Body = df.Body == null ? null : TranslateExpression(df.Body);
     f.Ins.AddRange(df.Formals.Select(TranslateFormal));
     f.Result = df.Result == null ? null : TranslateFormal(df.Result);

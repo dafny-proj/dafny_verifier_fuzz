@@ -50,7 +50,9 @@ public partial class ASTPrinter {
     var named = d is not DefaultClassDecl;
     if (named) {
       WriteIndent();
-      WriteLine($"class {d.Name} {{");
+      Write($"class {d.Name}");
+      PrintTypeParameters(d.TypeParams);
+      WriteLine(" {");
       IncIndent();
     }
     PrintMembers(d.Members);
@@ -101,6 +103,7 @@ public partial class ASTPrinter {
   private void PrintFunctionDecl(FunctionDecl d) {
     WriteIndent();
     Write($"function {d.Name}");
+    PrintTypeParameters(d.TypeParams);
     PrintFormals(d.Ins);
     Write(": ");
     if (d.HasNamedResult()) {

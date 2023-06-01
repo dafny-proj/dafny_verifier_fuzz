@@ -2,6 +2,7 @@ namespace AST;
 
 public partial class KeyValuePair<K, V> : Node where K : Node where V : Node { }
 public partial class ExpressionPair : KeyValuePair<Expression, Expression> { }
+public partial class VarExpressionPair : KeyValuePair<BoundVar, Expression> { }
 public partial class AssignmentPair : KeyValuePair<Expression, AssignmentRhs> { }
 public partial class MatchExprCase : KeyValuePair<Matcher, Expression> { }
 public partial class MatchStmtCase : KeyValuePair<Matcher, BlockStmt> { }
@@ -23,6 +24,11 @@ where K : Node where V : Node {
 
 public partial class ExpressionPair : KeyValuePair<Expression, Expression> {
   public ExpressionPair(Expression key, Expression value)
+  : base(key, value) { }
+}
+
+public partial class VarExpressionPair : KeyValuePair<BoundVar, Expression> {
+  public VarExpressionPair(BoundVar key, Expression value)
   : base(key, value) { }
 }
 

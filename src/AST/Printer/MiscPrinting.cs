@@ -3,7 +3,7 @@ namespace AST.Printer;
 public partial class ASTPrinter {
 
   private void PrintVariable(Variable v) {
-    Write(v.Name);
+    Write(v.GetDisplayName());
     if (v.HasExplicitType()) {
       Write(": ");
       PrintType(v.ExplicitType!);
@@ -103,9 +103,7 @@ public partial class ASTPrinter {
   }
 
   private void PrintMatcher(Matcher m) {
-    if (m is WildcardMatcher) {
-      Write("_");
-    } else if (m is ExpressionMatcher em) {
+    if (m is ExpressionMatcher em) {
       PrintExpression(em.E);
     } else if (m is BindingMatcher bm) {
       PrintVariable(bm.Var);

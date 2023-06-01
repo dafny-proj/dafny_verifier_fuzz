@@ -1,11 +1,10 @@
 namespace AST;
 
 public partial class LetExpr : Expression {
-  public readonly List<KeyValuePair<BoundVar, Expression>> Vars = new();
+  public readonly List<VarExpressionPair> Vars = new();
   public Expression Body { get; set; }
 
-  public LetExpr(IEnumerable<KeyValuePair<BoundVar, Expression>> vars,
-  Expression body) {
+  public LetExpr(IEnumerable<VarExpressionPair> vars, Expression body) {
     Vars.AddRange(vars);
     Body = body;
   }

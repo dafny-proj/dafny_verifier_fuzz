@@ -5,29 +5,33 @@ public partial class DefaultClassDecl : ClassDecl { }
 public partial class ArrayClassDecl : ClassDecl { }
 public partial class ArrowTypeDecl : ClassDecl { }
 
-// TODO: Type parameters for classes.
 public partial class ClassDecl : TopLevelDecl {
   public override string Name { get; protected set; }
+  public readonly List<TypeParameterDecl> TypeParams = new();
   public readonly List<MemberDecl> Members = new();
 
-  public ClassDecl(string name, IEnumerable<MemberDecl>? members = null) {
+  // Member declarations contain a reference to this enclosing declaration, so
+  // before the declaration has been constructed, it shouldn't be possible to 
+  // construct its members. Hence, member arguments are not included here.
+  public ClassDecl(string name, IEnumerable<TypeParameterDecl>? typeParams = null) {
     Name = name;
-    if (members != null) {
-      Members.AddRange(members);
+    if (typeParams != null) {
+      TypeParams.AddRange(typeParams);
     }
   }
 
-  public static ClassDecl Skeleton(string name) => new ClassDecl(name);
+  public static ClassDecl Skeleton(string name,
+  IEnumerable<TypeParameterDecl>? typeParams = null)
+    => new ClassDecl(name, typeParams);
   public void AddMember(MemberDecl member) => Members.Add(member);
   public void AddMembers(IEnumerable<MemberDecl> members)
     => Members.AddRange(members);
 
-  public override IEnumerable<Node> Children => Members;
+  public override IEnumerable<Node> Children => TypeParams.Concat<Node>(Members);
 }
 
 public partial class DefaultClassDecl : ClassDecl {
-  public DefaultClassDecl(IEnumerable<MemberDecl>? members = null)
-  : base("_default_class", members) { }
+  public DefaultClassDecl() : base(name: "_DF_default_class") { }
 
   public static DefaultClassDecl Skeleton() => new DefaultClassDecl();
 }
@@ -56,7 +60,8 @@ public partial class ArrayClassDecl : ClassDecl {
 public partial class ArrowTypeDecl : ClassDecl {
   // Number of arguments to the function. Excludes the single produced result.
   public int Arity { get; }
-  public ArrowTypeDecl(int arity) : base("_DF_builtin_arrow") { }
+
+  public ArrowTypeDecl(int arity) : base(name: "_DF_builtin_arrow") { }
 
   public static ArrowTypeDecl Skeleton(int arity) => new ArrowTypeDecl(arity);
 }

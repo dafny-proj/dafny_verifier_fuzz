@@ -48,8 +48,7 @@ public partial class VarWithSideEffectingAssignmentFinder {
     if (s.Initialiser is AssignStmt ss) {
       VisitAssignStmt(ss);
     } else if (s.Initialiser is CallStmt) {
-      Contract.Assert(s.Vars.Count == 1);
-      AddVar(s.Vars.First());
+      foreach (var v in s.Vars) { AddVar(v); }
     }
   }
 

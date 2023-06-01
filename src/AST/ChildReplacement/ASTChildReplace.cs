@@ -1,34 +1,40 @@
 namespace AST;
 
 public static partial class ASTChildReplacementMethods {
-  public static void ReplaceChild(this Node n, Node child, Node newChild) {
-    switch (n) {
-      case Expression e:
-        e.ReplaceChild(child, newChild);
+  public static void ReplaceChild(this Node node, Node child, Node newChild) {
+    switch (node) {
+      case Expression n:
+        n.ReplaceChild(child, newChild);
         break;
-      case Statement s:
-        s.ReplaceChild(child, newChild);
+      case Statement n:
+        n.ReplaceChild(child, newChild);
         break;
-      case AssignmentRhs a:
-        a.ReplaceChild(child, newChild);
+      case AssignmentRhs n:
+        n.ReplaceChild(child, newChild);
         break;
-      case AssignmentPair a:
-        a.ReplaceChild(child, newChild);
+      case AssignmentPair n:
+        n.ReplaceChild(child, newChild);
         break;
-      case ExpressionPair a:
-        a.ReplaceChild(child, newChild);
+      case ExpressionPair n:
+        n.ReplaceChild(child, newChild);
         break;
-      case MatchExprCase a:
-        a.ReplaceChild(child, newChild);
+      case VarExpressionPair n:
+        n.ReplaceChild(child, newChild);
         break;
-      case DatatypeUpdatePair a:
-        a.ReplaceChild(child, newChild);
+      case MatchExprCase n:
+        n.ReplaceChild(child, newChild);
         break;
-      case Matcher a:
-        a.ReplaceChild(child, newChild);
+      case DatatypeUpdatePair n:
+        n.ReplaceChild(child, newChild);
+        break;
+      case Matcher n:
+        n.ReplaceChild(child, newChild);
+        break;
+      case Specification n:
+        n.ReplaceChild(child, newChild);
         break;
       default:
-        throw new UnsupportedNodeChildReplacementException(n);
+        throw new UnsupportedNodeChildReplacementException(node);
     }
   }
 

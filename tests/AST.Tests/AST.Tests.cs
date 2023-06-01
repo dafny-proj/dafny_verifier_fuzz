@@ -83,6 +83,7 @@ public class ASTTests {
     var sourceStr = """
     method ArrayInit() {
       var a1 := new int[3];
+      var a2 := new int[3]((i) => i);
       var a3 := new int[3][1, 2, 3];
     }
 
@@ -94,10 +95,6 @@ public class ASTTests {
       var x5 := a[i];
     }
     """;
-    // var TODO = """
-    // // Unsupported lambdas and arrow types.
-    // var a2 := new int[3](i => i);
-    // """;
     CanParseClonePrint(sourceStr);
   }
 
@@ -472,6 +469,49 @@ public class ASTTests {
 
     function F(a: Int): int {
       if a is int then a as int else 0
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
+  [TestMethod]
+  public void WildVar() {
+    var sourceStr = """
+    method M() {
+      var _ := 1;
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
+  [TestMethod]
+  public void GenericMethod() {
+    var sourceStr = """
+    method M<T>(t: T)
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
+  [TestMethod]
+  public void GenericFunction() {
+    var sourceStr = """
+    function F<T>(t: T): T
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
+  [TestMethod]
+  public void GenericClass() {
+    var sourceStr = """
+    class GC<T> {
+      var t: T
+      constructor(t_: T) {
+        t := t_;
+      }
+    }
+
+    method M() {
+      var gc: GC<bool> := new GC<bool>(true);
     }
     """;
     CanParseClonePrint(sourceStr);

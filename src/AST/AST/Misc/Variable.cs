@@ -12,6 +12,8 @@ public abstract partial class Variable : Node {
   public virtual Type? ExplicitType { get; set; }
 
   public bool HasExplicitType() => ExplicitType != null;
+  public bool IsWildVar() => Name.StartsWith("_v");
+  public string GetDisplayName() => IsWildVar() ? "_" : Name;
 
   public Variable(string name, Type type, Type? explicitType = null) {
     Name = name;

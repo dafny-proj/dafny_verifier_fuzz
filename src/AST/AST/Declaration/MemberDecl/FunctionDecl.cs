@@ -1,8 +1,8 @@
 namespace AST;
 
-// TODO: Type parameters for generic functions.
 public partial class FunctionDecl : MemberDecl {
   public override string Name { get; protected set; }
+  public readonly List<TypeParameterDecl> TypeParams = new();
   public Expression? Body { get; set; }
   public readonly List<Formal> Ins = new();
   public Formal? Result { get; set; }
@@ -22,11 +22,14 @@ public partial class FunctionDecl : MemberDecl {
                           || HasReadsSpec() || HasDecreasesSpec();
 
   public FunctionDecl(TopLevelDecl enclosingDecl, string name, Type resultType,
-  Expression? body = null, IEnumerable<Formal>? ins = null,
+  IEnumerable<TypeParameterDecl>? typeParams = null, Expression? body = null, IEnumerable<Formal>? ins = null,
   Formal? result = null, Specification? pre = null, Specification? post = null,
   Specification? reads = null, Specification? dec = null)
   : base(enclosingDecl) {
     Name = name;
+    if (typeParams != null) {
+      TypeParams.AddRange(typeParams);
+    }
     Body = body;
     if (ins != null) {
       Ins.AddRange(ins);
@@ -45,6 +48,7 @@ public partial class FunctionDecl : MemberDecl {
 
   public override IEnumerable<Node> Children {
     get {
+      foreach (var t in TypeParams) { yield return t; }
       foreach (var i in Ins) { yield return i; }
       if (Result != null) { yield return Result; }
       if (HasPrecondition()) { yield return Precondition!; }

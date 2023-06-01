@@ -82,7 +82,7 @@ public partial class ASTCloner {
       DefaultClassDecl => DefaultClassDecl.Skeleton(),
       ArrayClassDecl a => ArrayClassDecl.Skeleton(a.Dimensions),
       ArrowTypeDecl a => ArrowTypeDecl.Skeleton(a.Arity),
-      _ => ClassDecl.Skeleton(d.Name),
+      _ => ClassDecl.Skeleton(d.Name, d.TypeParams.Select(CloneTypeParameterDecl)),
     };
     MarkDeclCloneSkeleton(d, s);
     return s;
@@ -257,6 +257,7 @@ public partial class ASTCloner {
     }
     var c = HasSkeletonDeclClone(d) ?
       (FunctionDecl)GetSkeletonDeclClone(d) : CreateFunctionDeclSkeleton(d);
+    c.TypeParams.AddRange(d.TypeParams.Select(CloneTypeParameterDecl));
     c.Body = d.Body == null ? null : CloneExpression(d.Body);
     c.Ins.AddRange(d.Ins.Select(CloneFormal));
     c.Result = d.Result == null ? null : CloneFormal(d.Result);
