@@ -211,7 +211,7 @@ public partial class ASTTranslator {
   private void
   PopulateDatatypeConstructors(Dafny.DatatypeDecl dd, DatatypeDecl d) {
     foreach (var c in dd.Ctors) {
-      d.AddConstructor(TranslateDatatypeConstructor(c));
+      d.AppendConstructor(TranslateDatatypeConstructor(c));
     }
   }
   private DatatypeDecl

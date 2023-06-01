@@ -39,6 +39,32 @@ public partial class MergeVarsToClassMutationRewriter {
     return null;
   }
 
+  private bool NotAutoInitialisable(Type t) {
+    if (t is BasicType or BuiltInType or NullableType or CollectionType) {
+      return true;
+    }
+    // TODO: Track auto-init info in types.
+    // This is not exactly accurate, but until there is better tracking of which 
+    // types are auto initialisable, use a blanket case.
+    return false;
+  }
+
+  private Type? TryConvertToAutoInitialisable(Type t) {
+    if (t is UserDefinedType ut) {
+      if (ut.TypeDecl is ClassDecl cd) {
+        return new NullableType(cd, ut.GetTypeArgs());
+      } else if (ut.TypeDecl is DatatypeDecl dd) {
+        // Create a None constructor for the datatype.
+        var none = new DatatypeConstructorDecl(dd, "DF_None");
+        dd.PrependConstructor(none);
+        return t;
+      }
+    }
+    // TODO: Handle other cases. An idea is to wrap the type in a class
+    // to enable formation of nullable types, or in a datatype with a None case.
+    return null;
+  }
+
   private ClassDecl GenClassFromVars(IEnumerable<LocalVar> vars) {
     // Generate class skeleton.
     var cls = ClassDecl.Skeleton(gen.GenClassName());
@@ -46,6 +72,13 @@ public partial class MergeVarsToClassMutationRewriter {
     foreach (var v in vars) {
       var ty = v.HasExplicitType() ? v.ExplicitType! : v.Type;
       Contract.Assert(ty is not TypeProxy);
+      if (NotAutoInitialisable(ty)) {
+        ty = TryConvertToAutoInitialisable(ty);
+        if (ty == null) {
+          // Failed to convert to auto-initialisable type. Skip this var.
+          continue;
+        }
+      }
       var fd = new FieldDecl(enclosingDecl: cls, name: v.Name, type: ty);
       varToField.Add(v, fd);
       cls.AddMember(fd);

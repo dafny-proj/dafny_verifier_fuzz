@@ -45,10 +45,16 @@ public partial class DatatypeDecl : TopLevelDecl {
   IEnumerable<TypeParameterDecl>? typeParams = null)
     => new DatatypeDecl(name, typeParams);
 
-  public void AddConstructor(DatatypeConstructorDecl constructor) {
+  public void PrependConstructor(DatatypeConstructorDecl constructor) {
+    InsertConstructor(constructor, index: 0);
+  }
+  public void AppendConstructor(DatatypeConstructorDecl constructor) {
+    InsertConstructor(constructor, index: Constructors.Count);
+  }
+  public void InsertConstructor(DatatypeConstructorDecl constructor, int index) {
     Contract.Requires(constructor.EnclosingDecl == this
       && !AllConstructorNames().Contains(constructor.Name));
-    Constructors.Add(constructor);
+    Constructors.Insert(index, constructor);
     // Create discriminator for constructor.
     var discriminator = new DatatypeDiscriminatorDecl(constructor);
     Discriminators.Add(discriminator.Name, discriminator);
@@ -65,7 +71,7 @@ public partial class DatatypeDecl : TopLevelDecl {
 
   public void AddConstructors(IEnumerable<DatatypeConstructorDecl> constructors) {
     foreach (var c in constructors) {
-      AddConstructor(c);
+      AppendConstructor(c);
     }
   }
 
@@ -73,7 +79,7 @@ public partial class DatatypeDecl : TopLevelDecl {
     Contract.Requires(member.EnclosingDecl == this
       && member is not (DatatypeDestructorDecl or DatatypeDiscriminatorDecl));
     if (member is DatatypeConstructorDecl constructor) {
-      AddConstructor(constructor);
+      AppendConstructor(constructor);
     } else {
       Members.Add(member);
     }
@@ -98,7 +104,7 @@ public partial class TupleTypeDecl : DatatypeDecl {
   public new static TupleTypeDecl Skeleton(string name,
   IEnumerable<TypeParameterDecl>? typeParams = null)
     => new TupleTypeDecl(name, typeParams);
-  
+
   // TODO: Auto-generate a tuple type and its accessors. 
   // public TupleTypeDecl(int dims)
 }
