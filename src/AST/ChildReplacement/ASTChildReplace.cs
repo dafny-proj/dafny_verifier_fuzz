@@ -3,6 +3,9 @@ namespace AST;
 public static partial class ASTChildReplacementMethods {
   public static void ReplaceChild(this Node node, Node child, Node newChild) {
     switch (node) {
+      case Declaration n:
+        n.ReplaceChild(child, newChild);
+        break;
       case Expression n:
         n.ReplaceChild(child, newChild);
         break;

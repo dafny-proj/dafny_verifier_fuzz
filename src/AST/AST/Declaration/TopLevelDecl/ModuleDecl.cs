@@ -17,4 +17,13 @@ public partial class ModuleDecl : TopLevelDecl {
     => Decls.AddRange(decls);
 
   public override IEnumerable<Node> Children => Decls;
+
+  public ClassDecl GetOrCreateDefaultClass() {
+    var cls = (ClassDecl?)Decls.Find(d => d is DefaultClassDecl);
+    if (cls == null) {
+      cls = new DefaultClassDecl();
+      AppendDecl(cls);
+    }
+    return cls;
+  }
 }

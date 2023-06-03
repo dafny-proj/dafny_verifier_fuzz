@@ -4,6 +4,8 @@ public interface IGenerator {
   public string GenLabelName();
   public string GenVarName();
   public string GenClassName();
+  public string GenFunctionName();
+  public string GenFormalName();
 }
 
 public class BasicGenerator : IGenerator {
@@ -21,4 +23,6 @@ public class BasicGenerator : IGenerator {
   public string GenClassName() => GenName("C");
   public string GenLabelName() => GenName("l");
   public string GenVarName() => GenName("v");
+  public string GenFunctionName() => GenName("fn");
+  public string GenFormalName() => GenName("fl");
 }
