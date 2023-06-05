@@ -209,7 +209,8 @@ public partial class ASTCloner {
       return (FieldDecl)GetClonedDecl(d);
     }
     var enclosingDecl = (TopLevelDecl)CloneDeclRef(d.EnclosingDecl);
-    var c = new FieldDecl(enclosingDecl, name: d.Name, type: CloneType(d.Type));
+    var c = new FieldDecl(enclosingDecl, 
+      name: d.Name, type: CloneType(d.Type), isBuiltIn: d.IsBuiltIn);
     MarkDeclCloned(d, c);
     return c;
   }

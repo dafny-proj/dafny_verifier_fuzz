@@ -517,4 +517,17 @@ public class ASTTests {
     CanParseClonePrint(sourceStr);
   }
 
+  [TestMethod]
+  public void FrameField() {
+    var sourceStr = """
+    class C {
+      var i: int
+      function M(c: C): int
+        reads `i, c`i
+
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
 }

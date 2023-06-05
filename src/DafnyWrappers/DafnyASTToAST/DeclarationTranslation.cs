@@ -282,7 +282,8 @@ public partial class ASTTranslator {
       return (FieldDecl)GetTranslatedDecl(df);
     }
     var enclosingDecl = (TopLevelDecl)TranslateDeclRef(df.EnclosingClass);
-    var f = new FieldDecl(enclosingDecl, df.Name, TranslateType(df.Type));
+    var f = new FieldDecl(enclosingDecl, df.Name, TranslateType(df.Type),
+      isBuiltIn: df is Dafny.SpecialField);
     MarkDeclTranslated(df, f);
     return f;
   }

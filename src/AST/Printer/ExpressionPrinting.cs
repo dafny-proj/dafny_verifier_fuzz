@@ -142,11 +142,13 @@ public partial class ASTPrinter {
   }
 
   private void PrintMemberSelectExpr(MemberSelectExpr e) {
+    var separator = "";
     if (e.Receiver is not (ImplicitThisExpr or ImplicitStaticReceiverExpr)) {
       PrintExpression(e.Receiver);
-      Write(".");
+      separator = ".";
     }
-    Write(e.MemberName);
+    if (e is FrameFieldExpr) { separator = "`"; }
+    Write($"{separator}{e.MemberName}");
   }
 
   private void PrintCollectionSelectExpr(CollectionSelectExpr e) {

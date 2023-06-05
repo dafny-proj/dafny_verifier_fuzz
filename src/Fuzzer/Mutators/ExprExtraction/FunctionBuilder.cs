@@ -16,6 +16,7 @@ public class FunctionData {
   }
 
   public void AddRequires(Expression e) => Requires.Add(e);
+  public void AddReads(Expression e) => Reads.Add(e);
 }
 
 public class FunctionBuilder {
@@ -52,6 +53,7 @@ public class FunctionBuilder {
       LiteralExpr e => VisitLiteralExpr(e),
       BinaryExpr e => VisitBinaryExpr(e),
       DatatypeUpdateExpr e => VisitDatatypeUpdateExpr(e),
+      MemberSelectExpr e => VisitMemberSelectExpr(e),
       _ => Identity(e_),
     };
   }
@@ -104,6 +106,28 @@ public class FunctionBuilder {
           : NodeFactory.CreateOrExpr(requires, constructorCheck);
       }
       f.AddRequires(requires!);
+      return f;
+    }
+  }
+
+  private FunctionData VisitMemberSelectExpr(MemberSelectExpr e) {
+    if (Rand.RandBool()) {
+      return Identity(e);
+    } else {
+      // Compose function from subexpressions.
+      FunctionData f;
+      if (e.Receiver is (StaticReceiverExpr)) {
+        f = BuiltIn(e);
+      } else {
+        var receiver = VisitExpr(e.Receiver);
+        f = Compose(e: new MemberSelectExpr(receiver.E, e.Member),
+          fds: new[] { receiver });
+        // Add reads clause if reading a non-static mutable user-defined field.
+        if (e.Member is FieldDecl fld && !fld.IsBuiltIn) {
+          // TODO: Fields currently don't have static/const attributes.
+          f.AddReads(new FrameFieldExpr(receiver.E, fld));
+        }
+      }
       return f;
     }
   }

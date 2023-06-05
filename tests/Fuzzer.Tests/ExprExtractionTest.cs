@@ -146,4 +146,38 @@ public class ExprExtractionTest {
       exprToExtractIndex: 3,
       randomizerChoices: new() { false, true, true });
   }
+
+  [TestMethod]
+  public void Test6() {
+    var input = """
+    class C {
+      var x: int
+    }
+
+    method M() {
+      var c := new C;
+      var x := c.x;
+    }
+    """;
+    var output = """
+    class C {
+      var x: int
+    }
+
+    method M() {
+      var c := new C;
+      var x := fn1_mock(c);
+    }
+
+    function fn1_mock(fl0_mock: C): int
+      reads fl0_mock`x
+    {
+      fl0_mock.x
+    }
+    """;
+    TestExprExtraction(input, output,
+      expectedNumExprsFound: 2,
+      exprToExtractIndex: 0,
+      randomizerChoices: new() { false });
+  }
 }

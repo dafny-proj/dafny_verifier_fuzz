@@ -37,7 +37,7 @@ public partial class DatatypeDestructorDecl : FieldDecl {
 
   public DatatypeDestructorDecl(TopLevelDecl enclosingDecl,
   string name, Type type)
-  : base(enclosingDecl, name, type) { }
+  : base(enclosingDecl, name, type, isBuiltIn: true) { }
 
   public DatatypeDestructorDecl(TopLevelDecl enclosingDecl,
   Formal constructorFormal)
@@ -48,7 +48,7 @@ public partial class DatatypeDestructorDecl : FieldDecl {
 public partial class DatatypeDiscriminatorDecl : FieldDecl {
   public DatatypeDiscriminatorDecl(TopLevelDecl enclosingDecl,
   string constructorName)
-  : base(enclosingDecl, constructorName + "?", Type.Bool) { }
+  : base(enclosingDecl, constructorName + "?", Type.Bool, isBuiltIn: true) { }
 
   public DatatypeDiscriminatorDecl(DatatypeConstructorDecl constructor)
   : this(constructor.EnclosingDecl, constructor.Name) { }

@@ -14,7 +14,7 @@ public partial class ASTTranslator {
     // and expressions.
     return n switch {
       Dafny.AttributedExpression ae => TranslateExpression(ae.E),
-      Dafny.FrameExpression fe => TranslateExpression(fe.E),
+      Dafny.FrameExpression fe => TranslateFrameExpression(fe),
       Dafny.Expression e => TranslateExpression(e),
       _ => throw new UnsupportedTranslationException(n),
     };
@@ -292,6 +292,14 @@ public partial class ASTTranslator {
       _ => throw new UnsupportedTranslationException(de),
     };
     SetType(de, e);
+    return e;
+  }
+
+  private Expression TranslateFrameExpression(Dafny.FrameExpression de) {
+    var e = TranslateExpression(de.E);
+    if (de.Field != null) {
+      e = new FrameFieldExpr(e, (FieldDecl)TranslateDeclRef(de.Field));
+    }
     return e;
   }
 

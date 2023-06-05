@@ -70,9 +70,15 @@ public partial class ASTCloner {
   }
 
   private MemberSelectExpr CloneMemberSelectExpr(MemberSelectExpr e) {
-    var c = new MemberSelectExpr(
-      CloneExpression(e.Receiver), (MemberDecl)CloneDeclRef(e.Member));
-    SetType(e, c);
+    var receiver = CloneExpression(e.Receiver);
+    var member = (MemberDecl)CloneDeclRef(e.Member);
+    MemberSelectExpr c;
+    if (e is FrameFieldExpr) {
+      c = new FrameFieldExpr(receiver, (FieldDecl)member);
+    } else {
+      c = new MemberSelectExpr(receiver, member);
+      SetType(e, c);
+    }
     return c;
   }
 
