@@ -1,9 +1,10 @@
 namespace AST;
 
 public abstract partial class Expression : Node {
+  private Type? _Type;
   public virtual Type Type {
-    get => throw new UnsupportedASTOperationException(this,
-      "expression type retrieval");
+    get => _Type ?? throw new ASTException($"Type not set for `{this}`.");
+    set => _Type = value;
   }
 }
 

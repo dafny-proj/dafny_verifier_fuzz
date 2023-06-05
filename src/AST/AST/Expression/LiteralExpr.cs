@@ -62,10 +62,7 @@ public partial class StringLiteralExpr : LiteralExpr {
 }
 
 public partial class NullLiteralExpr : LiteralExpr {
-  private Type _type { get; }
-  public override Type Type => _type;
-
   public NullLiteralExpr(Type type) {
-    _type = type;
+    Type = type;
   }
 }

@@ -19,6 +19,7 @@ public abstract partial class QuantifierExpr : Expression {
 
   public override IEnumerable<Node> Children
     => new Node[] { QuantifierDomain, Term };
+  public override Type Type => Type.Bool;
 }
 
 public partial class ForallExpr : QuantifierExpr {

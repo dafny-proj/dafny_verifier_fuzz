@@ -1,6 +1,10 @@
 namespace AST.Cloner;
 
 public partial class ASTCloner {
+  private void SetType(Expression e, Expression c) {
+    c.Type = CloneType(e.Type);
+  }
+
   private Expression CloneExpression(Expression e) {
     return e switch {
       LiteralExpr le => CloneLiteralExpr(le),
@@ -66,45 +70,63 @@ public partial class ASTCloner {
   }
 
   private MemberSelectExpr CloneMemberSelectExpr(MemberSelectExpr e) {
-    return new MemberSelectExpr(
+    var c = new MemberSelectExpr(
       CloneExpression(e.Receiver), (MemberDecl)CloneDeclRef(e.Member));
+    SetType(e, c);
+    return c;
   }
 
   private CollectionElementExpr CloneCollectionSelectExpr(CollectionElementExpr e) {
-    return new CollectionElementExpr(
+    var c = new CollectionElementExpr(
       CloneExpression(e.Collection), CloneExpression(e.Index));
+    SetType(e, c);
+    return c;
   }
 
   private CollectionSliceExpr CloneCollectionSelectExpr(CollectionSliceExpr e) {
-    return new CollectionSliceExpr(CloneExpression(e.Collection),
+    var c = new CollectionSliceExpr(CloneExpression(e.Collection),
       e.Index0 == null ? null : CloneExpression(e.Index0),
       e.Index1 == null ? null : CloneExpression(e.Index1));
+    SetType(e, c);
+    return c;
   }
 
   private SeqDisplayExpr CloneCollectionDisplayExpr(SeqDisplayExpr e) {
-    return new SeqDisplayExpr(e.Elements.Select(CloneExpression));
+    var c = new SeqDisplayExpr(e.Elements.Select(CloneExpression));
+    SetType(e, c);
+    return c;
   }
 
   private SetDisplayExpr CloneCollectionDisplayExpr(SetDisplayExpr e) {
-    return new SetDisplayExpr(e.Elements.Select(CloneExpression));
+    var c = new SetDisplayExpr(e.Elements.Select(CloneExpression));
+    SetType(e, c);
+    return c;
   }
 
   private MultiSetDisplayExpr CloneCollectionDisplayExpr(MultiSetDisplayExpr e) {
-    return new MultiSetDisplayExpr(e.Elements.Select(CloneExpression));
+    var c = new MultiSetDisplayExpr(e.Elements.Select(CloneExpression));
+    SetType(e, c);
+    return c;
   }
 
   private MapDisplayExpr CloneCollectionDisplayExpr(MapDisplayExpr e) {
-    return new MapDisplayExpr(e.Elements.Select(CloneExpressionPair));
+    var c = new MapDisplayExpr(e.Elements.Select(CloneExpressionPair));
+    SetType(e, c);
+    return c;
   }
 
   private SetComprehensionExpr CloneComprehensionExpr(SetComprehensionExpr e) {
-    return new SetComprehensionExpr(CloneQuantifierDomain(e.QuantifierDomain),
+    var c = new SetComprehensionExpr(CloneQuantifierDomain(e.QuantifierDomain),
       e.Value == null ? null : CloneExpression(e.Value));
+    SetType(e, c);
+    return c;
   }
 
   private MapComprehensionExpr CloneComprehensionExpr(MapComprehensionExpr e) {
-    return new MapComprehensionExpr(CloneQuantifierDomain(e.QuantifierDomain),
+    var c = new MapComprehensionExpr(CloneQuantifierDomain(e.QuantifierDomain),
       e.Key == null ? null : CloneExpression(e.Key), CloneExpression(e.Value));
+    SetType(e, c);
+    return c;
   }
 
   private CollectionUpdateExpr CloneCollectionUpdateExpr(CollectionUpdateExpr e) {
@@ -113,18 +135,24 @@ public partial class ASTCloner {
   }
 
   private MultiSetConstructionExpr CloneMultiSetConstructionExpr(MultiSetConstructionExpr e) {
-    return new MultiSetConstructionExpr(CloneExpression(e.E));
+    var c = new MultiSetConstructionExpr(CloneExpression(e.E));
+    SetType(e, c);
+    return c;
   }
 
   private SeqConstructionExpr CloneSeqConstructionExpr(SeqConstructionExpr e) {
-    return new SeqConstructionExpr(
+    var c = new SeqConstructionExpr(
       CloneExpression(e.Count), CloneExpression(e.Initialiser));
+    SetType(e, c);
+    return c;
   }
 
   private DatatypeValueExpr CloneDatatypeValueExpr(DatatypeValueExpr e) {
-    return new DatatypeValueExpr(
+    var c = new DatatypeValueExpr(
       (DatatypeConstructorDecl)CloneDeclRef(e.Constructor),
       e.ConstructorArguments.Select(CloneExpression));
+    SetType(e, c);
+    return c;
   }
 
   private ThisExpr CloneThisExpr(ThisExpr e) {
@@ -144,8 +172,10 @@ public partial class ASTCloner {
   }
 
   private FunctionCallExpr CloneFunctionCallExpr(FunctionCallExpr e) {
-    return new FunctionCallExpr(
+    var c = new FunctionCallExpr(
       CloneExpression(e.Callee), e.Arguments.Select(CloneExpression));
+    SetType(e, c);
+    return c;
   }
 
   private StaticReceiverExpr CloneStaticReceiverExpr(StaticReceiverExpr e) {
@@ -157,14 +187,18 @@ public partial class ASTCloner {
   }
 
   private ITEExpr CloneITEExpr(ITEExpr e) {
-    return new ITEExpr(CloneExpression(e.Guard),
+    var c = new ITEExpr(CloneExpression(e.Guard),
       CloneExpression(e.Thn), CloneExpression(e.Els));
+    SetType(e, c);
+    return c;
   }
 
   private LetExpr CloneLetExpr(LetExpr e) {
-    return new LetExpr(e.Vars.Select(v =>
+    var c = new LetExpr(e.Vars.Select(v =>
       new VarExpressionPair(CloneBoundVar(v.Key), CloneExpression(v.Value))),
       CloneExpression(e.Body));
+    SetType(e, c);
+    return c;
   }
 
   private QuantifierExpr CloneQuantifierExpr(QuantifierExpr e) {
@@ -180,16 +214,20 @@ public partial class ASTCloner {
   }
 
   private MatchExpr CloneMatchExpr(MatchExpr e) {
-    return new MatchExpr(
+    var c = new MatchExpr(
       CloneExpression(e.Selector), e.Cases.Select(CloneMatchExprCase));
+    SetType(e, c);
+    return c;
   }
 
   private LambdaExpr CloneLambdaExpr(LambdaExpr e) {
-    return new LambdaExpr(
+    var c = new LambdaExpr(
       params_: e.Params.Select(CloneBoundVar),
       result: CloneExpression(e.Result),
       pre: CloneSpecification(e.Precondition),
       reads: CloneSpecification(e.ReadFrame));
+    SetType(e, c);
+    return c;
   }
 
   private DatatypeUpdateExpr CloneDatatypeUpdateExpr(DatatypeUpdateExpr e) {
@@ -200,11 +238,13 @@ public partial class ASTCloner {
   private TypeUnaryExpr CloneTypeUnaryExpr(TypeUnaryExpr e) {
     var e_ = CloneExpression(e.E);
     var t = CloneType(e.T);
-    return e switch {
+    TypeUnaryExpr c = e switch {
       TypeConversionExpr => new TypeConversionExpr(e_, t),
       TypeCheckExpr => new TypeCheckExpr(e_, t),
       _ => throw new UnsupportedNodeCloningException(e),
     };
+    SetType(e, c);
+    return c;
   }
 
 }

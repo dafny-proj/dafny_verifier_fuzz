@@ -12,4 +12,5 @@ public partial class DatatypeUpdateExpr : Expression {
 
   public override IEnumerable<Node> Children
     => Updates.Prepend<Node>(DatatypeValue);
+  public override Type Type => DatatypeValue.Type;
 }
