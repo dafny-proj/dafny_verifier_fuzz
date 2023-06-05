@@ -45,6 +45,9 @@ public static partial class ASTChildReplacementMethods {
       case DatatypeValueExpr e:
         e.ReplaceChild(child, newChild);
         break;
+      case DatatypeUpdateExpr e:
+        e.ReplaceChild(child, newChild);
+        break;
       case FunctionCallExpr e:
         e.ReplaceChild(child, newChild);
         break;

@@ -10,6 +10,8 @@ public partial class DatatypeConstructorDecl : MemberDecl {
 
   public string DatatypeName => EnclosingDecl.Name;
   public bool HasParameters() => Parameters.Count > 0;
+  public DatatypeDiscriminatorDecl GetDiscriminator()
+    => ((DatatypeDecl)EnclosingDecl).GetDiscriminator(Name + "?");
 
   public DatatypeConstructorDecl(DatatypeDecl enclosingDecl,
   string name, IEnumerable<Formal>? parameters = null)
@@ -28,7 +30,10 @@ public partial class DatatypeConstructorDecl : MemberDecl {
 public partial class DatatypeDestructorDecl : FieldDecl {
   // Within the same datatype, fields of the same name and type within different 
   // constructors share the same destructor.
-  // public Dictionary<DatatypeConstructorDecl, Formal> Destructors = new();
+  public List<DatatypeConstructorDecl> Constructors = new();
+  public void AddConstructor(DatatypeConstructorDecl constructor) {
+    Constructors.Add(constructor);
+  }
 
   public DatatypeDestructorDecl(TopLevelDecl enclosingDecl,
   string name, Type type)

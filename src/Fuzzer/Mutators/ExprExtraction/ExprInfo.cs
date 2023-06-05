@@ -12,12 +12,12 @@ public class ExprInfo {
 }
 
 public class ExprInfoBuilder {
-  private List<ExprInfo> exprInfos = new();
+  private Dictionary<Expression, ExprInfo> exprInfos = new();
   private Stack<ModuleDecl> modules = new();
   private Stack<Node> parents = new();
   private Node? current;
 
-  public static List<ExprInfo> FindExprInfo(Node n) {
+  public static Dictionary<Expression, ExprInfo> FindExprInfo(Node n) {
     var b = new ExprInfoBuilder();
     b.VisitNode(n);
     return b.exprInfos;
@@ -37,7 +37,7 @@ public class ExprInfoBuilder {
   private void VisitNode(Node n) {
     EnterNode(n);
     if (n is Expression e) {
-      exprInfos.Add(new ExprInfo(e, GetParent(), GetModule()));
+      exprInfos.Add(e, new ExprInfo(e, GetParent(), GetModule()));
     }
     foreach (var c in n.Children) { VisitNode(c); }
     ExitNode(n);

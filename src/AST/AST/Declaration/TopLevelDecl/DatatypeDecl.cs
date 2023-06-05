@@ -61,11 +61,11 @@ public partial class DatatypeDecl : TopLevelDecl {
     // Create destructors, if not already existed, for constructor formals.
     var seenFormals = AllDestructorNames();
     foreach (var f in constructor.Parameters) {
-      if (seenFormals.Contains(f.Name)) {
-        Contract.Requires(f.Type == Destructors[f.Name].Type);
-        continue;
+      if (!seenFormals.Contains(f.Name)) {
+        Destructors.Add(f.Name, new DatatypeDestructorDecl(this, f));
       }
-      Destructors.Add(f.Name, new DatatypeDestructorDecl(this, f));
+      Contract.Assert(f.Type == Destructors[f.Name].Type);
+      Destructors[f.Name].AddConstructor(constructor);
     }
   }
 

@@ -2,12 +2,12 @@ namespace Fuzzer;
 
 public class ExprExtractionMutation : IMutation {
   public ExprInfo ExprToExtract;
-  public List<ExprInfo> ExprsForParams;
+  public ExprParamInfo ExprParamInfo;
   public ClassDecl FunctionInjectionPoint;
   public ExprExtractionMutation(ExprInfo exprToExtract,
-  List<ExprInfo> exprForParams, ClassDecl functionInjectionPoint) {
+  ExprParamInfo exprParamInfo, ClassDecl functionInjectionPoint) {
     ExprToExtract = exprToExtract;
-    ExprsForParams = exprForParams;
+    ExprParamInfo = exprParamInfo;
     FunctionInjectionPoint = functionInjectionPoint;
   }
 }
@@ -23,35 +23,33 @@ public class ExprExtractionMutator : IBasicMutator {
 
   // Stage 1: Extract a expression into a static function of the default class.
   public bool TryMutateProgram(Program p) {
-    var allExprs = ExprInfoBuilder.FindExprInfo(p);
-    var selectedExprInfo = SelectExprToExtract(allExprs);
-    if (selectedExprInfo == null) { return false; }
+    var allExprsInfo = ExprInfoBuilder.FindExprInfo(p);
+    var selectedExpr = SelectExprToExtract(allExprsInfo);
+    if (selectedExpr == null) { return false; }
+    var selectedExprInfo = allExprsInfo[selectedExpr];
     var mutation = new ExprExtractionMutation(
       exprToExtract: selectedExprInfo,
-      exprForParams: SelectFunctionParams(selectedExprInfo),
+      exprParamInfo: SelectFunctionParams(selectedExprInfo, allExprsInfo),
       functionInjectionPoint: SelectFunctionInjectionPoint(selectedExprInfo));
     ApplyMutation(mutation);
     return true;
   }
 
-  private ExprInfo? SelectExprToExtract(List<ExprInfo> es) {
-    var candidates = new List<ExprInfo>();
-    foreach (var e in es) {
+  private Expression? SelectExprToExtract(Dictionary<Expression, ExprInfo> es) {
+    var candidates = new List<Expression>();
+    foreach (var e in es.Keys) {
+      if (e is (WildcardExpr or StaticReceiverExpr)) { continue; }
       // Skip expressions whose types are not known.
-      if (e.E.Type is TypeProxy) { continue; }
+      if (e.Type is TypeProxy) { continue; }
       candidates.Add(e);
     }
     // Choose a random valid expression to extract.
-    return Rand.RandElement<ExprInfo>(candidates);
+    return Rand.RandElement<Expression>(candidates);
   }
 
-  // TODO: Go through the subexpressions as possible parameters.
-  // For now, select the entire function body as the parameter, i.e. producing a
-  // identity function.
-  private List<ExprInfo> SelectFunctionParams(ExprInfo e) {
-    var params_ = new List<ExprInfo>();
-    params_.Add(e);
-    return params_;
+  private ExprParamInfo SelectFunctionParams(ExprInfo e,
+  Dictionary<Expression, ExprInfo> exprInfos) {
+    return new ExprParamInfoBuilder(exprInfos, Rand).FindParams(e.E);
   }
 
   // TODO: Make a parent class covering all declarations with members.
@@ -65,7 +63,7 @@ public class ExprExtractionMutator : IBasicMutator {
     var exprInfo = m.ExprToExtract;
     var exprToExtract = exprInfo.E;
     var exprsToParams = new Dictionary<ExprInfo, Formal>();
-    foreach (var e in m.ExprsForParams) {
+    foreach (var e in m.ExprParamInfo.Params) {
       exprsToParams.Add(e, new Formal(Gen.GenFormalName(), e.E.Type));
     }
     var params_ = exprsToParams.Select(ep => ep.Value);
