@@ -22,6 +22,9 @@ public class FunctionData {
 public class FunctionBuilder {
   public IRandomizer Rand;
   public IGenerator Gen;
+  public ClassDecl? ThisClass;
+  public Expression? ThisObject;
+
   public FunctionBuilder(IRandomizer rand, IGenerator gen) {
     Rand = rand;
     Gen = gen;
@@ -101,13 +104,28 @@ public class FunctionBuilder {
       }
       foreach (var c in constructors) {
         var constructorCheck
-          = NodeFactory.CreateDatatypeConstructorCheck(dtv, c);
+          = NodeFactory.CreateDatatypeConstructorCheck(
+            Cloner.Clone<Expression>(dtv), c);
         requires = requires == null ? constructorCheck
           : NodeFactory.CreateOrExpr(requires, constructorCheck);
       }
       f.AddRequires(requires!);
       return f;
     }
+  }
+
+  private bool TryUseExprAsThis(Expression e) {
+    if (ThisObject != null) { return false; }
+    var t = e.Type;
+    if (t is UserDefinedType ut && ut.TypeDecl is ClassDecl cd) {
+      // Disallow adding members to built-in types.
+      if (cd is not (ArrayClassDecl or ArrowTypeDecl)) {
+        ThisObject = e;
+        ThisClass = cd;
+        return true;
+      }
+    }
+    return false;
   }
 
   private FunctionData VisitMemberSelectExpr(MemberSelectExpr e) {
@@ -119,13 +137,20 @@ public class FunctionBuilder {
       if (e.Receiver is (StaticReceiverExpr)) {
         f = BuiltIn(e);
       } else {
-        var receiver = VisitExpr(e.Receiver);
-        f = Compose(e: new MemberSelectExpr(receiver.E, e.Member),
-          fds: new[] { receiver });
+        Expression receiver;
+        if (Rand.RandBool() && TryUseExprAsThis(e.Receiver)) {
+          receiver = new ThisExpr(e.Type);
+          f = BuiltIn(new MemberSelectExpr(receiver, e.Member));
+        } else {
+          var receiverFD = VisitExpr(e.Receiver);
+          receiver = receiverFD.E;
+          f = Compose(e: new MemberSelectExpr(receiver, e.Member),
+            fds: new[] { receiverFD });
+        }
         // Add reads clause if reading a non-static mutable user-defined field.
         if (e.Member is FieldDecl fld && !fld.IsBuiltIn) {
           // TODO: Fields currently don't have static/const attributes.
-          f.AddReads(new FrameFieldExpr(receiver.E, fld));
+          f.AddReads(new FrameFieldExpr(Cloner.Clone<Expression>(receiver), fld));
         }
       }
       return f;

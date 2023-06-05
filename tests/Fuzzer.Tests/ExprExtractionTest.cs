@@ -20,10 +20,7 @@ public class ExprExtractionTest {
     Assert.AreEqual(expectedNumExprsFound, allExprs.Count);
 
     var e = allExprs.ElementAt(exprToExtractIndex).Value;
-    var mutation = new ExprExtractionMutation(
-      exprToExtract: e,
-      functionInjectionPoint: e.EnclosingModule.GetOrCreateDefaultClass()
-    );
+    var mutation = new ExprExtractionMutation(exprToExtract: e);
     mutator.ApplyMutation(mutation);
     var mutant = ASTPrinter.PrintNodeToString(program).TrimEnd();
     Assert.AreEqual(output, mutant);
@@ -178,6 +175,39 @@ public class ExprExtractionTest {
     TestExprExtraction(input, output,
       expectedNumExprsFound: 2,
       exprToExtractIndex: 0,
-      randomizerChoices: new() { false });
+      randomizerChoices: new() { false, false });
+  }
+
+  [TestMethod]
+  public void Test7() {
+    var input = """
+    class C {
+      var x: int
+    }
+
+    method M() {
+      var c := new C;
+      var x := c.x;
+    }
+    """;
+    var output = """
+    class C {
+      var x: int
+      function fn0_mock(): int
+        reads this`x
+      {
+        this.x
+      }
+    }
+
+    method M() {
+      var c := new C;
+      var x := c.fn0_mock();
+    }
+    """;
+    TestExprExtraction(input, output,
+      expectedNumExprsFound: 2,
+      exprToExtractIndex: 0,
+      randomizerChoices: new() { false, true });
   }
 }

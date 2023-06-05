@@ -2,11 +2,8 @@ namespace Fuzzer;
 
 public class ExprExtractionMutation : IMutation {
   public ExprInfo ExprToExtract;
-  public ClassDecl FunctionInjectionPoint;
-  public ExprExtractionMutation(ExprInfo exprToExtract,
-  ClassDecl functionInjectionPoint) {
+  public ExprExtractionMutation(ExprInfo exprToExtract) {
     ExprToExtract = exprToExtract;
-    FunctionInjectionPoint = functionInjectionPoint;
   }
 }
 
@@ -19,15 +16,12 @@ public class ExprExtractionMutator : IBasicMutator {
     Gen = gen;
   }
 
-  // Stage 1: Extract a expression into a static function of the default class.
   public bool TryMutateProgram(Program p) {
     var allExprsInfo = ExprInfoBuilder.FindExprInfo(p);
     var selectedExpr = SelectExprToExtract(allExprsInfo);
     if (selectedExpr == null) { return false; }
     var selectedExprInfo = allExprsInfo[selectedExpr];
-    var mutation = new ExprExtractionMutation(
-      exprToExtract: selectedExprInfo,
-      functionInjectionPoint: SelectFunctionInjectionPoint(selectedExprInfo));
+    var mutation = new ExprExtractionMutation(exprToExtract: selectedExprInfo);
     ApplyMutation(mutation);
     return true;
   }
@@ -51,12 +45,18 @@ public class ExprExtractionMutator : IBasicMutator {
   }
 
   public void ApplyMutation(ExprExtractionMutation m) {
-    var cls = m.FunctionInjectionPoint;
     var exprInfo = m.ExprToExtract;
     var exprToExtract = exprInfo.E;
-    var functionData = new FunctionBuilder(Rand, Gen).BuildFromExpression(exprToExtract);
+    // Scan expression to select parameters and build function body and spec.
+    var functionBuilder = new FunctionBuilder(Rand, Gen);
+    var functionData = functionBuilder.BuildFromExpression(exprToExtract);
+    // Get function injection point.
+    var cls = functionBuilder.ThisClass 
+      ?? SelectFunctionInjectionPoint(exprInfo);
+    // Get function parameters.
     var exprsToParams = functionData.Params;
     var params_ = exprsToParams.Select(ep => ep.Value);
+    // Make function signature.
     var function = new FunctionDecl(
       enclosingDecl: cls,
       name: Gen.GenFunctionName(),
@@ -71,21 +71,11 @@ public class ExprExtractionMutator : IBasicMutator {
     // Inject function declaration.
     cls.AddMember(function);
     // Replace expression at extraction site with a function call.
+    var receiver = functionBuilder.ThisObject 
+      ?? new ImplicitStaticReceiverExpr(cls);
     var call = new FunctionCallExpr(
-      callee: new MemberSelectExpr(new ImplicitStaticReceiverExpr(cls), function),
+      callee: new MemberSelectExpr(receiver, function),
       arguments: exprsToParams.Select(ep => ep.Key));
     exprInfo.Parent.ReplaceChild(exprToExtract, call);
-  }
-
-  private void
-  RewriteExprConvertedParams(Dictionary<ExprInfo, Formal> exprsToParams) {
-    // By construction, the expressions chosen as params are in separate lines 
-    // of hierarchy, i.e. each expression is neither a transitive child/parent
-    // of each other.
-    foreach (var ep in exprsToParams) {
-      var e = ep.Key;
-      var p = ep.Value;
-      e.Parent.ReplaceChild(e.E, new IdentifierExpr(p));
-    }
   }
 }
