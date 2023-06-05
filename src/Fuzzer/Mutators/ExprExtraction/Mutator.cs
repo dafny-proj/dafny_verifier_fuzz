@@ -2,12 +2,10 @@ namespace Fuzzer;
 
 public class ExprExtractionMutation : IMutation {
   public ExprInfo ExprToExtract;
-  public ExprParamInfo ExprParamInfo;
   public ClassDecl FunctionInjectionPoint;
   public ExprExtractionMutation(ExprInfo exprToExtract,
-  ExprParamInfo exprParamInfo, ClassDecl functionInjectionPoint) {
+  ClassDecl functionInjectionPoint) {
     ExprToExtract = exprToExtract;
-    ExprParamInfo = exprParamInfo;
     FunctionInjectionPoint = functionInjectionPoint;
   }
 }
@@ -29,7 +27,6 @@ public class ExprExtractionMutator : IBasicMutator {
     var selectedExprInfo = allExprsInfo[selectedExpr];
     var mutation = new ExprExtractionMutation(
       exprToExtract: selectedExprInfo,
-      exprParamInfo: SelectFunctionParams(selectedExprInfo, allExprsInfo),
       functionInjectionPoint: SelectFunctionInjectionPoint(selectedExprInfo));
     ApplyMutation(mutation);
     return true;
@@ -47,11 +44,6 @@ public class ExprExtractionMutator : IBasicMutator {
     return Rand.RandElement<Expression>(candidates);
   }
 
-  private ExprParamInfo SelectFunctionParams(ExprInfo e,
-  Dictionary<Expression, ExprInfo> exprInfos) {
-    return new ExprParamInfoBuilder(exprInfos, Rand).FindParams(e.E);
-  }
-
   // TODO: Make a parent class covering all declarations with members.
   // For now, just get the default class of the expression's enclosing module.
   private ClassDecl SelectFunctionInjectionPoint(ExprInfo e) {
@@ -62,28 +54,27 @@ public class ExprExtractionMutator : IBasicMutator {
     var cls = m.FunctionInjectionPoint;
     var exprInfo = m.ExprToExtract;
     var exprToExtract = exprInfo.E;
-    var exprsToParams = new Dictionary<ExprInfo, Formal>();
-    foreach (var e in m.ExprParamInfo.Params) {
-      exprsToParams.Add(e, new Formal(Gen.GenFormalName(), e.E.Type));
-    }
+    var functionData = new FunctionBuilder(Rand, Gen).BuildFromExpression(exprToExtract);
+    var exprsToParams = functionData.Params;
     var params_ = exprsToParams.Select(ep => ep.Value);
     var function = new FunctionDecl(
       enclosingDecl: cls,
       name: Gen.GenFunctionName(),
       ins: params_,
       resultType: exprToExtract.Type);
-    // Attach and rewrite function body.
-    var oldParent = exprInfo.Parent;
-    exprInfo.Parent = function;
-    function.Body = exprToExtract;
-    RewriteExprConvertedParams(exprsToParams);
+    // Attach function body and specifications.
+    function.Body = functionData.E;
+    function.Precondition = new Specification(
+      Specification.Type.Precondition, functionData.Requires);
+    function.Reads = new Specification(
+      Specification.Type.ReadFrame, functionData.Reads);
     // Inject function declaration.
     cls.AddMember(function);
     // Replace expression at extraction site with a function call.
     var call = new FunctionCallExpr(
       callee: new MemberSelectExpr(new ImplicitStaticReceiverExpr(cls), function),
-      arguments: exprsToParams.Select(ep => ep.Key.E));
-    oldParent.ReplaceChild(exprToExtract, call);
+      arguments: exprsToParams.Select(ep => ep.Key));
+    exprInfo.Parent.ReplaceChild(exprToExtract, call);
   }
 
   private void

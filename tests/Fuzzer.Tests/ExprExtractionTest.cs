@@ -3,11 +3,7 @@ namespace Fuzzer.Tests;
 public class ExprExtractionTestRandomizer : Randomizer {
   public List<bool>? Bools { get; set; }
   private int randBoolCount = 0;
-  // public override bool RandBool() => Bools?[randBoolCount++] ?? base.RandBool();
-  public override bool RandBool() {
-    Console.WriteLine(randBoolCount);
-    return Bools?[randBoolCount++] ?? base.RandBool();
-  }
+  public override bool RandBool() => Bools?[randBoolCount++] ?? base.RandBool();
 }
 
 [TestClass]
@@ -26,7 +22,6 @@ public class ExprExtractionTest {
     var e = allExprs.ElementAt(exprToExtractIndex).Value;
     var mutation = new ExprExtractionMutation(
       exprToExtract: e,
-      exprParamInfo: new ExprParamInfoBuilder(allExprs, randomizer).FindParams(e.E),
       functionInjectionPoint: e.EnclosingModule.GetOrCreateDefaultClass()
     );
     mutator.ApplyMutation(mutation);
@@ -136,7 +131,7 @@ public class ExprExtractionTest {
     datatype Entity = Person(name: string, age: int) | Animal(name: string, age: int) | Food(name: string)
 
     method M() {
-      var tim := Person("Tim", 10);
+      var tim := Entity.Person("Tim", 10);
       var tam := fn3_mock(tim, "Tam", 5);
     }
 
