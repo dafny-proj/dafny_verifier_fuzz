@@ -210,4 +210,91 @@ public class ExprExtractionTest {
       exprToExtractIndex: 0,
       randomizerChoices: new() { false, true });
   }
+
+  [TestMethod]
+  public void Test8() {
+    var input = """
+    method M(b: bool) {
+      var i := if b then 1 else 0;
+    }
+    """;
+    // Ok to decompose ITEExpr if there are no unsafe operations.
+    var output = """
+    method M(b: bool) {
+      var i := fn1_mock(b);
+    }
+    
+    function fn1_mock(fl0_mock: bool): int {
+      if fl0_mock then 1 else 0
+    }
+    """;
+    TestExprExtraction(input, output,
+      expectedNumExprsFound: 4,
+      exprToExtractIndex: 0,
+      randomizerChoices: new() { false, false, false });
+  }
+
+  [TestMethod]
+  public void Test9() {
+    var input = """
+    datatype Access = Guard(danger: bool) | Safe
+
+    method M(b: bool) {
+      var a := Guard(b);
+      var i := if a.danger then 1 else 0;
+    }
+    """;
+    // Ok to decompose ITEExpr if the unsafe operation only occurs in the guard.
+    // Add a precondition to the extracted function.
+    var output = """
+    datatype Access = Guard(danger: bool) | Safe
+    
+    method M(b: bool) {
+      var a := Access.Guard(b);
+      var i := fn1_mock(a);
+    }
+
+    function fn1_mock(fl0_mock: Access): int
+      requires fl0_mock.Guard?
+    {
+      if fl0_mock.danger then 1 else 0
+    }
+    """;
+    TestExprExtraction(input, output,
+      expectedNumExprsFound: 7,
+      exprToExtractIndex: 2,
+      randomizerChoices: new() { false, false, false, false, false });
+  }
+
+  // Failing.
+  [TestMethod]
+  public void Test10() {
+    var input = """
+    datatype Access = Guard(danger: int) | Safe
+
+    method M(b: bool) {
+      var a := Access.Guard(1);
+      var i := if b then a.danger else 0;
+    }
+    """;
+    // Do not decompose ITEExpr if there is at least one unsafe operation in 
+    // any of the branches. Pass in the entire ITEExpr by value.
+    var output = """
+    datatype Access = Guard(danger: int) | Safe
+    
+    method M(b: bool) {
+      var a := Access.Guard(1);
+      var i := fn1_mock(if b then a.danger else 0);
+    }
+
+    function fn1_mock(fl0_mock: int): int {
+      fl0_mock
+    }
+    """;
+    TestExprExtraction(input, output,
+      expectedNumExprsFound: 7,
+      exprToExtractIndex: 2,
+      randomizerChoices: new() { false, true, false });
+  }
+
 }

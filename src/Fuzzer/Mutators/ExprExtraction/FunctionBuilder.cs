@@ -5,11 +5,13 @@ public class FunctionData {
   public Dictionary<Expression, Formal> Params;
   public List<Expression> Requires;
   public List<Expression> Reads;
+  public bool MayTriggerCallSiteUB;
 
-  public FunctionData(Expression e,
+  public FunctionData(Expression e, bool mayTriggerCallSiteUB = false,
   Dictionary<Expression, Formal>? params_ = null,
   IEnumerable<Expression>? req = null, IEnumerable<Expression>? reads = null) {
     E = e;
+    MayTriggerCallSiteUB = mayTriggerCallSiteUB;
     Params = params_ != null ? new(params_) : new();
     Requires = req != null ? new(req) : new();
     Reads = reads != null ? new(reads) : new();
@@ -17,6 +19,7 @@ public class FunctionData {
 
   public void AddRequires(Expression e) => Requires.Add(e);
   public void AddReads(Expression e) => Reads.Add(e);
+  public bool IsSpecFree() => Requires.Count == 0 && Reads.Count == 0;
 }
 
 public class FunctionBuilder {
@@ -24,6 +27,7 @@ public class FunctionBuilder {
   public IGenerator Gen;
   public ClassDecl? ThisClass;
   public Expression? ThisObject;
+  private int guardDepth = 0;
 
   public FunctionBuilder(IRandomizer rand, IGenerator gen) {
     Rand = rand;
@@ -50,6 +54,37 @@ public class FunctionBuilder {
       req: fds.SelectMany(f => f.Requires),
       reads: fds.SelectMany(f => f.Reads));
   }
+  // Only use for propagating information between levels of expressions. The
+  // contained expression cannot be validly used in the function extracted. 
+  private FunctionData Intermediate(Expression e) {
+    return new FunctionData(e: e, mayTriggerCallSiteUB: true);
+  }
+  private bool TryUseExprAsThis(Expression e) {
+    if (ThisObject != null) { return false; }
+    var t = e.Type;
+    if (t is UserDefinedType ut && ut.TypeDecl is ClassDecl cd) {
+      // Disallow adding members to built-in types.
+      if (cd is not (ArrayClassDecl or ArrowTypeDecl)) {
+        ThisObject = e;
+        ThisClass = cd;
+        return true;
+      }
+    }
+    return false;
+  }
+  private Expression GenDatatypeConstructorCheck(Expression dtv,
+  IEnumerable<DatatypeConstructorDecl> constructors) {
+    Contract.Requires(constructors.Count() > 0);
+    Expression? allChecks = null;
+    foreach (var c in constructors) {
+      var thisCheck
+        = NodeFactory.CreateDatatypeConstructorCheck(
+          Cloner.Clone<Expression>(dtv), c);
+      allChecks = allChecks == null ? thisCheck
+        : NodeFactory.CreateOrExpr(allChecks, thisCheck);
+    }
+    return allChecks!;
+  }
 
   private FunctionData VisitExpr(Expression e_) {
     return e_ switch {
@@ -57,6 +92,7 @@ public class FunctionBuilder {
       BinaryExpr e => VisitBinaryExpr(e),
       DatatypeUpdateExpr e => VisitDatatypeUpdateExpr(e),
       MemberSelectExpr e => VisitMemberSelectExpr(e),
+      ITEExpr e => VisitITEExpr(e),
       _ => Identity(e_),
     };
   }
@@ -97,35 +133,13 @@ public class FunctionBuilder {
       var f = Compose(e: new DatatypeUpdateExpr(dtv, updates), fds: fds);
       // Find the constructors which match the updated fields. The datatype 
       // value updated must match one of the constructors.
-      Expression? requires = null;
       var constructors = e.Updates[0].Key.Constructors.AsEnumerable();
       foreach (var u in e.Updates) {
         constructors = constructors.Intersect(u.Key.Constructors);
       }
-      foreach (var c in constructors) {
-        var constructorCheck
-          = NodeFactory.CreateDatatypeConstructorCheck(
-            Cloner.Clone<Expression>(dtv), c);
-        requires = requires == null ? constructorCheck
-          : NodeFactory.CreateOrExpr(requires, constructorCheck);
-      }
-      f.AddRequires(requires!);
+      f.AddRequires(GenDatatypeConstructorCheck(dtv, constructors));
       return f;
     }
-  }
-
-  private bool TryUseExprAsThis(Expression e) {
-    if (ThisObject != null) { return false; }
-    var t = e.Type;
-    if (t is UserDefinedType ut && ut.TypeDecl is ClassDecl cd) {
-      // Disallow adding members to built-in types.
-      if (cd is not (ArrayClassDecl or ArrowTypeDecl)) {
-        ThisObject = e;
-        ThisClass = cd;
-        return true;
-      }
-    }
-    return false;
   }
 
   private FunctionData VisitMemberSelectExpr(MemberSelectExpr e) {
@@ -138,22 +152,60 @@ public class FunctionBuilder {
         f = BuiltIn(e);
       } else {
         Expression receiver;
+        // Potentially introduce an instance function if we find an object.
         if (Rand.RandBool() && TryUseExprAsThis(e.Receiver)) {
-          receiver = new ThisExpr(e.Type);
-          f = BuiltIn(new MemberSelectExpr(receiver, e.Member));
+          receiver = new ThisExpr(e.Receiver.Type);
+          f = BuiltIn(new MemberSelectExpr(receiver, e.Member, type: e.Type));
         } else {
           var receiverFD = VisitExpr(e.Receiver);
           receiver = receiverFD.E;
-          f = Compose(e: new MemberSelectExpr(receiver, e.Member),
+          f = Compose(e: new MemberSelectExpr(receiver, e.Member, type: e.Type),
             fds: new[] { receiverFD });
         }
-        // Add reads clause if reading a non-static mutable user-defined field.
-        if (e.Member is FieldDecl fld && !fld.IsBuiltIn) {
-          // TODO: Fields currently don't have static/const attributes.
-          f.AddReads(new FrameFieldExpr(Cloner.Clone<Expression>(receiver), fld));
+
+        if (e.Member is FieldDecl fld) {
+          if (!fld.IsBuiltIn) {
+            // Add reads clause if reading a non-static mutable user-defined field.
+            // TODO: Fields currently don't have static/const attributes.
+            f.AddReads(
+              new FrameFieldExpr(Cloner.Clone<Expression>(receiver), fld));
+          } else if (fld is DatatypeDestructorDecl dd) {
+            f.AddRequires(
+              GenDatatypeConstructorCheck(receiver, dd.Constructors));
+          }
+
         }
       }
       return f;
+    }
+  }
+
+  private FunctionData VisitITEExpr(ITEExpr e) {
+    if (Rand.RandBool()) {
+      return Identity(e);
+    } else {
+      // Try composing the function from subexpressions.
+      var guard = VisitExpr(e.Guard);
+      guardDepth++;
+      var thn = VisitExpr(e.Thn);
+      var els = VisitExpr(e.Els);
+      guardDepth--;
+      if (thn.IsSpecFree() && els.IsSpecFree()) {
+        return Compose(new ITEExpr(guard.E, thn.E, els.E, type: e.Type),
+          new[] { guard, thn, els });
+      }
+      // If any of the branches have specifications, we cannot determine the 
+      // specification needed to compose the expression. Hence, this expression
+      // needs to be passed in full.
+      if (guardDepth == 0) {
+        return Identity(e);
+      } else {
+        // There is at least one parent guard. It needs to be notified about
+        // potential specifications in the child. Additionally, this expression
+        // cannot be used as a parameter just by itself as it may have unsafe 
+        // operations guarded by the parent.
+        return Intermediate(e);
+      }
     }
   }
 }

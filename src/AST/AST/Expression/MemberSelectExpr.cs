@@ -8,9 +8,11 @@ public partial class MemberSelectExpr : Expression {
   public MemberDecl Member { get; }
   public string MemberName => Member.Name;
 
-  public MemberSelectExpr(Expression receiver, MemberDecl member) {
+  public MemberSelectExpr(Expression receiver, MemberDecl member,
+  Type? type = null) {
     Receiver = receiver;
     Member = member;
+    if (type != null) { Type = type; }
   }
 
   public override IEnumerable<Node> Children => new[] { Receiver };
