@@ -197,8 +197,7 @@ public class FunctionBuilder {
     if (!fld.IsBuiltIn) {
       // Add reads clause if reading a non-static mutable user-defined field.
       // TODO: Fields currently don't have static/const attributes.
-      f.AddReads(
-        new FrameFieldExpr(Cloner.Clone<Expression>(receiver), fld));
+      f.AddReads(Cloner.Clone<Expression>(receiver));
     }
     return f;
   }

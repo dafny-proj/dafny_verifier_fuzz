@@ -167,7 +167,7 @@ public class ExprExtractionTest {
     }
 
     function fn1_mock(fl0_mock: C): int
-      reads fl0_mock`x
+      reads fl0_mock
     {
       fl0_mock.x
     }
@@ -194,7 +194,7 @@ public class ExprExtractionTest {
     class C {
       var x: int
       function fn0_mock(): int
-        reads this`x
+        reads this
       {
         this.x
       }
