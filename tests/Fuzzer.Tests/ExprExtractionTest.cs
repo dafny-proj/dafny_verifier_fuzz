@@ -266,7 +266,6 @@ public class ExprExtractionTest {
       randomizerChoices: new() { false, false, false, false, false });
   }
 
-  // Failing.
   [TestMethod]
   public void Test10() {
     var input = """
@@ -284,17 +283,17 @@ public class ExprExtractionTest {
     
     method M(b: bool) {
       var a := Access.Guard(1);
-      var i := fn1_mock(if b then a.danger else 0);
+      var i := fn2_mock(if b then a.danger else 0);
     }
 
-    function fn1_mock(fl0_mock: int): int {
-      fl0_mock
+    function fn2_mock(fl1_mock: int): int {
+      fl1_mock
     }
     """;
     TestExprExtraction(input, output,
       expectedNumExprsFound: 7,
       exprToExtractIndex: 2,
-      randomizerChoices: new() { false, true, false });
+      randomizerChoices: new() { false, false });
   }
 
 }

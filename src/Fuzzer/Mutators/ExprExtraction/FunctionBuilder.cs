@@ -5,13 +5,13 @@ public class FunctionData {
   public Dictionary<Expression, Formal> Params;
   public List<Expression> Requires;
   public List<Expression> Reads;
-  public bool MayTriggerCallSiteUB;
+  public bool Unknown;
 
   public FunctionData(Expression e, bool mayTriggerCallSiteUB = false,
   Dictionary<Expression, Formal>? params_ = null,
   IEnumerable<Expression>? req = null, IEnumerable<Expression>? reads = null) {
     E = e;
-    MayTriggerCallSiteUB = mayTriggerCallSiteUB;
+    Unknown = mayTriggerCallSiteUB;
     Params = params_ != null ? new(params_) : new();
     Requires = req != null ? new(req) : new();
     Reads = reads != null ? new(reads) : new();
@@ -143,69 +143,76 @@ public class FunctionBuilder {
   }
 
   private FunctionData VisitMemberSelectExpr(MemberSelectExpr e) {
-    if (Rand.RandBool()) {
-      return Identity(e);
-    } else {
-      // Compose function from subexpressions.
-      FunctionData f;
-      if (e.Receiver is (StaticReceiverExpr)) {
-        f = BuiltIn(e);
-      } else {
-        Expression receiver;
-        // Potentially introduce an instance function if we find an object.
-        if (Rand.RandBool() && TryUseExprAsThis(e.Receiver)) {
-          receiver = new ThisExpr(e.Receiver.Type);
-          f = BuiltIn(new MemberSelectExpr(receiver, e.Member, type: e.Type));
-        } else {
-          var receiverFD = VisitExpr(e.Receiver);
-          receiver = receiverFD.E;
-          f = Compose(e: new MemberSelectExpr(receiver, e.Member, type: e.Type),
-            fds: new[] { receiverFD });
-        }
+    if (e.Member is DatatypeDestructorDecl) { return VisitDatatypeDestructor(e); }
+    if (e.Member is FieldDecl) { return VisitField(e); }
+    // TODO: Handle other cases.
+    return Identity(e);
+  }
 
-        if (e.Member is FieldDecl fld) {
-          if (!fld.IsBuiltIn) {
-            // Add reads clause if reading a non-static mutable user-defined field.
-            // TODO: Fields currently don't have static/const attributes.
-            f.AddReads(
-              new FrameFieldExpr(Cloner.Clone<Expression>(receiver), fld));
-          } else if (fld is DatatypeDestructorDecl dd) {
-            f.AddRequires(
-              GenDatatypeConstructorCheck(receiver, dd.Constructors));
-          }
-
-        }
-      }
-      return f;
+  private FunctionData VisitDatatypeDestructor(MemberSelectExpr e) {
+    Contract.Requires(e.Member is DatatypeDestructorDecl);
+    if (guardDepth != 0) {
+      // Case 1: This expression happened in a conditional, it is unclear how
+      // to generate the precondition to guard this expression. It is also
+      // potentially unsafe and cannot be used on its own as a parameter.
+      // Delegate to the parent.
+      // TODO: Alternatively, replace `e` with `assume Safe(e); e`.
+      return Intermediate(e);
     }
+    // If the expression was not guarded, we know that it must be safe. We can
+    // use it (Case 2) directly as an argument, or (Case 3) generate the 
+    // precondition as the safety condition of this expression.
+    // Case 2:
+    if (Rand.RandBool()) { return Identity(e); }
+    // Case 3: 
+    var receiverFD = VisitExpr(e.Receiver);
+    Contract.Assert(!receiverFD.Unknown);
+    var receiver = receiverFD.E;
+    var f = Compose(e: new MemberSelectExpr(receiver, e.Member, type: e.Type),
+      fds: new[] { receiverFD });
+    f.AddRequires(GenDatatypeConstructorCheck(receiver,
+      ((DatatypeDestructorDecl)e.Member).Constructors));
+    return f;
+  }
+
+  private FunctionData VisitField(MemberSelectExpr e) {
+    Contract.Requires(e.Member is FieldDecl);
+    if (Rand.RandBool()) { return Identity(e); }
+    if (e.Receiver is StaticReceiverExpr) { return BuiltIn(e); }
+    var fld = (FieldDecl)e.Member;
+    FunctionData f;
+    Expression receiver;
+    // Potentially introduce an instance function if we find an object.
+    if (Rand.RandBool() && TryUseExprAsThis(e.Receiver)) {
+      receiver = new ThisExpr(e.Receiver.Type);
+      f = BuiltIn(new MemberSelectExpr(receiver, e.Member, type: e.Type));
+    } else {
+      var receiverFD = VisitExpr(e.Receiver);
+      receiver = receiverFD.E;
+      f = Compose(e: new MemberSelectExpr(receiver, e.Member, type: e.Type),
+        fds: new[] { receiverFD });
+    }
+    if (!fld.IsBuiltIn) {
+      // Add reads clause if reading a non-static mutable user-defined field.
+      // TODO: Fields currently don't have static/const attributes.
+      f.AddReads(
+        new FrameFieldExpr(Cloner.Clone<Expression>(receiver), fld));
+    }
+    return f;
   }
 
   private FunctionData VisitITEExpr(ITEExpr e) {
-    if (Rand.RandBool()) {
-      return Identity(e);
-    } else {
-      // Try composing the function from subexpressions.
-      var guard = VisitExpr(e.Guard);
-      guardDepth++;
-      var thn = VisitExpr(e.Thn);
-      var els = VisitExpr(e.Els);
-      guardDepth--;
-      if (thn.IsSpecFree() && els.IsSpecFree()) {
-        return Compose(new ITEExpr(guard.E, thn.E, els.E, type: e.Type),
-          new[] { guard, thn, els });
-      }
-      // If any of the branches have specifications, we cannot determine the 
-      // specification needed to compose the expression. Hence, this expression
-      // needs to be passed in full.
-      if (guardDepth == 0) {
-        return Identity(e);
-      } else {
-        // There is at least one parent guard. It needs to be notified about
-        // potential specifications in the child. Additionally, this expression
-        // cannot be used as a parameter just by itself as it may have unsafe 
-        // operations guarded by the parent.
-        return Intermediate(e);
-      }
+    if (Rand.RandBool()) { return Identity(e); }
+    var guard = VisitExpr(e.Guard);
+    guardDepth++;
+    var thn = VisitExpr(e.Thn);
+    var els = VisitExpr(e.Els);
+    guardDepth--;
+    if (guard.Unknown || thn.Unknown || els.Unknown) {
+      return guardDepth == 0 ? Identity(e) : Intermediate(e);
     }
+    return Compose(new ITEExpr(guard.E, thn.E, els.E, type: e.Type),
+      new[] { guard, thn, els });
   }
+
 }
