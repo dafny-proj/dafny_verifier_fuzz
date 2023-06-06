@@ -125,6 +125,7 @@ public partial class ASTCloner {
     var c = new SubsetTypeDecl(name: d.Name,
       baseIdent: CloneBoundVar(d.BaseIdent),
       constraint: CloneExpression(d.Constraint),
+      witness: d.Witness == null ? null : CloneExpression(d.Witness),
       typeParams: d.TypeParams.Select(CloneTypeParameterDecl));
     MarkDeclCloned(d, c);
     return c;
@@ -209,7 +210,7 @@ public partial class ASTCloner {
       return (FieldDecl)GetClonedDecl(d);
     }
     var enclosingDecl = (TopLevelDecl)CloneDeclRef(d.EnclosingDecl);
-    var c = new FieldDecl(enclosingDecl, 
+    var c = new FieldDecl(enclosingDecl,
       name: d.Name, type: CloneType(d.Type), isBuiltIn: d.IsBuiltIn);
     MarkDeclCloned(d, c);
     return c;

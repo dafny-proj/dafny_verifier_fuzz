@@ -6,13 +6,14 @@ public partial class SubsetTypeDecl : TopLevelDecl {
   public BoundVar BaseIdent;
   public Type BaseType => BaseIdent.Type;
   public Expression Constraint { get; }
-  // TODO: Witness.
+  public Expression? Witness { get; }
 
   public SubsetTypeDecl(string name, BoundVar baseIdent, Expression constraint,
-  IEnumerable<TypeParameterDecl>? typeParams = null) {
+  Expression? witness = null, IEnumerable<TypeParameterDecl>? typeParams = null) {
     Name = name;
     BaseIdent = baseIdent;
     Constraint = constraint;
+    Witness = witness;
     if (typeParams != null) {
       TypeParams.AddRange(typeParams);
     }

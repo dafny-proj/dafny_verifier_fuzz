@@ -530,4 +530,16 @@ public class ASTTests {
     CanParseClonePrint(sourceStr);
   }
 
+  [TestMethod]
+  public void SubsetTypeDecl() {
+    var sourceStr = """
+    type Nat = n: int | 0 <= n
+
+    type NonEmptySeq = x: seq<int> | |x| > 0 witness [0]
+    
+    type Empty = x: int | false witness *
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
 }

@@ -126,6 +126,9 @@ public partial class ASTTranslator {
     var std = new SubsetTypeDecl(
       name: dstd.Name, baseIdent: TranslateBoundVar(dstd.Var),
       constraint: TranslateExpression(dstd.Constraint),
+      witness: dstd.WitnessKind == Dafny.SubsetTypeDecl.WKind.OptOut ? 
+        new WildcardExpr() : dstd.Witness == null ? null : 
+        TranslateExpression(dstd.Witness),
       typeParams: dstd.TypeArgs.Select(TranslateTypeParameter));
     MarkDeclTranslated(dstd, std);
     return std;

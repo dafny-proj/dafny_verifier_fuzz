@@ -162,6 +162,10 @@ public partial class ASTPrinter {
     PrintBoundVar(d.BaseIdent);
     Write(" | ");
     PrintExpression(d.Constraint);
+    if (d.Witness != null) {
+      Write(" witness ");
+      PrintExpression(d.Witness);
+    }
     WriteLine();
   }
 
