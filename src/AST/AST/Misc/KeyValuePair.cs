@@ -50,4 +50,6 @@ public partial class DatatypeUpdatePair :
 KeyValuePair<DatatypeDestructorDecl, Expression> {
   public DatatypeUpdatePair(DatatypeDestructorDecl key, Expression value)
   : base(key, value) { }
+
+  public override IEnumerable<Node> Children => new[] { Value };
 }

@@ -55,8 +55,10 @@ public partial class MergeVarsToClassMutationRewriter {
         return new NullableType(cd, ut.GetTypeArgs());
       } else if (ut.TypeDecl is DatatypeDecl dd) {
         // Create a None constructor for the datatype.
-        var none = new DatatypeConstructorDecl(dd, "DF_None");
-        dd.PrependConstructor(none);
+        var none = "DF_None";
+        if (!dd.HasConstructor(none)) {
+          dd.PrependConstructor(new DatatypeConstructorDecl(dd, none));
+        }
         return t;
       }
     }
