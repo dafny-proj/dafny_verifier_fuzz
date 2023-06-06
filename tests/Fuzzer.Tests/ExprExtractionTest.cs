@@ -296,4 +296,133 @@ public class ExprExtractionTest {
       randomizerChoices: new() { false, false });
   }
 
+  [TestMethod]
+  public void Test11() {
+    var input = """
+    method M() {
+      var a := new int[3]((i) => i);
+      var i := a[0];
+    }
+    """;
+    var output = """
+    method M() {
+      var a := new int[3]((i) => i);
+      var i := fn2_mock(a, 0);
+    }
+
+    function fn2_mock(fl0_mock: array<int>, fl1_mock: int): int
+      requires 0 <= fl1_mock && fl1_mock < fl0_mock.Length
+      reads fl0_mock
+    {
+      fl0_mock[fl1_mock]
+    }
+    """;
+    TestExprExtraction(input, output,
+      expectedNumExprsFound: 6,
+      exprToExtractIndex: 3,
+      randomizerChoices: new() { false, true });
+  }
+
+  [TestMethod]
+  public void Test12() {
+    var input = """
+    method M() {
+      var m := map[0 := 1];
+      var i := m[0];
+    }
+    """;
+    var output = """
+    method M() {
+      var m := map[0 := 1];
+      var i := fn2_mock(m, 0);
+    }
+
+    function fn2_mock(fl0_mock: map<int, int>, fl1_mock: int): int
+      requires fl1_mock in fl0_mock
+    {
+      fl0_mock[fl1_mock]
+    }
+    """;
+    TestExprExtraction(input, output,
+      expectedNumExprsFound: 6,
+      exprToExtractIndex: 3,
+      randomizerChoices: new() { false, true });
+  }
+
+  [TestMethod]
+  public void Test13() {
+    var input = """
+    method M() {
+      var s := [1, 2];
+      var i := s[0];
+    }
+    """;
+    var output = """
+    method M() {
+      var s := [1, 2];
+      var i := fn2_mock(s, 0);
+    }
+
+    function fn2_mock(fl0_mock: seq<int>, fl1_mock: int): int
+      requires 0 <= fl1_mock && fl1_mock < |fl0_mock|
+    {
+      fl0_mock[fl1_mock]
+    }
+    """;
+    TestExprExtraction(input, output,
+      expectedNumExprsFound: 6,
+      exprToExtractIndex: 3,
+      randomizerChoices: new() { false, true });
+  }
+
+  [TestMethod]
+  public void Test14() {
+    var input = """
+    method M() {
+      var m := multiset{0, 0};
+      var i := m[0];
+    }
+    """;
+    var output = """
+    method M() {
+      var m := multiset{0, 0};
+      var i := fn2_mock(m, 0);
+    }
+
+    function fn2_mock(fl0_mock: multiset<int>, fl1_mock: int): nat {
+      fl0_mock[fl1_mock]
+    }
+    """;
+    TestExprExtraction(input, output,
+      expectedNumExprsFound: 6,
+      exprToExtractIndex: 3,
+      randomizerChoices: new() { false, true });
+  }
+
+  [TestMethod]
+  public void Test15() {
+    var input = """
+    method M() {
+      var m := map[0 := [1, 2]];
+      var i := m[0][1];
+    }
+    """;
+    var output = """
+    method M() {
+      var m := map[0 := [1, 2]];
+      var i := fn2_mock(m, 0);
+    }
+
+    function fn2_mock(fl0_mock: map<int, seq<int>>, fl1_mock: int): int
+      requires fl1_mock in fl0_mock
+      requires 0 <= 1 && 1 < |fl0_mock[fl1_mock]|
+    {
+      fl0_mock[fl1_mock][1]
+    }
+    """;
+    TestExprExtraction(input, output,
+      expectedNumExprsFound: 10,
+      exprToExtractIndex: 5,
+      randomizerChoices: new() { false, false, true, false });
+  }
 }

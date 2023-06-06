@@ -51,6 +51,16 @@ public partial class ArrayClassDecl : ClassDecl {
   }
 
   public static ArrayClassDecl Skeleton(int dims) => new ArrayClassDecl(dims);
+
+  public FieldDecl LengthField(int dim = 1) {
+    var name = "Length" + (Dimensions == 1 ? "" : dim);
+    var ln = Members.Find(m => m.Name == name);
+    if (ln == null) {
+      ln = new FieldDecl(this, name, Type.Int, isBuiltIn: true);
+      AddMember(ln);
+    }
+    return (FieldDecl)ln;
+  }
 }
 
 // TODO: This class inherits from ClassDecl which reflects the implementation in 

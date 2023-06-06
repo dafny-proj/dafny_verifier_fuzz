@@ -7,8 +7,9 @@ public partial class CollectionSliceExpr : CollectionSelectExpr { }
 public abstract partial class CollectionSelectExpr : Expression {
   public Expression Collection { get; set; }
 
-  protected CollectionSelectExpr(Expression collection) {
+  protected CollectionSelectExpr(Expression collection, Type? type = null) {
     Collection = collection;
+    if (type != null) { Type = type; }
   }
 
   public override IEnumerable<Node> Children => new[] { Collection };
@@ -18,8 +19,9 @@ public abstract partial class CollectionSelectExpr : Expression {
 public partial class CollectionElementExpr : CollectionSelectExpr {
   public Expression Index { get; set; }
 
-  public CollectionElementExpr(Expression collection, Expression index)
-  : base(collection) {
+  public CollectionElementExpr(Expression collection, Expression index,
+  Type? type = null)
+  : base(collection, type) {
     Index = index;
   }
 
@@ -32,8 +34,8 @@ public partial class CollectionSliceExpr : CollectionSelectExpr {
   public Expression? Index1 { get; set; }
 
   public CollectionSliceExpr(Expression collection,
-  Expression? index0 = null, Expression? index1 = null)
-  : base(collection) {
+  Expression? index0 = null, Expression? index1 = null, Type? type = null)
+  : base(collection, type) {
     Index0 = index0;
     Index1 = index1;
   }

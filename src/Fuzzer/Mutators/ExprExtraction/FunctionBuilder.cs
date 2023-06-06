@@ -1,3 +1,5 @@
+using NF = AST.NodeFactory;
+
 namespace Fuzzer;
 
 public class FunctionData {
@@ -77,11 +79,10 @@ public class FunctionBuilder {
     Contract.Requires(constructors.Count() > 0);
     Expression? allChecks = null;
     foreach (var c in constructors) {
-      var thisCheck
-        = NodeFactory.CreateDatatypeConstructorCheck(
-          Cloner.Clone<Expression>(dtv), c);
+      var thisCheck = NF.CreateDatatypeConstructorCheck(
+        Cloner.Clone<Expression>(dtv), c);
       allChecks = allChecks == null ? thisCheck
-        : NodeFactory.CreateOrExpr(allChecks, thisCheck);
+        : NF.CreateOrExpr(allChecks, thisCheck);
     }
     return allChecks!;
   }
@@ -93,6 +94,7 @@ public class FunctionBuilder {
       DatatypeUpdateExpr e => VisitDatatypeUpdateExpr(e),
       MemberSelectExpr e => VisitMemberSelectExpr(e),
       ITEExpr e => VisitITEExpr(e),
+      CollectionElementExpr e => VisitCollectionElementExpr(e),
       _ => Identity(e_),
     };
   }
@@ -213,6 +215,53 @@ public class FunctionBuilder {
     }
     return Compose(new ITEExpr(guard.E, thn.E, els.E, type: e.Type),
       new[] { guard, thn, els });
+  }
+
+  // 0 <= index && index < length
+  private Expression GenBoundsCheck(Expression index, Expression length) {
+    return NF.CreateAndExpr(
+      e0: NF.CreateLEExpr(
+        NF.CreateIntLiteral(0), Cloner.Clone<Expression>(index)),
+      e1: NF.CreateLTExpr(
+        Cloner.Clone<Expression>(index), Cloner.Clone<Expression>(length)));
+  }
+
+  private FunctionData VisitCollectionElementExpr(CollectionElementExpr e) {
+    // Case 1: Cannot be used on its own.
+    if (guardDepth != 0 && e.Collection.Type is not MultiSetType) {
+      return Intermediate(e);
+    }
+    // Case 2: Pass in entire expression by value.
+    if (Rand.RandBool()) { return Identity(e); }
+    // Case 3: Decompose expression.
+    var collection = VisitExpr(e.Collection);
+    var index = VisitExpr(e.Index);
+    Contract.Assert(!collection.Unknown && !index.Unknown);
+    var f = Compose(e: new CollectionElementExpr(collection.E, index.E, e.Type),
+      fds: new[] { collection, index });
+    // Add requires and reads.
+    var collectionType = e.Collection.Type;
+    if (collectionType is ArrayType at) {
+      // read: array
+      f.AddReads(collection.E);
+      var arrDec = (ArrayClassDecl)at.TypeDecl;
+      // TODO: Handle multidimensional array indexing.
+      // req: 0 <= index < array.Length
+      var arrLength = new MemberSelectExpr(
+        receiver: Cloner.Clone<Expression>(collection.E),
+        member: arrDec.LengthField(), type: Type.Int);
+      f.AddRequires(GenBoundsCheck(index.E, arrLength));
+    } else if (collectionType is MapType) {
+      // req: index in map
+      f.AddRequires(NF.CreateInExpr(
+        e0: Cloner.Clone<Expression>(index.E),
+        e1: Cloner.Clone<Expression>(collection.E)));
+    } else if (collectionType is SeqType) {
+      // req: 0 <= index < |seq|
+      var seqLength = NF.CreateCardinalityExpr(collection.E);
+      f.AddRequires(GenBoundsCheck(index.E, seqLength));
+    }
+    return f;
   }
 
 }
