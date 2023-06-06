@@ -41,12 +41,12 @@ public partial class MergeVarsToClassMutationRewriter {
 
   private bool NotAutoInitialisable(Type t) {
     if (t is BasicType or BuiltInType or NullableType or CollectionType) {
-      return true;
+      return false;
     }
     // TODO: Track auto-init info in types.
     // This is not exactly accurate, but until there is better tracking of which 
     // types are auto initialisable, use a blanket case.
-    return false;
+    return true;
   }
 
   private Type? TryConvertToAutoInitialisable(Type t) {
