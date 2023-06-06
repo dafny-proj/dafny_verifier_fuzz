@@ -29,3 +29,12 @@ public partial class NullableType : UserDefinedType {
   public NullableType(ClassDecl classDecl, IEnumerable<Type>? typeArgs = null)
   : base(classDecl, typeArgs) { }
 }
+
+public partial class CallableType : Type {
+  public MemberDecl Callable { get; }
+  public override string BaseName
+    => throw new UnsupportedASTOperationException(this, "naming of callable types");
+  public CallableType(MemberDecl callable) {
+    Callable = callable;
+  }
+}

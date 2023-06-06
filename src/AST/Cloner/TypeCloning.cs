@@ -19,6 +19,8 @@ public partial class ASTCloner {
       UserDefinedType ut => new UserDefinedType(
         typeDecl: (TopLevelDecl)CloneDeclRef(ut.TypeDecl),
         typeArgs: ut.GetTypeArgs().Select(CloneType)),
+      CallableType ct 
+        => new CallableType((MemberDecl)CloneDeclRef(ct.Callable)),
       TypeProxy tt => new TypeProxy(),
       _ => throw new UnsupportedNodeCloningException(t),
     };

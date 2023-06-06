@@ -8,11 +8,14 @@ public partial class MemberSelectExpr : Expression {
   public MemberDecl Member { get; }
   public string MemberName => Member.Name;
 
-  public MemberSelectExpr(Expression receiver, MemberDecl member,
-  Type? type = null) {
+  public MemberSelectExpr(Expression receiver, MemberDecl member) {
     Receiver = receiver;
     Member = member;
-    if (type != null) { Type = type; }
+    if (member is FieldDecl fld) {
+      Type = fld.Type;
+    } else if (member is MethodDecl or FunctionDecl) {
+      Type = new CallableType(member);
+    }
   }
 
   public override IEnumerable<Node> Children => new[] { Receiver };

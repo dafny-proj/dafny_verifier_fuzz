@@ -170,8 +170,8 @@ public class FunctionBuilder {
     var receiverFD = VisitExpr(e.Receiver);
     Contract.Assert(!receiverFD.Unknown);
     var receiver = receiverFD.E;
-    var f = Compose(e: new MemberSelectExpr(receiver, e.Member, type: e.Type),
-      fds: new[] { receiverFD });
+    var f = Compose(
+      e: new MemberSelectExpr(receiver, e.Member), fds: new[] { receiverFD });
     f.AddRequires(GenDatatypeConstructorCheck(receiver,
       ((DatatypeDestructorDecl)e.Member).Constructors));
     return f;
@@ -187,11 +187,11 @@ public class FunctionBuilder {
     // Potentially introduce an instance function if we find an object.
     if (Rand.RandBool() && TryUseExprAsThis(e.Receiver)) {
       receiver = new ThisExpr(e.Receiver.Type);
-      f = BuiltIn(new MemberSelectExpr(receiver, e.Member, type: e.Type));
+      f = BuiltIn(new MemberSelectExpr(receiver, e.Member));
     } else {
       var receiverFD = VisitExpr(e.Receiver);
       receiver = receiverFD.E;
-      f = Compose(e: new MemberSelectExpr(receiver, e.Member, type: e.Type),
+      f = Compose(e: new MemberSelectExpr(receiver, e.Member),
         fds: new[] { receiverFD });
     }
     if (!fld.IsBuiltIn) {
@@ -248,7 +248,7 @@ public class FunctionBuilder {
       // req: 0 <= index < array.Length
       var arrLength = new MemberSelectExpr(
         receiver: Cloner.Clone<Expression>(collection.E),
-        member: arrDec.LengthField(), type: Type.Int);
+        member: arrDec.LengthField());
       f.AddRequires(GenBoundsCheck(index.E, arrLength));
     } else if (collectionType is MapType) {
       // req: index in map

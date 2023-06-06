@@ -542,4 +542,16 @@ public class ASTTests {
     CanParseClonePrint(sourceStr);
   }
 
+  [TestMethod]
+  public void FunctionCallExpr() {
+    var sourceStr = """
+    function F0(): int
+
+    function F1(): int {
+      F0()
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
 }

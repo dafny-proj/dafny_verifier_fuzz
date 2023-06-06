@@ -91,6 +91,7 @@ public partial class UserDefinedType : Type { }
 public partial class TypeProxy : Type { }
 public partial class NullableType : UserDefinedType { }
 public partial class ArrowType : UserDefinedType { }
+public partial class CallableType : Type { }
 
 public abstract partial class Variable : Node { }
 public partial class Specification : Node { }
