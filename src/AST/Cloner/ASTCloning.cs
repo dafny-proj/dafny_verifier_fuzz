@@ -26,17 +26,10 @@ public partial class ASTCloner {
     return DeclarationsToClone[d]!;
   }
 
-  private Dictionary<Variable, Variable> ClonedVariables = new();
-  private Variable GetOrCreateVariableClone(Variable v) {
-    if (!ClonedVariables.ContainsKey(v)) {
-      ClonedVariables.Add(v, CreateVariableClone(v));
-    }
-    return ClonedVariables[v];
-  }
-
   public static T Clone<T>(Node n) where T : Node {
     var cloner = new ASTCloner();
     cloner.IdentifyDeclsToClone(n);
+    cloner.IdentifyVarsToClone(n);
     return (T)cloner.CloneNode(n);
   }
 

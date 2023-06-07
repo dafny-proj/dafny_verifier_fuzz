@@ -1,6 +1,15 @@
 namespace AST.Cloner;
 
 public partial class ASTCloner {
+  private Dictionary<Variable, Variable> VariablesToClone = new();
+  private void IdentifyVarsToClone(Node n) {
+    if (n is Variable v) {
+      VariablesToClone.Add(v, CreateVariableClone(v));
+    }
+    foreach (var c in n.Children) {
+      IdentifyVarsToClone(c);
+    }
+  }
   private Variable CreateVariableClone(Variable v) {
     var name = v.Name;
     var type = CloneType(v.Type);
@@ -15,19 +24,19 @@ public partial class ASTCloner {
   }
 
   private Variable CloneVariable(Variable v) {
-    return GetOrCreateVariableClone(v);
+    return VariablesToClone.GetValueOrDefault(v) ?? v;
   }
 
   private BoundVar CloneBoundVar(BoundVar v) {
-    return (BoundVar)GetOrCreateVariableClone(v);
+    return (BoundVar)CloneVariable(v);
   }
 
   private LocalVar CloneLocalVar(LocalVar v) {
-    return (LocalVar)GetOrCreateVariableClone(v);
+    return (LocalVar)CloneVariable(v);
   }
 
   private Formal CloneFormal(Formal v) {
-    return (Formal)GetOrCreateVariableClone(v);
+    return (Formal)CloneVariable(v);
   }
 
   private Specification? CloneSpecification(Specification? s) {
