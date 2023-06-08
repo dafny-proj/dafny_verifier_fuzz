@@ -21,8 +21,11 @@ where T : Node {
 
 public partial class MapDisplayExpr
 : CollectionDisplayExpr<ExpressionPair> {
-  public MapDisplayExpr(IEnumerable<ExpressionPair>? elements = null)
-  : base(elements) { }
+  public MapDisplayExpr(IEnumerable<ExpressionPair>? elements = null,
+  MapType? type = null)
+  : base(elements) {
+    if (type != null) { Type = type; }
+  }
 }
 
 public partial class SeqDisplayExpr : CollectionDisplayExpr<Expression> {

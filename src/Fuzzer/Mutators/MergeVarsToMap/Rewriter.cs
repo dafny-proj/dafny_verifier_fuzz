@@ -70,19 +70,19 @@ public partial class MergeVarsToMapMutationRewriter {
   // m[v]
   private CollectionSelectExpr GenMapElementForVar(LocalVar v) {
     Contract.Assert(ContainsVar(v));
-    return new CollectionElementExpr(
-      collection: GenMapIdent(), index: GenMapIndexForVar(v));
+    return new CollectionElementExpr(collection: GenMapIdent(), 
+      index: GenMapIndexForVar(v), type: v.Type);
   }
 
   // map[]
   public MapDisplayExpr GenEmptyMap() {
-    return new MapDisplayExpr();
+    return new MapDisplayExpr(type: mapType);
   }
 
   // map[v0 := ..., v1 := ..., ...]
   public MapDisplayExpr
   GenMapDisplayForVars(IEnumerable<ExpressionPair> assignments) {
-    return new MapDisplayExpr(assignments);
+    return new MapDisplayExpr(assignments, type: mapType);
   }
 
   // m[v := ...]
