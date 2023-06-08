@@ -1,81 +1,101 @@
+using System.Runtime.ExceptionServices;
+
 namespace Fuzzer;
 
 public class NoMutationsException : Exception {
   public NoMutationsException() : base("No mutations found.") { }
 }
 
-public static class FuzzerService {
-  public static string ParseBaseName(string filePath) {
-    return Path.GetFileNameWithoutExtension(filePath);
+public class MutantInfo {
+  public string SeedFile;
+  public Program SeedProgram;
+  public int RandSeed;
+  public int Order;
+  public string MutantFile;
+  public ILogger Logger;
+
+  public string SeedName => Path.GetFileName(SeedFile);
+
+  public MutantInfo(string seedFile, Program seedProgram, string mutantFile,
+  int randSeed, int order, ILogger logger) {
+    SeedFile = seedFile;
+    SeedProgram = seedProgram;
+    MutantFile = mutantFile;
+    RandSeed = randSeed;
+    Order = order;
+    Logger = logger;
   }
 
-  public static string PrintProgramToString(Program program) {
-    return Printer.PrintNodeToString(program);
-  }
+}
 
-  public static void PrintProgramToFile(Program program, string filePath) {
-    if (File.Exists(filePath)) {
-      throw new Exception($"File `{filePath}` already exists.");
-    }
-    using (StreamWriter wr = File.CreateText(filePath)) {
-      Printer.PrintNode(program, wr);
-    }
-  }
+public class Fuzzer {
+  private Random globalRand = new Random(0);
+  private Randomizer mutatorRand = new Randomizer();
+  private BasicGenerator gen = new BasicGenerator();
+  private ComposedMutator mutator;
 
-  public static void GenerateMutantsAsFile(string seedFilePath,
-  string mutantOutDir, int numOfMutants = 1, int maxOrder = 1) {
-    var seedName = ParseBaseName(seedFilePath);
-    var seedProgram = DafnyW.ParseProgramFromFile(seedFilePath);
-    var mutants = GenerateMutants(seedProgram, numOfMutants, maxOrder);
-    if (!Directory.Exists(mutantOutDir)) {
-      Directory.CreateDirectory(mutantOutDir);
-    }
-    for (int i = 0; i < mutants.Count(); i++) {
-      var mutantFilePath = Path.Combine(mutantOutDir, $"{seedName}_{i}.dfy");
-      PrintProgramToFile(mutants.ElementAt(i), mutantFilePath);
-    }
-  }
-
-  public static IEnumerable<string>
-  GenerateMutantsAsString(string seed, int numOfMutants = 1, int maxOrder = 1) {
-    var seedProgram = DafnyW.ParseProgramFromString(seed);
-    var mutants = GenerateMutants(seedProgram, numOfMutants, maxOrder);
-    foreach (var mutant in mutants) {
-      yield return PrintProgramToString(mutant);
-    }
-  }
-
-  public static IEnumerable<Program>
-  GenerateMutants(Program seed, int numOfMutants = 1, int maxOrder = 1) {
-    for (int i = 0; i < numOfMutants; i++) {
-      yield return GenerateMutant(seed, maxOrder);
-    }
-  }
-
-  public static Program GenerateMutant(Program seed, int maxOrder = 1) {
-    var rand = new Randomizer();
-    var gen = new BasicGenerator();
-
+  public Fuzzer() {
     var basicMutators = new List<IBasicMutator>() {
-      new ForLoopToWhileLoopMutator(rand),
-      new WhileLoopUnpeelMutator(rand, gen),
-      new MergeVarsToClassMutator(rand, gen),
-      new MergeVarsToMapMutator(rand, gen),
+      new ForLoopToWhileLoopMutator(mutatorRand),
+      new WhileLoopUnpeelMutator(mutatorRand, gen),
+      new MergeVarsToClassMutator(mutatorRand, gen),
+      new MergeVarsToMapMutator(mutatorRand, gen),
     };
-    var mutator = new ComposedMutator(basicMutators, rand);
-    var mutant = Cloner.Clone<Program>(seed);
+    mutator = new ComposedMutator(basicMutators, mutatorRand);
+  }
 
-    int order = rand.RandInt(minValue: 1, maxValue: maxOrder + 1);
-    int numOfMutationsApplied = 0;
-    for (int i = 0; i < order; i++) {
-      gen.Reset(suffix: i.ToString());
+  public void GenerateMutant(MutantInfo i) {
+    i.Logger.LogCheckPoint($"Generating mutant for `{i.SeedName}`.");
+    i.Logger.LogCheckPoint($"Seed: {i.RandSeed}");
+    i.Logger.LogCheckPoint($"Order: {i.Order}");
+    mutator.ClearHistory();
+    mutatorRand.ResetRandomizer(i.RandSeed);
+    var mutant = Cloner.Clone<Program>(i.SeedProgram);
+    for (int j = 0; j < i.Order; j++) {
+      gen.Reset(suffix: j.ToString());
       // Exit if no more mutations to be applied.
       if (!mutator.TryMutateProgram(mutant)) { break; }
-      numOfMutationsApplied++;
+      i.Logger.LogCheckPoint($"Applied `{mutator.History.Last().GetType()}`.");
     }
-    if (numOfMutationsApplied == 0) {
+    var numMutationsApplied = mutator.History.Count;
+    if (numMutationsApplied == 0) {
       throw new NoMutationsException();
     }
-    return mutant;
+    if (File.Exists(i.MutantFile)) {
+      i.Logger.LogCheckPoint($"Overwriting existing file `{i.MutantFile}`.");
+    }
+    using (StreamWriter wr = File.CreateText(i.MutantFile)) {
+      Printer.PrintNode(mutant, wr);
+    }
+    i.Logger.LogCheckPoint($"Completed generating mutant. {numMutationsApplied} mutations applied.");
+    i.Logger.Close();
   }
+
+  public void GenerateMutants(string seedFile, string outdir,
+  int numMutants = 1, int maxOrder = 1) {
+    var seedName = Path.GetFileNameWithoutExtension(seedFile);
+    var seedProgram = DafnyW.ParseProgramFromFile(seedFile);
+    var mutantsDir = Path.Join(outdir, seedName);
+    Directory.CreateDirectory(mutantsDir);
+    for (int i = 0; i < numMutants; i++) {
+      var mutantSeed = globalRand.Next();
+      var mutantOrder = globalRand.Next(minValue: 1, maxValue: maxOrder + 1);
+      var mutantFile
+        = Path.Join(mutantsDir, $"{seedName}_{mutantSeed}_{mutantOrder}.dfy");
+      var mutantLog = mutantFile + ".log";
+      var mutantInfo = new MutantInfo(seedFile, seedProgram, mutantFile,
+        mutantSeed, mutantOrder, new SingleLogger(seedName, mutantLog));
+      ExceptionDispatchInfo? edi = null;
+      try {
+        GenerateMutant(mutantInfo);
+      } catch (Exception e) {
+        mutantInfo.Logger.LogError(e.Message);
+        if (e.StackTrace != null) { mutantInfo.Logger.LogError(e.StackTrace); }
+        edi = ExceptionDispatchInfo.Capture(e);
+      }
+      mutantInfo.Logger.Close();
+      edi?.Throw();
+    }
+  }
+
 }

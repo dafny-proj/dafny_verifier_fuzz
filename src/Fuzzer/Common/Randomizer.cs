@@ -10,7 +10,11 @@ public interface IRandomizer {
   public T RandElement<T>(IEnumerable<T> ts);
 }
 public class Randomizer : IRandomizer {
-  private Random rand = new Random();
+  private Random rand = new Random(0);
+
+  public void ResetRandomizer(int seed) {
+    rand = new Random(seed);
+  }
 
   public virtual int RandInt() {
     return rand.Next();

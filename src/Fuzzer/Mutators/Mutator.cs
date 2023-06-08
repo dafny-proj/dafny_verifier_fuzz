@@ -8,6 +8,9 @@ public interface IMutator {
 public class ComposedMutator : IMutator {
   public List<IBasicMutator> Mutators;
   public Randomizer Rand;
+  public List<IBasicMutator> History = new();
+  public void ClearHistory() => History.Clear();
+
   public ComposedMutator(IEnumerable<IBasicMutator> mutators, Randomizer rand) {
     Mutators = new(mutators);
     Rand = rand;
@@ -16,7 +19,10 @@ public class ComposedMutator : IMutator {
   public bool TryMutateProgram(Program p) {
     Mutators = Rand.Shuffle<IBasicMutator>(Mutators).ToList();
     foreach (var m in Mutators) {
-      if (m.TryMutateProgram(p)) { return true; }
+      if (m.TryMutateProgram(p)) {
+        History.Add(m);
+        return true;
+      }
     }
     return false;
   }

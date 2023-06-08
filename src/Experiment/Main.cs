@@ -37,38 +37,37 @@ public class FuzzerMain {
     rootCommand.AddOption(outputDirOption);
     rootCommand.AddOption(numMutantsOption);
     rootCommand.AddOption(maxOrderOption);
-    rootCommand.SetHandler(MainHelper, 
+    rootCommand.SetHandler(MainHelper,
       seedOption, outputDirOption, numMutantsOption, maxOrderOption);
     rootCommand.Invoke(args);
   }
 
   public static void MainHelper(
   FileInfo seed, DirectoryInfo outputDir, int numMutants, int maxOrder) {
+    Directory.CreateDirectory(outputDir.FullName);
+    var errorLogger = new SingleLogger(seed.Name,
+      Path.Join(outputDir.FullName, "error.log"));
+    var exitCode = FuzzerExitCode.Success;
     try {
-      FuzzerService.GenerateMutantsAsFile(
+      new Fuzzer().GenerateMutants(
         seed.FullName, outputDir.FullName, numMutants, maxOrder);
     } catch (Exception e) {
       if (e is DafnyException de) {
-        var stage = de switch {
-          DafnyParseException => "parse",
-          DafnyResolveException => "resolver",
-          _ => "",
-        };
-        Console.WriteLine($"{de.ErrorCount} {stage} errors.");
-        de.ErrorMessages.ForEach(m => Console.WriteLine(m));
+        de.ErrorMessages.ForEach(m => errorLogger.LogError(m));
       } else {
-        Console.WriteLine(e.Message);
+        errorLogger.LogError(e.Message);
+        if (e.StackTrace != null) { errorLogger.LogError(e.StackTrace); }
       }
-      var errorCode = e switch {
+      exitCode = e switch {
         DafnyException => FuzzerExitCode.DafnyError,
         AST.Translation.UnsupportedTranslationException => FuzzerExitCode.TranslationError,
         ASTException => FuzzerExitCode.InternalError,
         NoMutationsException => FuzzerExitCode.NoMutationError,
         _ => FuzzerExitCode.OtherError,
       };
-      Environment.Exit((int)errorCode);
     }
-    Environment.Exit((int)FuzzerExitCode.Success);
+    errorLogger.Close();
+    Environment.Exit((int)exitCode);
   }
 
 }
