@@ -78,6 +78,7 @@ public partial class ASTCloner {
   }
 
   private ClassDecl CreateClassDeclSkeleton(ClassDecl d) {
+    if (d == Type.ObjectClass) { return d; }
     var s = d switch {
       DefaultClassDecl => DefaultClassDecl.Skeleton(),
       ArrayClassDecl a => ArrayClassDecl.Skeleton(a.Dimensions),

@@ -87,4 +87,27 @@ public partial class MergeVarsToClassMutationRewriter {
       throw new UnsupportedMutationException();
     }
   }
+
+  private class LoopAddEmptyModifiesRewriteTask : Task {
+    // Introduction of classes requires us to consider heap semantics.
+    // In loops, modifications to the heap are hard to reason about.
+    // Dafny does over-approximations such as assuming method calls and update 
+    // statements can change anything in the heap allowed in the modifies clause
+    // of the enclosing method. This leads to loss of information after the loop
+    // unless we can construct invariants and frames to recover the information 
+    // which is not an easy task. Hence, we decide to restrict programs to only 
+    // those that don't modify the heap in loops and add an empty modifies 
+    // clause which signals that to the loop.
+    private LoopStmt s;
+
+    public LoopAddEmptyModifiesRewriteTask(LoopStmt s) {
+      this.s = s;
+    }
+
+    public override void Execute() {
+      // TODO: Make object? type a singleton?
+      s.AddModifies(new SetDisplayExpr(type:
+        new SetType(new NullableType(Type.ObjectClass))));
+    }
+  }
 }

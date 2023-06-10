@@ -24,6 +24,9 @@ public partial class MergeVarsToClassMutationRewriter {
       case VarDeclStmt s:
         VisitVarDeclStmt(s);
         return;
+      case LoopStmt s:
+        VisitLoopStmt(s);
+        return;
       default:
         return;
     }
@@ -40,6 +43,10 @@ public partial class MergeVarsToClassMutationRewriter {
       Contract.Assert(GetParent(s) is BlockStmt);
       rewriteTasks.Add(new VarDeclRewriteTask(s, (BlockStmt)GetParent(s), this));
     }
+  }
+
+  private void VisitLoopStmt(LoopStmt s) {
+    rewriteTasks.Add(new LoopAddEmptyModifiesRewriteTask(s));
   }
 
   private void VisitChildren(Node n) {

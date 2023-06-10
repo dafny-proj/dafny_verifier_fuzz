@@ -13,6 +13,7 @@ public abstract partial class Type : Node {
   public static readonly RealType Real = RealType.Instance;
   public static readonly NatType Nat = NatType.Instance;
   public static readonly StringType String = StringType.Instance;
+  public static readonly ClassDecl ObjectClass = new ClassDecl("object");
 
   public override IEnumerable<Node> Children => TypeArgs;
 }

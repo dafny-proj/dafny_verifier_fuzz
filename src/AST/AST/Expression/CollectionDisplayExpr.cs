@@ -10,9 +10,13 @@ public abstract partial class CollectionDisplayExpr<T> : Expression
 where T : Node {
   public List<T> Elements = new();
 
-  public CollectionDisplayExpr(IEnumerable<T>? elements = null) {
+  public CollectionDisplayExpr(IEnumerable<T>? elements = null,
+  Type? type = null) {
     if (elements != null) {
       Elements.AddRange(elements);
+    }
+    if (type != null) {
+      Type = type;
     }
   }
 
@@ -22,23 +26,20 @@ where T : Node {
 public partial class MapDisplayExpr
 : CollectionDisplayExpr<ExpressionPair> {
   public MapDisplayExpr(IEnumerable<ExpressionPair>? elements = null,
-  MapType? type = null)
-  : base(elements) {
-    if (type != null) { Type = type; }
-  }
+  MapType? type = null) : base(elements, type) { }
 }
 
 public partial class SeqDisplayExpr : CollectionDisplayExpr<Expression> {
-  public SeqDisplayExpr(IEnumerable<Expression>? elements = null)
-  : base(elements) { }
+  public SeqDisplayExpr(IEnumerable<Expression>? elements = null,
+  SeqType? type = null) : base(elements, type) { }
 }
 
 public partial class SetDisplayExpr : CollectionDisplayExpr<Expression> {
-  public SetDisplayExpr(IEnumerable<Expression>? elements = null)
-  : base(elements) { }
+  public SetDisplayExpr(IEnumerable<Expression>? elements = null,
+  SetType? type = null) : base(elements, type) { }
 }
 
 public partial class MultiSetDisplayExpr : CollectionDisplayExpr<Expression> {
-  public MultiSetDisplayExpr(IEnumerable<Expression>? elements = null)
-  : base(elements) { }
+  public MultiSetDisplayExpr(IEnumerable<Expression>? elements = null,
+  MultiSetType? type = null) : base(elements, type) { }
 }

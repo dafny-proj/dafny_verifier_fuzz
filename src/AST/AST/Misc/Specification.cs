@@ -34,6 +34,7 @@ public partial class Specification {
   public bool HasUserDefinedSpec() => GetUserDefinedSpec().Count() > 0;
   public static bool HasUserDefinedSpec(Specification? s)
     => s == null ? false : s.HasUserDefinedSpec();
+  public void Add(Expression e) => Expressions.Add(e);
 
   public override IEnumerable<Node> Children => GetUserDefinedSpec();
 }

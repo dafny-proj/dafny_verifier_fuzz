@@ -25,6 +25,15 @@ public abstract partial class LoopStmt : Statement {
     Decreases = dec;
   }
 
+  public void AddModifies(Expression e) {
+    if (Modifies == null) {
+      Modifies = new Specification(
+        Specification.Type.ModifiesFrame, new[] { e });
+    } else {
+      Modifies.Add(e);
+    }
+  }
+
   public override IEnumerable<Node> Children {
     get {
       if (HasInvariants()) { yield return Invariants!; }

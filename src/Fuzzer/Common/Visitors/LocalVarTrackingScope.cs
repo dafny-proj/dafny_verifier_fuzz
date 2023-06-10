@@ -11,6 +11,7 @@ public partial class LocalVarTrackingScope {
   public List<LocalVarTrackingScope> Children = new();
 
   public void AddVar(LocalVar var) => Vars.Add(var);
+  public void RemoveVar(LocalVar var) => Vars.Remove(var);
   public void AddChild(LocalVarTrackingScope child) => Children.Add(child);
 
   public LocalVarTrackingScope(BlockStmt node, ModuleDecl enclosingModule,

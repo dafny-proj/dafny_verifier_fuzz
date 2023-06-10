@@ -33,20 +33,7 @@ public class MergeVarsToClassMutator : BasicMutator<MergeVarsToClassMutation> {
 
   public override List<MergeVarsToClassMutation>
   FindPotentialMutations(Program p) {
-    var potentialMutations = new List<MergeVarsToClassMutation>();
-    var scopes = LocalVarTrackingScopeBuilder.FindScopes(p);
-    foreach (var s in scopes) {
-      // Remove variables with unknown type.
-      var vs = s.Vars.Where(v => v.Type is not TypeProxy);
-      if (vs.Count() == 0) continue;
-      // Variables of the same scope and of known type can be merged to a class.
-      potentialMutations.Add(new MergeVarsToClassMutation(
-        vars: vs,
-        enclosingScope: s.Node,
-        enclosingModule: s.EnclosingModule
-      ));
-    }
-    return potentialMutations;
+    return MergeVarsToClassMutationFinder.FindMutations(p);
   }
 
   public override MergeVarsToClassMutation

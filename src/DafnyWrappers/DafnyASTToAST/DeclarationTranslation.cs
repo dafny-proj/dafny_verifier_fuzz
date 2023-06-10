@@ -78,6 +78,7 @@ public partial class ASTTranslator {
   }
 
   private ClassDecl CreateClassDeclSkeleton(Dafny.ClassDecl d) {
+    if (d.Name == "object") { return Type.ObjectClass; }
     ClassDecl s = d switch {
       Dafny.DefaultClassDecl => DefaultClassDecl.Skeleton(),
       // TODO: Add to a built-ins list?
@@ -126,8 +127,8 @@ public partial class ASTTranslator {
     var std = new SubsetTypeDecl(
       name: dstd.Name, baseIdent: TranslateBoundVar(dstd.Var),
       constraint: TranslateExpression(dstd.Constraint),
-      witness: dstd.WitnessKind == Dafny.SubsetTypeDecl.WKind.OptOut ? 
-        new WildcardExpr() : dstd.Witness == null ? null : 
+      witness: dstd.WitnessKind == Dafny.SubsetTypeDecl.WKind.OptOut ?
+        new WildcardExpr() : dstd.Witness == null ? null :
         TranslateExpression(dstd.Witness),
       typeParams: dstd.TypeArgs.Select(TranslateTypeParameter));
     MarkDeclTranslated(dstd, std);

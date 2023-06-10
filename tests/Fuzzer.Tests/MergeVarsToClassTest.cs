@@ -4,7 +4,7 @@ namespace Fuzzer.Tests;
 public class MergeVarsToClassTest {
   public void TestMergeVarsToClass(
     string input,
-    string? expectedOutput,
+    string? expectedOutput = null,
     int expectedNumMutationsFound = 1,
     int mutationToTrigger = 0,
     int maxVarsMerged = -1
@@ -154,6 +154,49 @@ public class MergeVarsToClassTest {
     method M() returns (x: int) {
       var v1_mock: C0_mock := new C0_mock;
       v1_mock.y := M();
+    }
+    """;
+    TestMergeVarsToClass(source, target);
+  }
+
+  [TestMethod]
+  public void Test6() {
+    var source = """
+    method M() {
+      var y := 1;
+      while * {
+        y := y + 1;
+      }
+    }
+    """;
+    TestMergeVarsToClass(source, expectedNumMutationsFound: 0);
+  }
+
+  [TestMethod]
+  public void Test7() {
+    var source = """
+    method M() {
+      var y := 1;
+      while * {
+        M();
+      }
+      assert y == 1;
+    }
+    """;
+    var target = """
+    class C0_mock {
+      var y: int
+    }
+
+    method M() {
+      var v1_mock: C0_mock := new C0_mock;
+      v1_mock.y := 1;
+      while *
+        modifies {}
+      {
+        M();
+      }
+      assert v1_mock.y == 1;
     }
     """;
     TestMergeVarsToClass(source, target);
