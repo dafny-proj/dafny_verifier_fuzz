@@ -554,4 +554,19 @@ public class ASTTests {
     CanParseClonePrint(sourceStr);
   }
 
+  [TestMethod]
+  public void BreakAndContinue() {
+    var sourceStr = """
+    method M() {
+      while true {
+        break;
+      }
+      while true {
+        continue;
+      }
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
 }

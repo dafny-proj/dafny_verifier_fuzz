@@ -4,52 +4,52 @@ namespace Fuzzer;
 // Requires loop bodies to not have labeled statements.
 /// <summary>
 /// `while cond { body }`
-/// Unpeels to
+/// Peels to
 /// ```
 /// if cond { body }
 /// while cond { body }
 /// ```
 /// </summary>
-public class WhileLoopUnpeelMutation: IMutation {
+public class WhileLoopPeelMutation: IMutation {
   public WhileLoopStmt whileLoop;
   public BlockStmt enclosingScope;
 
   public
-  WhileLoopUnpeelMutation(WhileLoopStmt whileLoop, BlockStmt enclosingScope) {
+  WhileLoopPeelMutation(WhileLoopStmt whileLoop, BlockStmt enclosingScope) {
     this.whileLoop = whileLoop;
     this.enclosingScope = enclosingScope;
   }
 }
 
-public class WhileLoopUnpeelMutator : BasicMutator<WhileLoopUnpeelMutation> {
+public class WhileLoopPeelMutator : BasicMutator<WhileLoopPeelMutation> {
   public IGenerator Gen { get; }
-  public WhileLoopUnpeelMutator(Randomizer rand, IGenerator gen) : base(rand) {
+  public WhileLoopPeelMutator(Randomizer rand, IGenerator gen) : base(rand) {
     Gen = gen;
   }
 
-  public override List<WhileLoopUnpeelMutation> FindPotentialMutations(Program p) {
-    return new WhileLoopUnpeelMutationFinder().FindMutations(p);
+  public override List<WhileLoopPeelMutation> FindPotentialMutations(Program p) {
+    return new WhileLoopPeelMutationFinder().FindMutations(p);
   }
 
-  public override WhileLoopUnpeelMutation
-  SelectMutation(List<WhileLoopUnpeelMutation> ms) {
+  public override WhileLoopPeelMutation
+  SelectMutation(List<WhileLoopPeelMutation> ms) {
     Contract.Requires(ms.Count > 0);
     return Rand.RandElement(ms);
   }
 
-  public override void ApplyMutation(WhileLoopUnpeelMutation m) {
-    new WhileLoopUnpeelMutationRewriter(m, Gen).Rewrite();
+  public override void ApplyMutation(WhileLoopPeelMutation m) {
+    new WhileLoopPeelMutationRewriter(m, Gen).Rewrite();
   }
 }
 
-public class WhileLoopUnpeelMutationFinder {
-  public List<WhileLoopUnpeelMutation> FindMutations(Node n) {
+public class WhileLoopPeelMutationFinder {
+  public List<WhileLoopPeelMutation> FindMutations(Node n) {
     Reset();
     VisitNode(n);
     return mutations;
   }
 
-  private List<WhileLoopUnpeelMutation> mutations = new();
+  private List<WhileLoopPeelMutation> mutations = new();
   private Stack<BlockStmt> scopes = new();
   private void EnterScope(BlockStmt s) => scopes.Push(s);
   private void ExitScope(BlockStmt s) => scopes.Pop();
@@ -81,7 +81,7 @@ public class WhileLoopUnpeelMutationFinder {
 
   private void VisitWhileLoopStmt(WhileLoopStmt s) {
     if (s.HasBody()) {
-      mutations.Add(new WhileLoopUnpeelMutation(
+      mutations.Add(new WhileLoopPeelMutation(
       whileLoop: s, enclosingScope: GetEnclosingScope()));
     }
     VisitChildren(s);

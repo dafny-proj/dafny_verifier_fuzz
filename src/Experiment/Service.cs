@@ -37,7 +37,7 @@ public class Fuzzer {
   public Fuzzer() {
     var basicMutators = new List<IBasicMutator>() {
       new ForLoopToWhileLoopMutator(mutatorRand),
-      new WhileLoopUnpeelMutator(mutatorRand, gen),
+      new WhileLoopPeelMutator(mutatorRand, gen),
       new MergeVarsToClassMutator(mutatorRand, gen),
       new MergeVarsToMapMutator(mutatorRand, gen),
     };

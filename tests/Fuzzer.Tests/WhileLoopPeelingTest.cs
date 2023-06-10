@@ -1,15 +1,15 @@
 namespace Fuzzer.Tests;
 
 [TestClass]
-public class WhileLoopUnpeelTest {
-  public void TestWhileLoopUnpeel(
+public class WhileLoopPeelTest {
+  public void TestWhileLoopPeel(
     string input,
     string expectedOutput,
     int expectedNumMutationsFound = 1,
     int mutationToTrigger = 0
   ) {
     var program = DafnyW.ParseProgramFromString(input);
-    var mutator = new WhileLoopUnpeelMutator(
+    var mutator = new WhileLoopPeelMutator(
       new MockRandomizer(), new MockGenerator());
     var potentialMutations = mutator.FindPotentialMutations(program);
     Assert.AreEqual(expectedNumMutationsFound, potentialMutations.Count);
@@ -21,7 +21,7 @@ public class WhileLoopUnpeelTest {
   }
 
   [TestMethod]
-  public void UnrollSimpleWhileLoop() {
+  public void PeelSimpleWhileLoop() {
     var whileWhole = """
     method Foo(n: nat) {
       var i := 0;
@@ -30,7 +30,7 @@ public class WhileLoopUnpeelTest {
       }
     }
     """;
-    var whileUnrolled = """
+    var whilePeeled = """
     method Foo(n: nat) {
       var i := 0;
       if i < n {
@@ -41,15 +41,49 @@ public class WhileLoopUnpeelTest {
       }
     }
     """;
-    TestWhileLoopUnpeel(whileWhole, whileUnrolled);
+    TestWhileLoopPeel(whileWhole, whilePeeled);
   }
 
   [TestMethod]
-  public void UnrollWhileLoopWithUnconditionalBreak() {
+  public void PeelWhileLoopWithInvariants() {
+    var whileWhole = """
+    method Foo(n: nat) {
+      var i := 0;
+      while i < n 
+        invariant 0 <= i
+        invariant i <= n
+      {
+        i := i + 1;
+      }
+    }
+    """;
+    var whilePeeled = """
+    method Foo(n: nat) {
+      var i := 0;
+      assert 0 <= i;
+      assert i <= n;
+      if i < n {
+        i := i + 1;
+      }
+      while i < n
+        invariant 0 <= i
+        invariant i <= n
+      {
+        i := i + 1;
+      }
+    }
+    """;
+    TestWhileLoopPeel(whileWhole, whilePeeled);
+  }
+
+  [TestMethod]
+  public void PeelWhileLoopWithUnconditionalBreak() {
     var whileWhole = """
     method Foo(n: nat) {
       print 0;
-      while * {
+      while *
+        invariant true
+      {
         print 1;
         break;
         print 2;
@@ -57,10 +91,11 @@ public class WhileLoopUnpeelTest {
       print 3;
     }
     """;
-    var whileUnrolled = """
+    var whilePeeled = """
     method Foo(n: nat) {
       print 0;
       var v0_mock: bool := false;
+      assert true;
       label l1_mock:
       if * {
         print 1;
@@ -69,7 +104,9 @@ public class WhileLoopUnpeelTest {
         print 2;
       }
       if !v0_mock {
-        while * {
+        while *
+          invariant true
+        {
           print 1;
           break;
           print 2;
@@ -78,11 +115,11 @@ public class WhileLoopUnpeelTest {
       print 3;
     }
     """;
-    TestWhileLoopUnpeel(whileWhole, whileUnrolled);
+    TestWhileLoopPeel(whileWhole, whilePeeled);
   }
 
   [TestMethod]
-  public void UnrollWhileLoopWithConditionalBreak() {
+  public void PeelWhileLoopWithConditionalBreak() {
     var whileWhole = """
     function Bool(n: nat): bool
 
@@ -102,7 +139,7 @@ public class WhileLoopUnpeelTest {
       print 6;
     }
     """;
-    var whileUnrolled = """
+    var whilePeeled = """
     function Bool(n: nat): bool
 
     method Foo(n: nat) {
@@ -137,11 +174,11 @@ public class WhileLoopUnpeelTest {
       print 6;
     }
     """;
-    TestWhileLoopUnpeel(whileWhole, whileUnrolled);
+    TestWhileLoopPeel(whileWhole, whilePeeled);
   }
 
   [TestMethod]
-  public void UnrollWhileLoopWithNestedConditionalBreak() {
+  public void PeelWhileLoopWithNestedConditionalBreak() {
     var whileWhole = """
     function Bool(n: nat): bool
 
@@ -163,7 +200,7 @@ public class WhileLoopUnpeelTest {
       print 7;
     }
     """;
-    var whileUnrolled = """
+    var whilePeeled = """
     function Bool(n: nat): bool
 
     method Foo(n: nat) {
@@ -202,11 +239,11 @@ public class WhileLoopUnpeelTest {
       print 7;
     }
     """;
-    TestWhileLoopUnpeel(whileWhole, whileUnrolled);
+    TestWhileLoopPeel(whileWhole, whilePeeled);
   }
 
   [TestMethod]
-  public void UnrollNestedWhileLoopWithInnerBreak() {
+  public void PeelNestedWhileLoopWithInnerBreak() {
     var whileWhole = """
     function Bool(n: nat): bool
 
@@ -224,7 +261,7 @@ public class WhileLoopUnpeelTest {
       print 5;
     }
     """;
-    var outerWhileUnrolled = """
+    var outerWhilePeeled = """
     function Bool(n: nat): bool
 
     method Foo(n: nat) {
@@ -250,7 +287,7 @@ public class WhileLoopUnpeelTest {
       print 5;
     }
     """;
-    var innerWhileUnrolled = """
+    var innerWhilePeeled = """
     function Bool(n: nat): bool
 
     method Foo(n: nat) {
@@ -277,18 +314,18 @@ public class WhileLoopUnpeelTest {
       print 5;
     }
     """;
-    TestWhileLoopUnpeel(whileWhole,
-      outerWhileUnrolled,
+    TestWhileLoopPeel(whileWhole,
+      outerWhilePeeled,
       expectedNumMutationsFound: 2,
       mutationToTrigger: 0);
-    TestWhileLoopUnpeel(whileWhole,
-      innerWhileUnrolled,
+    TestWhileLoopPeel(whileWhole,
+      innerWhilePeeled,
       expectedNumMutationsFound: 2,
       mutationToTrigger: 1);
   }
 
   [TestMethod]
-  public void UnrollNestedWhileLoopWithInnerBreakBreak() {
+  public void PeelNestedWhileLoopWithInnerBreakBreak() {
     var whileWhole = """
     function Bool(n: nat): bool
 
@@ -306,7 +343,7 @@ public class WhileLoopUnpeelTest {
       print 5;
     }
     """;
-    var outerWhileUnrolled = """
+    var outerWhilePeeled = """
     function Bool(n: nat): bool
 
     method Foo(n: nat) {
@@ -337,7 +374,7 @@ public class WhileLoopUnpeelTest {
       print 5;
     }
     """;
-    var innerWhileUnrolled = """
+    var innerWhilePeeled = """
     function Bool(n: nat): bool
 
     method Foo(n: nat) {
@@ -359,13 +396,47 @@ public class WhileLoopUnpeelTest {
       print 5;
     }
     """;
-    TestWhileLoopUnpeel(whileWhole,
-      outerWhileUnrolled,
+    TestWhileLoopPeel(whileWhole,
+      outerWhilePeeled,
       expectedNumMutationsFound: 2,
       mutationToTrigger: 0);
-    TestWhileLoopUnpeel(whileWhole,
-      innerWhileUnrolled,
+    TestWhileLoopPeel(whileWhole,
+      innerWhilePeeled,
       expectedNumMutationsFound: 2,
       mutationToTrigger: 1);
   }
+
+  [TestMethod]
+  public void PeelWhileLoopWithContinue() {
+    var whileWhole = """
+    method Foo(n: nat) {
+      print 0;
+      while * {
+        print 1;
+        continue;
+        print 2;
+      }
+      print 3;
+    }
+    """;
+    var whilePeeled = """
+    method Foo(n: nat) {
+      print 0;
+      label l0_mock:
+      if * {
+        print 1;
+        break l0_mock;
+        print 2;
+      }
+      while * {
+        print 1;
+        continue;
+        print 2;
+      }
+      print 3;
+    }
+    """;
+    TestWhileLoopPeel(whileWhole, whilePeeled);
+  }
+
 }

@@ -1,16 +1,16 @@
 namespace Fuzzer;
 
-public partial class WhileLoopUnpeelMutationRewriter {
+public partial class WhileLoopPeelMutationRewriter {
   private WhileLoopStmt whileLoop;
   private BlockStmt enclosingScope;
   private LocalVar? breakVariable;
   private string? breakLabel;
   private IGenerator gen;
 
-  public WhileLoopUnpeelMutationRewriter(WhileLoopUnpeelMutation m, IGenerator g)
+  public WhileLoopPeelMutationRewriter(WhileLoopPeelMutation m, IGenerator g)
   : this(m.whileLoop, m.enclosingScope, g) { }
 
-  public WhileLoopUnpeelMutationRewriter(
+  public WhileLoopPeelMutationRewriter(
   WhileLoopStmt whileLoop, BlockStmt enclosingScope, IGenerator generator) {
     this.whileLoop = whileLoop;
     this.enclosingScope = enclosingScope;
@@ -18,7 +18,7 @@ public partial class WhileLoopUnpeelMutationRewriter {
   }
 
   public void Rewrite() {
-    var unpeeledLoop = new List<Statement>();
+    var peeledLoop = new List<Statement>();
     // Extract an iteration of the loop into an if statement.
     var guard = whileLoop.Guard;
     var body = whileLoop.Body!;
@@ -29,32 +29,34 @@ public partial class WhileLoopUnpeelMutationRewriter {
     // Recondition break statements in the extracted iteration.
     new BreakReconditioner(this).Recondition(extractedIteration.Thn);
 
-    if (breakVariable == null) {
-      unpeeledLoop.AddRange(GenAssertFromInvariants());
-      unpeeledLoop.Add(extractedIteration);
-      unpeeledLoop.AddRange(GenAssertFromInvariants());
-      unpeeledLoop.Add(whileLoop);
-    } else {
+    if (breakVariable != null) {
       // Create break variable declaration.
       var initBreakToFalse = new AssignStmt(new AssignmentPair(
         GenBreakVariableIdent(), new ExprRhs(new BoolLiteralExpr(false))));
       var breakDecl = new VarDeclStmt(breakVariable, initBreakToFalse);
-      unpeeledLoop.Add(breakDecl);
-      unpeeledLoop.AddRange(GenAssertFromInvariants());
+      peeledLoop.Add(breakDecl);
+    }
 
+    peeledLoop.AddRange(GenAssertFromInvariants());
+
+    if (breakLabel != null) {
       // Set break label for extracted iteration.
       extractedIteration.AddLabel(GetBreakLabel());
-      unpeeledLoop.Add(extractedIteration);
+    }
+    peeledLoop.Add(extractedIteration);
 
-      // Wrap assertions and remaining loop in a check for the break.
+    if (breakVariable != null) {
+      // Wrap remaining loop in a check for the break.
       var notBreak = new UnaryExpr(UnaryExpr.Opcode.Not, GenBreakVariableIdent());
       var remLoop = new IfStmt(guard: notBreak,
-        thn: new BlockStmt(GenAssertFromInvariants().Append<Statement>(whileLoop)));
-      unpeeledLoop.Add(remLoop);
+        thn: new BlockStmt(new[] { whileLoop }));
+      peeledLoop.Add(remLoop);
+    } else {
+      peeledLoop.Add(whileLoop);
     }
 
     // Rewrite the loop in the parent.
-    enclosingScope.Replace(whileLoop, unpeeledLoop);
+    enclosingScope.Replace(whileLoop, peeledLoop);
   }
 
   private IdentifierExpr GenBreakVariableIdent() {
@@ -79,7 +81,7 @@ public partial class WhileLoopUnpeelMutationRewriter {
 
   private class BreakReconditioner {
     private List<Task> reconditionTasks = new();
-    private WhileLoopUnpeelMutationRewriter _wr;
+    private WhileLoopPeelMutationRewriter wr;
 
     private int loopNestingDepth;
     private void EnterLoop() => loopNestingDepth++;
@@ -100,8 +102,8 @@ public partial class WhileLoopUnpeelMutationRewriter {
       childToParent.Add(c, p);
     }
 
-    public BreakReconditioner(WhileLoopUnpeelMutationRewriter wr) {
-      _wr = wr;
+    public BreakReconditioner(WhileLoopPeelMutationRewriter wr) {
+      this.wr = wr;
     }
 
     private void Reset() {
@@ -148,7 +150,7 @@ public partial class WhileLoopUnpeelMutationRewriter {
       } else if (netBreak == 0) {
         Contract.Assert(GetParent(s) is BlockStmt);
         reconditionTasks.Add(
-          new BreakThisLoopReconditionTask(s, (BlockStmt)GetParent(s), _wr));
+          new BreakThisLoopReconditionTask(s, (BlockStmt)GetParent(s), wr));
       } else {
         // Doesn't break out of current body. No need to recondition.
       }
@@ -156,38 +158,44 @@ public partial class WhileLoopUnpeelMutationRewriter {
   }
 
   private class BreakOuterLoopReconditionTask : Task {
-    private BreakStmt _s;
+    private BreakStmt s;
     public BreakOuterLoopReconditionTask(BreakStmt s) {
-      _s = s;
+      this.s = s;
     }
     public override void Execute() {
       // Breaks above the current body. Since control flow will jump outside the 
       // current body, there is no need to track the current loop break.
       // It suffices to just adjust the number of breaks.
-      Contract.Assert(_s.Count > 0);
-      _s.Count--;
+      Contract.Assert(s.Count > 0);
+      s.Count--;
     }
   }
 
   private class BreakThisLoopReconditionTask : Task {
-    private BreakStmt _s;
-    private BlockStmt _parent;
-    private WhileLoopUnpeelMutationRewriter _wr;
+    private BreakStmt s;
+    private BlockStmt parent;
+    private WhileLoopPeelMutationRewriter wr;
     public BreakThisLoopReconditionTask(BreakStmt s, BlockStmt parent,
-    WhileLoopUnpeelMutationRewriter wr) {
-      _s = s;
-      _parent = parent;
-      _wr = wr;
+    WhileLoopPeelMutationRewriter wr) {
+      this.s = s;
+      this.parent = parent;
+      this.wr = wr;
     }
     public override void Execute() {
-      // Breaks exactly out of the current body. Record the break using a variable
-      // to check if we should continue further iterations on the unpeeled loop.
+      // Breaks exactly out of the current body.
+      var replacement = new List<Statement>();
+      if (s is not ContinueStmt) {
+        // If we have a `break`, record using a variable to ensure we don't try
+        // to continue further iteraions of the peeled loop. Otherwise, we can 
+        // `continue` with the loop.
+        var setBreakVarToTrue = new AssignStmt(new AssignmentPair(
+          wr.GenBreakVariableIdent(), new ExprRhs(new BoolLiteralExpr(true))));
+        replacement.Add(setBreakVarToTrue);
+      }
       // Wrap the first iteration of the loop with a label to break out of.
-      // `break;` => `breakVar := true; break breakLabel;`
-      var setBreakVarToTrue = new AssignStmt(new AssignmentPair(
-        _wr.GenBreakVariableIdent(), new ExprRhs(new BoolLiteralExpr(true))));
-      var breakOutOfBody = new BreakStmt(_wr.GetBreakLabel());
-      _parent.Replace(_s, new Statement[] { setBreakVarToTrue, breakOutOfBody });
+      var breakOutOfBody = new BreakStmt(wr.GetBreakLabel());
+      replacement.Add(breakOutOfBody);
+      parent.Replace(s, replacement);
     }
   }
 }

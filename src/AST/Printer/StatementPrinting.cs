@@ -161,7 +161,7 @@ public partial class ASTPrinter {
     for (int i = 0; i < s.Count - 1; i++) {
       Write("break ");
     }
-    Write(s is BreakStmt ? "break" : "continue");
+    Write(s is ContinueStmt ? "continue" : "break");
     if (s.HasTargetLabel()) {
       Write($" {s.TargetLabel}");
     }
