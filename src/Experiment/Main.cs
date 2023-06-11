@@ -2,72 +2,64 @@ using System.CommandLine;
 
 namespace Fuzzer;
 
-public enum FuzzerExitCode : int {
-  Success = 0,
-  OtherError = 10,
-  DafnyError = 20,
-  TranslationError = 30,
-  InternalError = 40,
-  NoMutationError = 50,
-}
-
 public class FuzzerMain {
   public static void Main(string[] args) {
-    var seedOption = new Option<FileInfo>(
-      name: "--seed",
+    var seedArgument = new Argument<FileInfo>(
+      name: "seed",
       description: "The seed file from which mutants are generated.");
-    var outputDirOption = new Option<DirectoryInfo>(
-      name: "--output-dir",
-      description: "The output directory for containing the mutants.");
+    var workdirArgument = new Argument<DirectoryInfo>(
+      name: "work-dir",
+      description: "The directory to output mutants and logs to.");
+
+    var rootCommand = new RootCommand("Mutant generator for Dafny programs.");
+    rootCommand.AddArgument(seedArgument);
+    rootCommand.AddArgument(workdirArgument);
+
+    var genSingleCmd = new Command(
+      name: "gen-single",
+      description: "Generate a single mutant.");
+    var mutantSeedOption = new Option<int>(
+      name: "--mutant-seed",
+      description: "Random seed for determining the mutations applied.");
+    var mutantOrderOption = new Option<int>(
+      name: "--mutant-order",
+      description: "Number of mutations to apply.");
+    rootCommand.AddCommand(genSingleCmd);
+    genSingleCmd.AddOption(mutantSeedOption);
+    genSingleCmd.AddOption(mutantOrderOption);
+    genSingleCmd.SetHandler(GenSingle, seedArgument, workdirArgument,
+      mutantSeedOption, mutantOrderOption);
+
+    var genMultipleCmd = new Command(
+      name: "gen-multi",
+      description: "Generate multiple mutants.");
     var numMutantsOption = new Option<int>(
       name: "--num-mutants",
-      description: "The number of mutants to generate.");
+      description: "The number of mutants to generate.",
+      getDefaultValue: () => 1);
     var maxOrderOption = new Option<int>(
       name: "--max-order",
       description: "The maximum number of mutations applied to generate a mutant.",
       getDefaultValue: () => 1);
+    rootCommand.AddCommand(genMultipleCmd);
+    genMultipleCmd.AddOption(numMutantsOption);
+    genMultipleCmd.AddOption(maxOrderOption);
+    genMultipleCmd.SetHandler(GenMultiple, seedArgument, workdirArgument,
+      numMutantsOption, maxOrderOption);
 
-    seedOption.IsRequired = true;
-    outputDirOption.IsRequired = true;
-    numMutantsOption.IsRequired = true;
-
-    var rootCommand = new RootCommand("Mutant generator for Dafny programs.");
-    rootCommand.Name = "gen-mutant";
-    rootCommand.AddOption(seedOption);
-    rootCommand.AddOption(outputDirOption);
-    rootCommand.AddOption(numMutantsOption);
-    rootCommand.AddOption(maxOrderOption);
-    rootCommand.SetHandler(MainHelper,
-      seedOption, outputDirOption, numMutantsOption, maxOrderOption);
     rootCommand.Invoke(args);
   }
 
-  public static void MainHelper(
-  FileInfo seed, DirectoryInfo outputDir, int numMutants, int maxOrder) {
-    Directory.CreateDirectory(outputDir.FullName);
-    var errorLogger = new SingleLogger(seed.Name,
-      Path.Join(outputDir.FullName, "error.log"));
-    var exitCode = FuzzerExitCode.Success;
-    try {
-      new Fuzzer().GenerateMutants(
-        seed.FullName, outputDir.FullName, numMutants, maxOrder);
-    } catch (Exception e) {
-      if (e is DafnyException de) {
-        de.ErrorMessages.ForEach(m => errorLogger.LogError(m));
-      } else {
-        errorLogger.LogError(e.Message);
-        if (e.StackTrace != null) { errorLogger.LogError(e.StackTrace); }
-      }
-      exitCode = e switch {
-        DafnyException => FuzzerExitCode.DafnyError,
-        AST.Translation.UnsupportedTranslationException => FuzzerExitCode.TranslationError,
-        ASTException => FuzzerExitCode.InternalError,
-        NoMutationsException => FuzzerExitCode.NoMutationError,
-        _ => FuzzerExitCode.OtherError,
-      };
-    }
-    errorLogger.Close();
-    Environment.Exit((int)exitCode);
+  public static void GenSingle(FileInfo seed, DirectoryInfo workdir,
+  int mutantSeed, int mutantOrder) {
+    new MutantGenerator(seed.FullName, workdir.FullName)
+      .GenerateMutant(mutantSeed, mutantOrder);
+  }
+
+  public static void GenMultiple(FileInfo seed, DirectoryInfo workdir,
+  int numMutants, int maxOrder) {
+    new MutantGenerator(seed.FullName, workdir.FullName)
+      .GenerateMutants(numMutants, maxOrder);
   }
 
 }

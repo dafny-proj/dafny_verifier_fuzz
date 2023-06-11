@@ -6,96 +6,95 @@ public class NoMutationsException : Exception {
   public NoMutationsException() : base("No mutations found.") { }
 }
 
-public class MutantInfo {
-  public string SeedFile;
-  public Program SeedProgram;
-  public int RandSeed;
-  public int Order;
-  public string MutantFile;
-  public ILogger Logger;
+public class MutantGenerator {
+  private string seedFile;
+  private string seedName;
+  private Program? seedProgram;
 
-  public string SeedName => Path.GetFileName(SeedFile);
+  private string workDir;
+  private string outDir;
 
-  public MutantInfo(string seedFile, Program seedProgram, string mutantFile,
-  int randSeed, int order, ILogger logger) {
-    SeedFile = seedFile;
-    SeedProgram = seedProgram;
-    MutantFile = mutantFile;
-    RandSeed = randSeed;
-    Order = order;
-    Logger = logger;
-  }
-
-}
-
-public class Fuzzer {
   private Random globalRand = new Random(0);
   private Randomizer mutatorRand = new Randomizer();
   private BasicGenerator gen = new BasicGenerator();
   private ComposedMutator mutator;
 
-  public Fuzzer() {
+  public MutantGenerator(string seedFile, string workDir) {
+    this.seedFile = seedFile;
+    this.seedName = Path.GetFileNameWithoutExtension(seedFile);
+
+    this.workDir = workDir;
+    this.outDir = Path.Join(this.workDir, this.seedName);
+    Directory.CreateDirectory(this.workDir);
+    Directory.CreateDirectory(this.outDir);
+
     var basicMutators = new List<IBasicMutator>() {
       new ForLoopToWhileLoopMutator(mutatorRand),
       new WhileLoopPeelMutator(mutatorRand, gen),
       new MergeVarsToClassMutator(mutatorRand, gen),
       new MergeVarsToMapMutator(mutatorRand, gen),
+      new ExprExtractionMutator(mutatorRand, gen),
     };
-    mutator = new ComposedMutator(basicMutators, mutatorRand);
+    this.mutator = new ComposedMutator(basicMutators, mutatorRand);
+
+    TryParseProgram();
   }
 
-  public void GenerateMutant(MutantInfo i) {
-    i.Logger.LogCheckPoint($"Generating mutant for `{i.SeedName}`.");
-    i.Logger.LogCheckPoint($"Seed: {i.RandSeed}");
-    i.Logger.LogCheckPoint($"Order: {i.Order}");
+  private void TryParseProgram() {
+    try {
+      this.seedProgram = DafnyW.ParseProgramFromFile(this.seedFile);
+    } catch (Exception e) {
+      var logger = new SingleLogger(this.seedName,
+        Path.Join(this.outDir, $"{this.seedName}.dfy.log"));
+      if (e is DafnyException de) {
+        de.ErrorMessages.ForEach(m => logger.LogError(m));
+      } else {
+        logger.LogError(e.Message);
+        if (e.StackTrace != null) { logger.LogError(e.StackTrace); }
+      }
+    }
+  }
+
+  public void GenerateMutant(int seed, int order) {
+    if (this.seedProgram == null) { return; }
+    var mutantFile = Path.Join(this.outDir, $"{this.seedName}_{seed}_{order}.dfy");
+    var mutantLogger = new SingleLogger(this.seedName, mutantFile + ".log");
+    mutantLogger.LogCheckPoint($"Generating mutant for `{this.seedName}`.");
+    mutantLogger.LogCheckPoint($"Seed: {seed}.");
+    mutantLogger.LogCheckPoint($"Order: {order}.");
     mutator.ClearHistory();
-    mutatorRand.ResetRandomizer(i.RandSeed);
-    var mutant = Cloner.Clone<Program>(i.SeedProgram);
-    for (int j = 0; j < i.Order; j++) {
-      gen.Reset(suffix: j.ToString());
-      // Exit if no more mutations to be applied.
-      if (!mutator.TryMutateProgram(mutant)) { break; }
-      i.Logger.LogCheckPoint($"Applied `{mutator.History.Last().GetType()}`.");
+    mutatorRand.ResetRandomizer(seed);
+    try {
+      var mutant = Cloner.Clone<Program>(this.seedProgram);
+      for (int i = 0; i < order; i++) {
+        gen.Reset(suffix: i.ToString());
+        // Exit if no more mutations to be applied.
+        if (!mutator.TryMutateProgram(mutant)) { break; }
+        mutantLogger.LogCheckPoint($"Applied `{mutator.History.Last().GetType()}`.");
+      }
+      var actualOrder = mutator.History.Count;
+      if (actualOrder == 0) { throw new NoMutationsException(); }
+      mutantLogger.LogCheckPoint($"Completed applying mutations. {actualOrder} mutations applied.");
+      if (File.Exists(mutantFile)) {
+        mutantLogger.LogCheckPoint($"Overwriting existing file.");
+      }
+      using (StreamWriter wr = File.CreateText(mutantFile)) {
+        Printer.PrintNode(mutant, wr);
+      }
+      mutantLogger.LogCheckPoint($"Mutant written to `{mutantFile}`.");
+    } catch (Exception e) {
+      mutantLogger.LogError(e.Message);
+      if (e.StackTrace != null) { mutantLogger.LogError(e.StackTrace); }
     }
-    var numMutationsApplied = mutator.History.Count;
-    if (numMutationsApplied == 0) {
-      throw new NoMutationsException();
-    }
-    if (File.Exists(i.MutantFile)) {
-      i.Logger.LogCheckPoint($"Overwriting existing file `{i.MutantFile}`.");
-    }
-    using (StreamWriter wr = File.CreateText(i.MutantFile)) {
-      Printer.PrintNode(mutant, wr);
-    }
-    i.Logger.LogCheckPoint($"Completed generating mutant. {numMutationsApplied} mutations applied.");
-    i.Logger.Close();
+    mutantLogger.Close();
   }
 
-  public void GenerateMutants(string seedFile, string outdir,
-  int numMutants = 1, int maxOrder = 1) {
-    var seedName = Path.GetFileNameWithoutExtension(seedFile);
-    var seedProgram = DafnyW.ParseProgramFromFile(seedFile);
-    var mutantsDir = Path.Join(outdir, seedName);
-    Directory.CreateDirectory(mutantsDir);
+  public void GenerateMutants(int numMutants, int maxOrder) {
+    if (this.seedProgram == null) { return; }
     for (int i = 0; i < numMutants; i++) {
       var mutantSeed = globalRand.Next();
       var mutantOrder = globalRand.Next(minValue: 1, maxValue: maxOrder + 1);
-      var mutantFile
-        = Path.Join(mutantsDir, $"{seedName}_{mutantSeed}_{mutantOrder}.dfy");
-      var mutantLog = mutantFile + ".log";
-      var mutantInfo = new MutantInfo(seedFile, seedProgram, mutantFile,
-        mutantSeed, mutantOrder, new SingleLogger(seedName, mutantLog));
-      ExceptionDispatchInfo? edi = null;
-      try {
-        GenerateMutant(mutantInfo);
-      } catch (Exception e) {
-        mutantInfo.Logger.LogError(e.Message);
-        if (e.StackTrace != null) { mutantInfo.Logger.LogError(e.StackTrace); }
-        edi = ExceptionDispatchInfo.Capture(e);
-      }
-      mutantInfo.Logger.Close();
-      edi?.Throw();
+      GenerateMutant(mutantSeed, mutantOrder);
     }
   }
-
 }
