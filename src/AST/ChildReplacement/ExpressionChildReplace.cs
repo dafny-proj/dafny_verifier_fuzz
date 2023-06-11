@@ -192,11 +192,7 @@ public static partial class ASTChildReplacementMethods {
   }
 
   public static void ReplaceChild(this FunctionCallExpr n, Node child, Node newChild) {
-    if (n.Callee == child) {
-      n.Callee = CheckAndCastNewChild<MemberSelectExpr>(n, child, newChild);
-    } else {
-      ReplaceInList<Expression>(n.Arguments, child, newChild, n);
-    }
+    ReplaceInList<Expression>(n.Arguments, child, newChild, n);
   }
 
   public static void ReplaceChild(this ITEExpr n, Node child, Node newChild) {

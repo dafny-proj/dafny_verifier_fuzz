@@ -16,10 +16,13 @@ public partial class ASTCloner {
       ArrowType at => new ArrowType(arrow: at.Arrow,
         typeDecl: (TopLevelDecl)CloneDeclRef(at.TypeDecl),
         typeArgs: at.GetTypeArgs().Select(CloneType)),
+      ArrayType at => new ArrayType(
+        arrayClass: (ArrayClassDecl)CloneDeclRef(at.TypeDecl),
+        elementType: CloneType(at.ElementType)),
       UserDefinedType ut => new UserDefinedType(
         typeDecl: (TopLevelDecl)CloneDeclRef(ut.TypeDecl),
         typeArgs: ut.GetTypeArgs().Select(CloneType)),
-      CallableType ct 
+      CallableType ct
         => new CallableType((MemberDecl)CloneDeclRef(ct.Callable)),
       TypeProxy tt => new TypeProxy(),
       _ => throw new UnsupportedNodeCloningException(t),

@@ -178,10 +178,8 @@ public partial class ASTCloner {
   }
 
   private FunctionCallExpr CloneFunctionCallExpr(FunctionCallExpr e) {
-    var c = new FunctionCallExpr(
+    return new FunctionCallExpr(
       CloneExpression(e.Callee), e.Arguments.Select(CloneExpression));
-    SetType(e, c);
-    return c;
   }
 
   private StaticReceiverExpr CloneStaticReceiverExpr(StaticReceiverExpr e) {

@@ -3,7 +3,7 @@ using System.Diagnostics.Contracts;
 namespace AST;
 
 public partial class FunctionCallExpr : Expression {
-  public Expression Callee { get; set; }
+  public Expression Callee { get; }
   public readonly List<Expression> Arguments = new();
 
   public FunctionCallExpr(Expression callee,
@@ -12,6 +12,7 @@ public partial class FunctionCallExpr : Expression {
     if (arguments != null) {
       Arguments.AddRange(arguments);
     }
+    Type = ((FunctionDecl)((MemberSelectExpr)callee).Member).ResultType;
   }
 
   public override IEnumerable<Node> Children

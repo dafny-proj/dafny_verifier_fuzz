@@ -9,11 +9,11 @@ public class FunctionData {
   public List<Expression> Reads;
   public bool Unknown;
 
-  public FunctionData(Expression e, bool mayTriggerCallSiteUB = false,
+  public FunctionData(Expression e, bool unknown = false,
   Dictionary<Expression, Formal>? params_ = null,
   IEnumerable<Expression>? req = null, IEnumerable<Expression>? reads = null) {
     E = e;
-    Unknown = mayTriggerCallSiteUB;
+    Unknown = unknown;
     Params = params_ != null ? new(params_) : new();
     Requires = req != null ? new(req) : new();
     Reads = reads != null ? new(reads) : new();
@@ -59,7 +59,7 @@ public class FunctionBuilder {
   // Only use for propagating information between levels of expressions. The
   // contained expression cannot be validly used in the function extracted. 
   private FunctionData Intermediate(Expression e) {
-    return new FunctionData(e: e, mayTriggerCallSiteUB: true);
+    return new FunctionData(e: e, unknown: true);
   }
   private bool TryUseExprAsThis(Expression e) {
     if (ThisObject != null) { return false; }
@@ -259,6 +259,11 @@ public class FunctionBuilder {
       // req: 0 <= index < |seq|
       var seqLength = NF.CreateCardinalityExpr(collection.E);
       f.AddRequires(GenBoundsCheck(index.E, seqLength));
+    } else if (collectionType is MultiSetType) {
+      // No precondition/reads required.
+    } else {
+      throw new InvalidASTOperationException(
+        $"Collection of `{e}` should be of array, map, seq, multiset type.  Got `{collectionType}`.");
     }
     return f;
   }

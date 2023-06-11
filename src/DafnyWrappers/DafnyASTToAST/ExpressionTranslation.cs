@@ -199,11 +199,9 @@ public partial class ASTTranslator {
   }
 
   private FunctionCallExpr TranslateFunctionCallExpr(Dafny.ApplyExpr de) {
-    var e = new FunctionCallExpr(
+    return new FunctionCallExpr(
       callee: TranslateExpression(de.Function),
       arguments: de.Args.Select(TranslateExpression));
-    SetType(de, e);
-    return e;
   }
 
   private StaticReceiverExpr TranslateStaticReceiverExpr(Dafny.StaticReceiverExpr de) {
