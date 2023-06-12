@@ -36,6 +36,11 @@ public class ExprInfoBuilder {
   }
   private void VisitNode(Node n) {
     EnterNode(n);
+    if (n is UpdateStmt s) {
+      // Don't visit lhs.
+      foreach (var c in s.Rhss) { VisitNode(c); }
+      return;
+    }
     if (n is Expression e) {
       exprInfos.Add(e, new ExprInfo(e, GetParent(), GetModule()));
     }

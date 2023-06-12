@@ -40,8 +40,18 @@ public class FunctionBuilder {
     return VisitExpr(e);
   }
 
+  private bool IsGeneric(Type t) {
+    if (t is UserDefinedType ut && ut.TypeDecl is TypeParameterDecl) {
+      return true;
+    }
+    return t.GetTypeArgs().Any(a => IsGeneric(a));
+  }
+
   private FunctionData BuiltIn(Expression e) {
     return new FunctionData(e: e);
+  }
+  private FunctionData TryIdentity(Expression e) {
+    return IsGeneric(e.Type) ? Intermediate(e) : Identity(e);
   }
   private FunctionData Identity(Expression e) {
     var param = new Formal(name: Gen.GenFormalName(), type: e.Type);
@@ -64,6 +74,7 @@ public class FunctionBuilder {
   private bool TryUseExprAsThis(Expression e) {
     if (ThisObject != null) { return false; }
     var t = e.Type;
+    if (IsGeneric(t)) { return false; }
     if (t is UserDefinedType ut && ut.TypeDecl is ClassDecl cd) {
       // Disallow adding members to built-in types.
       if (cd is not (ArrayClassDecl or ArrowTypeDecl)) {
@@ -95,7 +106,7 @@ public class FunctionBuilder {
       MemberSelectExpr e => VisitMemberSelectExpr(e),
       ITEExpr e => VisitITEExpr(e),
       CollectionElementExpr e => VisitCollectionElementExpr(e),
-      _ => Identity(e_),
+      _ => TryIdentity(e_),
     };
   }
 
@@ -106,12 +117,13 @@ public class FunctionBuilder {
 
   private FunctionData VisitBinaryExpr(BinaryExpr e) {
     if (Rand.RandBool()) {
-      return Identity(e);
+      return TryIdentity(e);
     } else {
       // Construct the binary expression from its subexpressions. The parameters 
       // are the combination of parameters required by its subexpressions.
       var sub0 = VisitExpr(e.E0);
       var sub1 = VisitExpr(e.E1);
+      if (sub0.Unknown || sub1.Unknown) { return Intermediate(e); }
       return Compose(
         e: new BinaryExpr(e.Op, sub0.E, sub1.E), fds: new[] { sub0, sub1 });
     }
@@ -119,7 +131,7 @@ public class FunctionBuilder {
 
   private FunctionData VisitDatatypeUpdateExpr(DatatypeUpdateExpr e) {
     if (Rand.RandBool()) {
-      return Identity(e);
+      return TryIdentity(e);
     } else {
       // Compose function from subexpressions.
       var fds = new List<FunctionData>();
@@ -132,6 +144,7 @@ public class FunctionBuilder {
         fds.Add(fd);
         updates.Add(new DatatypeUpdatePair(u.Key, fd.E));
       }
+      if (fds.Any(fd => fd.Unknown)) { return Intermediate(e); }
       var f = Compose(e: new DatatypeUpdateExpr(dtv, updates), fds: fds);
       // Find the constructors which match the updated fields. The datatype 
       // value updated must match one of the constructors.
@@ -148,7 +161,7 @@ public class FunctionBuilder {
     if (e.Member is DatatypeDestructorDecl) { return VisitDatatypeDestructor(e); }
     if (e.Member is FieldDecl) { return VisitField(e); }
     // TODO: Handle other cases.
-    return Identity(e);
+    return TryIdentity(e);
   }
 
   private FunctionData VisitDatatypeDestructor(MemberSelectExpr e) {
@@ -165,10 +178,10 @@ public class FunctionBuilder {
     // use it (Case 2) directly as an argument, or (Case 3) generate the 
     // precondition as the safety condition of this expression.
     // Case 2:
-    if (Rand.RandBool()) { return Identity(e); }
+    if (Rand.RandBool()) { return TryIdentity(e); }
     // Case 3: 
     var receiverFD = VisitExpr(e.Receiver);
-    Contract.Assert(!receiverFD.Unknown);
+    if (receiverFD.Unknown) { return Intermediate(e); }
     var receiver = receiverFD.E;
     var f = Compose(
       e: new MemberSelectExpr(receiver, e.Member), fds: new[] { receiverFD });
@@ -179,17 +192,19 @@ public class FunctionBuilder {
 
   private FunctionData VisitField(MemberSelectExpr e) {
     Contract.Requires(e.Member is FieldDecl);
-    if (Rand.RandBool()) { return Identity(e); }
+    if (Rand.RandBool()) { return TryIdentity(e); }
     if (e.Receiver is StaticReceiverExpr) { return BuiltIn(e); }
     var fld = (FieldDecl)e.Member;
     FunctionData f;
     Expression receiver;
     // Potentially introduce an instance function if we find an object.
     if (Rand.RandBool() && TryUseExprAsThis(e.Receiver)) {
+      // FIXME: Type is potentially incorrect if the type is generic.
       receiver = new ThisExpr(e.Receiver.Type);
       f = BuiltIn(new MemberSelectExpr(receiver, e.Member));
     } else {
       var receiverFD = VisitExpr(e.Receiver);
+      if (receiverFD.Unknown) { return Intermediate(e); }
       receiver = receiverFD.E;
       f = Compose(e: new MemberSelectExpr(receiver, e.Member),
         fds: new[] { receiverFD });
@@ -203,7 +218,7 @@ public class FunctionBuilder {
   }
 
   private FunctionData VisitITEExpr(ITEExpr e) {
-    if (Rand.RandBool()) { return Identity(e); }
+    if (Rand.RandBool()) { return TryIdentity(e); }
     var guard = VisitExpr(e.Guard);
     guardDepth++;
     var thn = VisitExpr(e.Thn);
@@ -231,11 +246,11 @@ public class FunctionBuilder {
       return Intermediate(e);
     }
     // Case 2: Pass in entire expression by value.
-    if (Rand.RandBool()) { return Identity(e); }
+    if (Rand.RandBool()) { return TryIdentity(e); }
     // Case 3: Decompose expression.
     var collection = VisitExpr(e.Collection);
     var index = VisitExpr(e.Index);
-    Contract.Assert(!collection.Unknown && !index.Unknown);
+    if (collection.Unknown || index.Unknown) { return Intermediate(e); }
     var f = Compose(e: new CollectionElementExpr(collection.E, index.E, e.Type),
       fds: new[] { collection, index });
     // Add requires and reads.

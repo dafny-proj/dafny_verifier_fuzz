@@ -30,9 +30,10 @@ public class ExprExtractionMutator : IBasicMutator {
     var candidates = new List<Expression>();
     foreach (var e in es.Keys) {
       if (e is (WildcardExpr or StaticReceiverExpr)) { continue; }
-      // Skip expressions whose types are not known.
-      if (e.Type is TypeProxy) { continue; }
-      candidates.Add(e);
+      if (e.Type is BasicType) { candidates.Add(e); }
+      // // Skip expressions whose types are not known.
+      // if (e.Type is TypeProxy) { continue; }
+      // candidates.Add(e);
     }
     // Choose a random valid expression to extract.
     return Rand.RandElement<Expression>(candidates);
@@ -51,7 +52,7 @@ public class ExprExtractionMutator : IBasicMutator {
     var functionBuilder = new FunctionBuilder(Rand, Gen);
     var functionData = functionBuilder.BuildFromExpression(exprToExtract);
     // Get function injection point.
-    var cls = functionBuilder.ThisClass 
+    var cls = functionBuilder.ThisClass
       ?? SelectFunctionInjectionPoint(exprInfo);
     // Get function parameters.
     var exprsToParams = functionData.Params;
@@ -71,7 +72,7 @@ public class ExprExtractionMutator : IBasicMutator {
     // Inject function declaration.
     cls.AddMember(function);
     // Replace expression at extraction site with a function call.
-    var receiver = functionBuilder.ThisObject 
+    var receiver = functionBuilder.ThisObject
       ?? new ImplicitStaticReceiverExpr(cls);
     var call = new FunctionCallExpr(
       callee: new MemberSelectExpr(receiver, function),
