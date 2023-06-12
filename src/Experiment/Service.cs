@@ -93,8 +93,28 @@ public class MutantGenerator {
     if (this.seedProgram == null) { return; }
     for (int i = 0; i < numMutants; i++) {
       var mutantSeed = globalRand.Next();
-      var mutantOrder = globalRand.Next(minValue: 1, maxValue: maxOrder + 1);
+      var mutantOrder = SelectOrderForMutant(maxOrder);
       GenerateMutant(mutantSeed, mutantOrder);
     }
+  }
+
+  private int SelectOrderForMutant(int maxOrder) {
+    var min = 1;
+    var max = maxOrder;
+    if (maxOrder > 10) {
+      var p = globalRand.NextDouble();
+      if (p < 0.2) {
+        max = (int)Math.Floor(0.1 * maxOrder);
+      } else if (p < 0.7) {
+        min = (int)Math.Ceiling(0.1 * maxOrder);
+        max = (int)Math.Floor(0.5 * maxOrder);
+      } else if (p < 0.9) {
+        min = (int)Math.Ceiling(0.5 * maxOrder);
+        max = (int)Math.Floor(0.8 * maxOrder);
+      } else {
+        min = (int)Math.Ceiling(0.8 * maxOrder);
+      }
+    }
+    return globalRand.Next(minValue: min, maxValue: max + 1);
   }
 }
