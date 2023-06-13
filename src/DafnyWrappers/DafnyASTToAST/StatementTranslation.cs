@@ -34,6 +34,7 @@ public partial class ASTTranslator {
       Dafny.AssertStmt ats => TranslateAssertStmt(ats),
       Dafny.ForallStmt fs => TranslateForallStmt(fs),
       Dafny.NestedMatchStmt ms => TranslateMatchStmt(ms),
+      Dafny.ExpectStmt es => TranslateExpectStmt(es),
       _ => throw new UnsupportedTranslationException(ds),
     };
     SetStatementLabel(ds, s);
@@ -108,6 +109,12 @@ public partial class ASTTranslator {
 
   private AssertStmt TranslateAssertStmt(Dafny.AssertStmt ds) {
     var s = new AssertStmt(TranslateExpression(ds.Expr));
+    SetStatementLabel(ds, s);
+    return s;
+  }
+
+  private ExpectStmt TranslateExpectStmt(Dafny.ExpectStmt ds) {
+    var s = new ExpectStmt(TranslateExpression(ds.Expr));
     SetStatementLabel(ds, s);
     return s;
   }

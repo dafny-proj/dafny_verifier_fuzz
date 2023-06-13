@@ -68,6 +68,7 @@ public partial class MergeVarsToMapMutationRewriter {
   private bool OfInterest(Node n) {
     switch (n) {
       case Type:
+      case BoundVar:
         return false;
       default:
         return true;

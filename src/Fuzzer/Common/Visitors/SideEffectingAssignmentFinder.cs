@@ -62,12 +62,12 @@ public partial class VarWithSideEffectingAssignmentFinder {
 
   private bool OfInterest(Node n) {
     switch (n) {
-      case Program:
-      case Declaration:
-      case Statement:
-        return true;
-      default:
+      case Type:
+      case Expression:
+      case AssignmentRhs:
         return false;
+      default:
+        return true;
     }
   }
 

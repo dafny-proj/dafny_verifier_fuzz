@@ -12,7 +12,20 @@ public partial class FunctionCallExpr : Expression {
     if (arguments != null) {
       Arguments.AddRange(arguments);
     }
-    Type = ((FunctionDecl)((MemberSelectExpr)callee).Member).ResultType;
+    TrySetType();
+  }
+
+  private void TrySetType() {
+    // FIXME: Generics and propagation of type arguments are handled incorrectly.
+    if (Callee.Type is CallableType ct) {
+      if (ct.Callable is FunctionDecl fd) {
+        Type = fd.ResultType;
+      }
+    } else if (Callee.Type is ArrowType at) {
+      Type = at.ResultType;
+    } else {
+      Type = new TypeProxy();
+    }
   }
 
   public override IEnumerable<Node> Children

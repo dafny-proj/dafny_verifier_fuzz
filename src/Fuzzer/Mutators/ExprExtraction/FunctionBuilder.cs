@@ -146,13 +146,15 @@ public class FunctionBuilder {
       }
       if (fds.Any(fd => fd.Unknown)) { return Intermediate(e); }
       var f = Compose(e: new DatatypeUpdateExpr(dtv, updates), fds: fds);
-      // Find the constructors which match the updated fields. The datatype 
-      // value updated must match one of the constructors.
-      var constructors = e.Updates[0].Key.Constructors.AsEnumerable();
-      foreach (var u in e.Updates) {
-        constructors = constructors.Intersect(u.Key.Constructors);
+      if (dtv.Type is UserDefinedType ut && ut.TypeDecl is not TupleTypeDecl) {
+        // Find the constructors which match the updated fields. The datatype 
+        // value updated must match one of the constructors.
+        var constructors = e.Updates[0].Key.Constructors.AsEnumerable();
+        foreach (var u in e.Updates) {
+          constructors = constructors.Intersect(u.Key.Constructors);
+        }
+        f.AddRequires(GenDatatypeConstructorCheck(dtv, constructors));
       }
-      f.AddRequires(GenDatatypeConstructorCheck(dtv, constructors));
       return f;
     }
   }
@@ -257,7 +259,7 @@ public class FunctionBuilder {
     var collectionType = e.Collection.Type;
     if (collectionType is ArrayType at) {
       // read: array
-      f.AddReads(collection.E);
+      f.AddReads(Cloner.Clone<Expression>(collection.E));
       var arrDec = (ArrayClassDecl)at.TypeDecl;
       // TODO: Handle multidimensional array indexing.
       // req: 0 <= index < array.Length

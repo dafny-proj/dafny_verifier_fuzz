@@ -36,6 +36,7 @@ public partial class BreakStmt : Statement { }
 public partial class ContinueStmt : BreakStmt { }
 public partial class AssertStmt : Statement { }
 public partial class MatchStmt : Statement { }
+public partial class ExpectStmt : Statement { }
 
 public abstract partial class Expression : Node { }
 public abstract partial class LiteralExpr : Expression { }

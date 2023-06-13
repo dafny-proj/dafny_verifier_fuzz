@@ -45,6 +45,9 @@ public partial class ASTPrinter {
       case MatchStmt ms:
         PrintMatchStmt(ms);
         break;
+      case ExpectStmt es:
+        PrintExpectStmt(es);
+        break;
       default:
         throw new UnsupportedNodePrintingException(s);
     }
@@ -207,6 +210,12 @@ public partial class ASTPrinter {
     DecIndent();
     WriteIndent();
     Write("}");
+  }
+
+  private void PrintExpectStmt(ExpectStmt s) {
+    Write("expect ");
+    PrintExpression(s.Expectation);
+    Write(";");
   }
 
 }

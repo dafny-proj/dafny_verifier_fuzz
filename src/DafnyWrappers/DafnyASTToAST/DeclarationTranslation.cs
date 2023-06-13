@@ -40,6 +40,7 @@ public partial class ASTTranslator {
       Dafny.SubsetTypeDecl std => TranslateSubsetTypeDecl(std),
       Dafny.TypeSynonymDecl tsd => TranslateTypeSynonymDecl(tsd),
       Dafny.DatatypeDecl dtd => TranslateDatatypeDecl(dtd),
+      Dafny.ValuetypeDecl vtd => TopLevelDecl.BuiltIn,
       _ => throw new UnsupportedTranslationException(tld),
     };
   }
@@ -285,7 +286,8 @@ public partial class ASTTranslator {
     if (HasTranslatedDecl(df)) {
       return (FieldDecl)GetTranslatedDecl(df);
     }
-    var enclosingDecl = (TopLevelDecl)TranslateDeclRef(df.EnclosingClass);
+    var enclosingDecl = df.EnclosingClass == null ? TopLevelDecl.BuiltIn :
+      (TopLevelDecl)TranslateDeclRef(df.EnclosingClass);
     var f = new FieldDecl(enclosingDecl, df.Name, TranslateType(df.Type),
       isBuiltIn: df is Dafny.SpecialField);
     MarkDeclTranslated(df, f);

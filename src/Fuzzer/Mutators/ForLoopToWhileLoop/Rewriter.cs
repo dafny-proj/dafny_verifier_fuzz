@@ -13,6 +13,8 @@ public partial class ForLoopToWhileLoopMutationRewriter {
     this.enclosingScope = enclosingScope;
   }
 
+  // FIXME: Creation of a local variable here means that all identifiers to the 
+  // original variable need to be replaced.
   public void Rewrite() {
     var indexBV = forLoop.LoopIndex;
     var indexLV = new LocalVar(indexBV.Name, indexBV.Type, indexBV.ExplicitType);
@@ -53,8 +55,30 @@ public partial class ForLoopToWhileLoopMutationRewriter {
     var whileLoop = new WhileLoopStmt(guard: guard, body: body,
       inv: forLoop.Invariants, mod: forLoop.Modifies, dec: forLoop.Decreases);
 
+    CorrectReferenceToLoopIndex(body, indexBV, indexLV);
+    if (forLoop.Invariants != null) {
+      CorrectReferenceToLoopIndex(forLoop.Invariants, indexBV, indexLV);
+    }
+    if (forLoop.Modifies != null) {
+      CorrectReferenceToLoopIndex(forLoop.Modifies, indexBV, indexLV);
+    }
+    if (forLoop.Decreases != null) {
+      CorrectReferenceToLoopIndex(forLoop.Decreases, indexBV, indexLV);
+    }
+
     // Replace for loop with index declaration and while loop.
     enclosingScope.Replace(forLoop, new Statement[] { indexDecl, whileLoop });
+  }
+
+  // TODO: A very hacky fix for correcting variable references.
+  private void CorrectReferenceToLoopIndex(Node n, BoundVar initIndex,
+  LocalVar newIndex) {
+    if (n is IdentifierExpr i && i.Var == initIndex) {
+      i.Var = newIndex;
+    }
+    foreach (var c in n.Children) {
+      CorrectReferenceToLoopIndex(c, initIndex, newIndex);
+    }
   }
 
 }

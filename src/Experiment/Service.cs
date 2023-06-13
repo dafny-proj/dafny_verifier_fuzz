@@ -14,7 +14,7 @@ public class MutantGenerator {
   private string workDir;
   private string outDir;
 
-  private Random globalRand = new Random(0);
+  private Random globalRand = new Random();
   private Randomizer mutatorRand = new Randomizer();
   private BasicGenerator gen = new BasicGenerator();
   private ComposedMutator mutator;
@@ -52,6 +52,7 @@ public class MutantGenerator {
         logger.LogError(e.Message);
         if (e.StackTrace != null) { logger.LogError(e.StackTrace); }
       }
+      logger.Close();
     }
   }
 

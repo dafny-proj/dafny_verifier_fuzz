@@ -3,7 +3,9 @@ namespace AST.Cloner;
 public partial class ASTCloner {
   private Dictionary<Variable, Variable> VariablesToClone = new();
   private void IdentifyVarsToClone(Node n) {
-    if (n is Variable v) {
+    // FIXME: All variables should only visited once, however there seems to be
+    // duplicates which should be fixed. 
+    if (n is Variable v && !VariablesToClone.ContainsKey(v)) {
       VariablesToClone.Add(v, CreateVariableClone(v));
     }
     foreach (var c in n.Children) {

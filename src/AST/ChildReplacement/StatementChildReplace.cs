@@ -30,6 +30,9 @@ public static partial class ASTChildReplacementMethods {
       case MatchStmt s:
         s.ReplaceChild(child, newChild);
         break;
+      case ExpectStmt s:
+        s.ReplaceChild(child, newChild);
+        break;
       default:
         throw new UnsupportedNodeChildReplacementException(n);
     }
@@ -101,6 +104,14 @@ public static partial class ASTChildReplacementMethods {
     } else {
       // Other children are unlikely to be mutated here, skip for now.
       throw new UnsupportedNodeChildReplacementException(n);
+    }
+  }
+
+  public static void ReplaceChild(this ExpectStmt n, Node child, Node newChild) {
+    if (n.Expectation == child) {
+      n.Expectation = CheckAndCastNewChild<Expression>(n, child, newChild);
+    } else {
+      throw new ChildNotFoundException(n, child);
     }
   }
 

@@ -569,4 +569,24 @@ public class ASTTests {
     CanParseClonePrint(sourceStr);
   }
 
+  [TestMethod]
+  public void ExpectStmt() {
+    var sourceStr = """
+    method M() {
+      expect true;
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
+  [TestMethod]
+  public void MapBuiltInFunctions() {
+    var sourceStr = """
+    method M(m: map<int, int>) {
+      var s := m.Keys;
+    }
+    """;
+    CanParseClonePrint(sourceStr);
+  }
+
 }
