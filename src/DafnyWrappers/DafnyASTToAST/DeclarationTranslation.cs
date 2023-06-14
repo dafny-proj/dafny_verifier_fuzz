@@ -226,7 +226,9 @@ public partial class ASTTranslator {
     }
     var d = HasSkeletonDecl(dd) ?
       (DatatypeDecl)GetSkeletonDecl(dd) : CreateDatatypeDeclSkeleton(dd);
-    PopulateDatatypeConstructors(dd, d);
+    if (d.Constructors.Count == 0) {
+      PopulateDatatypeConstructors(dd, d);
+    }
     var userDefinedMembers = dd.Members.Where(
       m => m is not (Dafny.DatatypeDestructor or Dafny.DatatypeDiscriminator));
     foreach (var m in userDefinedMembers) {
