@@ -1,17 +1,25 @@
 import Env
+
+from tqdm import tqdm
 import json
 import matplotlib.pyplot as plt
 import os
 import os.path as path
 import subprocess
-from tqdm import tqdm
 import random
 
 
-# dotnet tool install --global coverlet.console
-
-
 def collect_coverage(dafny_dir, files: list[str], name: str):
+  '''Measures coverage on Dafny given the `files` for verification.
+
+  Prerequisites:
+  - Coverlet: 
+    Tool for collecting coverage, install via the command 
+    `dotnet tool install --global coverlet.console`.
+  - Dafny source code: 
+    Install Dafny and build from source code via the instructions at https://github.com/dafny-lang/dafny/wiki/INSTALL#building-and-developing-from-source-code.
+    Provide the path to the Dafny source code via `dafny_dir`.
+  '''
   dafny_asm = path.join(dafny_dir, 'Binaries', 'Dafny.dll')
   dafny = path.join(dafny_dir, 'Scripts', 'Dafny')
   os.makedirs(Env.COVERAGE_DIR, exist_ok=True)
@@ -46,25 +54,27 @@ def collect_coverage(dafny_dir, files: list[str], name: str):
     file.write(cov_progression_json)
 
 
-def run_collect_coverage(name: str):
+def run_collect_coverage(entries_file: str, name: str):
+  ''' Collect coverage for files listed in `entries_file`.'''
   files = []
-  with open(path.join(Env.MUTANTS_DIR, f'{name}.txt')) as entry_file:
-    files = [entry.strip() for entry in entry_file.readlines()]
+  with open(path.join(entries_file)) as ef:
+    files = [e.strip() for e in ef.readlines()]
   random.shuffle(files)
   collect_coverage(dafny_dir=Env.DAFNY_DIR, files=files, name=name)
 
 
-def read_coverage(name: str):
-  coverage_fp = path.join(
-      Env.COVERAGE_DIR, f'{name}_coverage', 'cov_progression.json')
+def read_coverage(dir: str):
+  '''Returns the line and branch coverage from the coverage files in `dir`.'''
+  coverage_fp = path.join(Env.COVERAGE_DIR, dir, 'cov_progression.json')
   with open(coverage_fp) as coverage_file:
     coverage = json.load(coverage_file)
   return coverage['line_cov'], coverage['branch_cov']
 
 
 def plot_coverage():
-  seed_lc, seed_bc = read_coverage('seed')
-  mut_lc, mut_bc = read_coverage('mutant')
+  '''Plot line and branch coverage for seeds and mutants.'''
+  seed_lc, seed_bc = read_coverage('seed_coverage')
+  mut_lc, mut_bc = read_coverage('mutant_coverage')
   test_num = range(1, 52)
   plt.plot(test_num, mut_lc, 'r.-', label='Line coverage from mutants')
   plt.plot(test_num, mut_bc, 'r+-', label='Branch coverage from mutants')

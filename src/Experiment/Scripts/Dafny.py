@@ -1,5 +1,14 @@
 import subprocess
 
+''' Dafny Exit Codes:
+- 0: Success
+- 1: Preprocessing Error.
+- 2: Dafny Error.
+- 3: Compile Error.
+- 4: Verification Error.
+- 5: Format Error.
+'''
+
 
 def verify(dafny_binary_path: str, file: str):
   flags = ["verify",

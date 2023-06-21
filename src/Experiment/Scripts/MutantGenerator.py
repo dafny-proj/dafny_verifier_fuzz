@@ -1,5 +1,6 @@
-from typing import Optional
 import Env
+
+from typing import Optional
 import pathlib
 import subprocess
 
@@ -27,20 +28,3 @@ def runGenSingle(seed_file: str, mutant_seed: int, mutant_order: int,
            f"--mutant-seed={mutant_seed}",
            f"--mutant-order={mutant_order}"]
   return runMutantGenerator(seed_file, flags, work_dir)
-
-
-def generateMutantsFromSeeds(seed_files: list[str],
-                             mutants_per_seed: int = 1,
-                             max_order: int = 20):
-  for seed in seed_files:
-    runGenMulti(seed_file=seed,
-                num_mutants=mutants_per_seed,
-                max_order=max_order)
-
-
-def generateMutantsFromDir(seed_dir: str,
-                           mutants_per_seed: int = 1,
-                           max_order: int = 20):
-  generateMutantsFromSeeds(seed_files=list(pathlib.Path(seed_dir).glob('*.dfy')),
-                           mutants_per_seed=mutants_per_seed,
-                           max_order=max_order)
