@@ -1,8 +1,10 @@
 XDSMITH_PATH = '../../../../xdsmith'
 FUZZD_PATH = '../../../../fuzz-d'
 DAFNYVERIFIER_PATH = '../../../../dafny-verifier'
+DAFNY_DIR = '../../../../dafny_sut'
+DAFNY_BINARY = '../../../../dafny_sut/Scripts/dafny'
 
-MUTANT_GEN_PATH = '../bin/Debug/net7.0/Experiment'
+MUTANT_GEN_PATH = '../../MutantGeneratorMain/bin/Debug/net7.0/MutantGeneratorMain'
 WORK_DIR = '../work_dir'
 SEEDS_DIR = '../work_dir/seeds'
 XDSMITH_SEEDS_DIR = '../work_dir/seeds/xdsmith'
@@ -15,5 +17,3 @@ TMP_DIR = '../work_dir/tmp'
 COVERAGE_DIR = '../work_dir/coverage'
 POTENTIAL_BUGS_FILE = '../work_dir/potential_bugs.log'
 
-DAFNY_DIR = '../../../../dafny_sut'
-DAFNY_BINARY = '../../../../dafny_sut/Scripts/dafny'

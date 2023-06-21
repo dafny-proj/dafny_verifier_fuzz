@@ -1,6 +1,12 @@
+# General
 .vscode
 .vs
-
 obj
 bin
 TestResults
+__pycache__
+.DS_Store
+
+# Project-specific
+work_dir
+archive

@@ -11,11 +11,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7C10979C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AST.Tests", "tests\AST.Tests\AST.Tests.csproj", "{6796D577-CEE4-4001-B755-96A1F1555C50}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fuzzer", "src\Fuzzer\Fuzzer.csproj", "{47F6B8CF-5780-41F2-880E-01EF83EBC765}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MutantGenerator", "src\MutantGenerator\MutantGenerator.csproj", "{47F6B8CF-5780-41F2-880E-01EF83EBC765}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fuzzer.Tests", "tests\Fuzzer.Tests\Fuzzer.Tests.csproj", "{9DA15A40-AF0C-46AF-A9B9-21DF4775CE02}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MutantGenerator.Tests", "tests\MutantGenerator.Tests\MutantGenerator.Tests.csproj", "{9DA15A40-AF0C-46AF-A9B9-21DF4775CE02}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DafnyWrappers", "src\DafnyWrappers\DafnyWrappers.csproj", "{95461A98-4D82-4E3F-A737-1B87503B3FF4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MutantGeneratorMain", "src\MutantGeneratorMain\MutantGeneratorMain.csproj", "{70E29905-76A3-4EA5-A7DE-5B7508B1F279}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,6 +48,10 @@ Global
 		{95461A98-4D82-4E3F-A737-1B87503B3FF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95461A98-4D82-4E3F-A737-1B87503B3FF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95461A98-4D82-4E3F-A737-1B87503B3FF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70E29905-76A3-4EA5-A7DE-5B7508B1F279}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70E29905-76A3-4EA5-A7DE-5B7508B1F279}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70E29905-76A3-4EA5-A7DE-5B7508B1F279}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70E29905-76A3-4EA5-A7DE-5B7508B1F279}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BAC1CF57-3205-4776-BF57-9A5A3CEE58E0} = {C0572490-5C6F-4830-A1F8-69079CE42C24}
@@ -53,5 +59,6 @@ Global
 		{47F6B8CF-5780-41F2-880E-01EF83EBC765} = {C0572490-5C6F-4830-A1F8-69079CE42C24}
 		{9DA15A40-AF0C-46AF-A9B9-21DF4775CE02} = {7C10979C-9E55-4D67-ADDF-CF33D8E15885}
 		{95461A98-4D82-4E3F-A737-1B87503B3FF4} = {C0572490-5C6F-4830-A1F8-69079CE42C24}
+		{70E29905-76A3-4EA5-A7DE-5B7508B1F279} = {C0572490-5C6F-4830-A1F8-69079CE42C24}
 	EndGlobalSection
 EndGlobal
