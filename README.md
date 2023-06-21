@@ -31,9 +31,11 @@ A single mutant is generated for a specific seed program, mutant seed and mutant
 ```
 Usage:
   MutantGeneratorMain gen-single <seed> <work-dir> [options]
+
 Arguments:
   <seed>      The seed file from which mutants are generated.
   <work-dir>  The directory to output mutants and logs to.
+
 Options:
   --mutant-seed <mutant-seed>    Random seed for determining the mutations applied.
   --mutant-order <mutant-order>  Number of mutations to apply.
@@ -43,7 +45,7 @@ Options:
 Multiple mutants are generated from a specific seed program using random mutant seeds and mutant order.
 ```
 Usage:
-  MutantGeneratorMain <seed> <work-dir> gen-multi [options]
+  MutantGeneratorMain gen-multi <seed> <work-dir> [options]
 
 Arguments:
   <seed>      The seed file from which mutants are generated.
@@ -55,7 +57,7 @@ Options:
 ```
 
 ### Extending the mutant generator.
-The existing equivalence mutations can be found in the [`MutantGenerator\Mutators` directory](src/MutantGenerator/Mutators/). The mutant generator can be extended by adding additional mutators that implement the `IMutator` interface in this section of the repository.
+The existing equivalence mutations can be found in the [MutantGenerator\Mutators directory](src/MutantGenerator/Mutators/). The mutant generator can be extended by adding additional mutators that implement the `IMutator` interface in this section of the repository.
 
 ## Fuzzing
-Example scripts demonstrating how the mutant generator can be invoked for fuzzing and coverage collection are provided in the [`Experiment` directory](src/Experiment) of this repository.
+Example scripts demonstrating how the mutant generator can be invoked for fuzzing and coverage collection are provided in the [Experiment directory](src/Experiment/) of this repository.
