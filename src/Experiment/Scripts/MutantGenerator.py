@@ -24,7 +24,7 @@ def runGenMulti(seed_file: str, num_mutants: int = 1, max_order: int = 20,
 
 def runGenSingle(seed_file: str, mutant_seed: int, mutant_order: int,
                  work_dir: Optional[str] = None):
-  flags = ["gen-single"
+  flags = ["gen-single",
            f"--mutant-seed={mutant_seed}",
            f"--mutant-order={mutant_order}"]
   return runMutantGenerator(seed_file, flags, work_dir)
